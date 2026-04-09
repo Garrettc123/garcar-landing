@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Garcar Enterprise — AI-Powered Call Handling for Roofing Companies</title>
+  <meta name="description" content="Stop losing leads to missed calls. Garcar Enterprise builds AI-powered call handling, lead follow-up, and CRM integration for roofing and home services companies.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Garcar Enterprise — Stop Losing Leads to Missed Calls">
+  <meta property="og:description" content="AI-powered call handling, lead follow-up, and CRM integration built for roofing companies doing $1M-$10M.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://garcar.com">
+  <meta property="og:site_name" content="Garcar Enterprise">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Garcar Enterprise — Stop Losing Leads to Missed Calls">
+  <meta name="twitter:description" content="AI-powered call handling, lead follow-up, and CRM integration built for roofing companies doing $1M-$10M.">
+
+  <!-- Favicon (inline SVG as data URI) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a2332'/%3E%3Cpath d='M8 22V10l8-4 8 4v12l-8 4-8-4z' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M16 6v20M8 10l8 4 8-4' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Garcar Enterprise",
+    "description": "AI-powered operational infrastructure for roofing and home services companies. Call handling, lead follow-up, and CRM integration.",
+    "email": "carrolgarrett55@gmail.com",
+    "url": "https://garcar.com",
+    "founder": {
+      "@type": "Person",
+      "name": "Carrol Garrett"
+    },
+    "areaServed": "United States",
+    "serviceType": ["AI Call Handling", "Lead Follow-Up Automation", "CRM Integration", "Operational Audit"]
+  }
+  </script>
+
+  <style>
+    /* ========================================
+       RESET & BASE
+       ======================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      scroll-behavior: smooth;
+      scroll-padding-top: 5rem;
+    }
+
+    body {
+      min-height: 100dvh;
+      line-height: 1.6;
+      font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+      font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      color: #2d3748;
+      background-color: #ffffff;
+    }
+
+    img, svg { display: block; max-width: 100%; height: auto; }
+    ul { list-style: none; }
+    a { text-decoration: none; color: inherit; }
+
+    button {
+      cursor: pointer;
+      background: none;
+      border: none;
+      font: inherit;
+      color: inherit;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      text-wrap: balance;
+      line-height: 1.15;
+    }
+
+    p, li, figcaption {
+      text-wrap: pretty;
+      max-width: 72ch;
+    }
+
+    ::selection {
+      background: rgba(245, 158, 11, 0.2);
+      color: #1a2332;
+    }
+
+    :focus-visible {
+      outline: 2px solid #f59e0b;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ========================================
+       DESIGN TOKENS
+       ======================================== */
+    :root {
+      /* Colors */
+      --navy-900: #0f1623;
+      --navy-800: #1a2332;
+      --navy-700: #243042;
+      --navy-600: #2e3d54;
+      --navy-500: #3d4f66;
+      --slate-400: #8b9bb5;
+      --slate-300: #b0bdd0;
+      --slate-200: #d1dae6;
+      --slate-100: #e8edf4;
+      --white: #ffffff;
+      --off-white: #f8f9fb;
+
+      --amber-500: #f59e0b;
+      --amber-400: #fbbf24;
+      --amber-600: #d97706;
+      --amber-700: #b45309;
+      --amber-glow: rgba(245, 158, 11, 0.15);
+
+      /* Type scale */
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+
+      /* Spacing */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-20: 5rem;
+      --space-24: 6rem;
+
+      /* Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+
+      /* Transitions */
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* Shadows */
+      --shadow-sm: 0 1px 3px rgba(15, 22, 35, 0.08);
+      --shadow-md: 0 4px 12px rgba(15, 22, 35, 0.1);
+      --shadow-lg: 0 12px 32px rgba(15, 22, 35, 0.14);
+      --shadow-amber: 0 4px 20px rgba(245, 158, 11, 0.3);
+
+      /* Content widths */
+      --content-narrow: 640px;
+      --content-default: 960px;
+      --content-wide: 1200px;
+    }
+
+    /* ========================================
+       LAYOUT
+       ======================================== */
+    .container {
+      width: 100%;
+      max-width: var(--content-wide);
+      margin-inline: auto;
+      padding-inline: var(--space-5);
+    }
+
+    @media (min-width: 768px) {
+      .container { padding-inline: var(--space-8); }
+    }
+
+    .section-padding {
+      padding-block: clamp(var(--space-12), 6vw, var(--space-24));
+    }
+
+    /* ========================================
+       HEADER / NAV
+       ======================================== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(26, 35, 50, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .header__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-block: var(--space-4);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .logo__mark {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+
+    .logo__text {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .header__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-5);
+      background: var(--amber-500);
+      color: var(--navy-900);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+
+    .header__cta:hover {
+      background: var(--amber-400);
+      box-shadow: var(--shadow-amber);
+    }
+
+    /* ========================================
+       HERO
+       ======================================== */
+    .hero {
+      position: relative;
+      background: linear-gradient(165deg, var(--navy-900) 0%, var(--navy-800) 50%, var(--navy-700) 100%);
+      color: var(--white);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 20%, rgba(245, 158, 11, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 80% at 20% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* Subtle grid pattern */
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .hero__inner {
+      position: relative;
+      z-index: 1;
+      padding-top: clamp(var(--space-16), 10vw, var(--space-24));
+      padding-bottom: clamp(var(--space-16), 10vw, var(--space-24));
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-1) var(--space-4);
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: var(--radius-xl);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--amber-400);
+      margin-bottom: var(--space-6);
+      letter-spacing: 0.03em;
+    }
+
+    .hero__badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--amber-500);
+      border-radius: 50%;
+    }
+
+    .hero__title {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      line-height: 1.08;
+      margin-bottom: var(--space-6);
+      max-width: 16ch;
+    }
+
+    .hero__title span {
+      color: var(--amber-400);
+    }
+
+    .hero__subtitle {
+      font-size: var(--text-lg);
+      color: var(--slate-300);
+      max-width: 52ch;
+      margin-bottom: var(--space-8);
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+      align-items: center;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-8);
+      background: var(--amber-500);
+      color: var(--navy-900);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary:hover {
+      background: var(--amber-400);
+      box-shadow: var(--shadow-amber);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-6);
+      color: var(--slate-300);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: color var(--transition), border-color var(--transition), background var(--transition);
+    }
+
+    .btn-ghost:hover {
+      color: var(--white);
+      border-color: rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .hero__stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      margin-top: clamp(var(--space-12), 6vw, var(--space-16));
+      padding-top: var(--space-8);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stat__number {
+      font-size: var(--text-xl);
+      font-weight: 800;
+      color: var(--amber-400);
+      line-height: 1;
+      margin-bottom: var(--space-1);
+    }
+
+    .stat__label {
+      font-size: var(--text-xs);
+      color: var(--slate-400);
+      font-weight: 500;
+    }
+
+    /* ========================================
+       PROBLEM SECTION
+       ======================================== */
+    .problem {
+      background: var(--off-white);
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--amber-600);
+      margin-bottom: var(--space-4);
+    }
+
+    .section-title {
+      font-size: var(--text-xl);
+      font-weight: 800;
+      color: var(--navy-800);
+      margin-bottom: var(--space-3);
+    }
+
+    .section-desc {
+      font-size: var(--text-base);
+      color: var(--navy-500);
+      max-width: 56ch;
+      margin-bottom: var(--space-10);
+    }
+
+    .problem__grid {
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    @media (min-width: 768px) {
+      .problem__grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .problem__card {
+      background: var(--white);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      position: relative;
+    }
+
+    .problem__card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: var(--space-6);
+      right: var(--space-6);
+      height: 3px;
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    }
+
+    .problem__icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-4);
+      margin-top: var(--space-2);
+    }
+
+    .problem__icon svg {
+      width: 22px;
+      height: 22px;
+      color: #dc2626;
+    }
+
+    .problem__card h3 {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--navy-800);
+      margin-bottom: var(--space-2);
+      line-height: 1.3;
+    }
+
+    .problem__card p {
+      font-size: var(--text-base);
+      color: var(--navy-500);
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       SOLUTION SECTION
+       ======================================== */
+    .solution {
+      background: var(--white);
+    }
+
+    .solution__grid {
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    @media (min-width: 768px) {
+      .solution__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .solution__card {
+      background: var(--off-white);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .solution__card:hover {
+      border-color: var(--amber-500);
+      box-shadow: 0 0 0 1px var(--amber-500), var(--shadow-md);
+    }
+
+    .solution__icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(245, 158, 11, 0.1);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .solution__icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--amber-600);
+    }
+
+    .solution__card h3 {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--navy-800);
+      margin-bottom: var(--space-2);
+      line-height: 1.3;
+    }
+
+    .solution__card p {
+      font-size: var(--text-base);
+      color: var(--navy-500);
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       HOW IT WORKS
+       ======================================== */
+    .how-it-works {
+      background: var(--navy-800);
+      color: var(--white);
+    }
+
+    .how-it-works .section-label {
+      color: var(--amber-400);
+    }
+
+    .how-it-works .section-title {
+      color: var(--white);
+    }
+
+    .how-it-works .section-desc {
+      color: var(--slate-300);
+    }
+
+    .steps {
+      display: grid;
+      gap: var(--space-8);
+    }
+
+    @media (min-width: 768px) {
+      .steps {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-6);
+      }
+    }
+
+    .step {
+      position: relative;
+    }
+
+    .step__number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--amber-500), var(--amber-600));
+      color: var(--navy-900);
+      font-size: var(--text-lg);
+      font-weight: 800;
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-5);
+    }
+
+    .step h3 {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+      color: var(--white);
+    }
+
+    .step p {
+      font-size: var(--text-base);
+      color: var(--slate-300);
+      line-height: 1.6;
+    }
+
+    /* Connector line between steps on desktop */
+    @media (min-width: 768px) {
+      .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 24px;
+        left: calc(48px + var(--space-4));
+        right: calc(-1 * var(--space-4));
+        height: 2px;
+        background: linear-gradient(90deg, var(--amber-500), rgba(245, 158, 11, 0.15));
+      }
+    }
+
+    /* ========================================
+       PRICING
+       ======================================== */
+    .pricing {
+      background: var(--off-white);
+    }
+
+    .pricing__grid {
+      display: grid;
+      gap: var(--space-6);
+      max-width: 800px;
+    }
+
+    @media (min-width: 640px) {
+      .pricing__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .pricing__card {
+      background: var(--white);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .pricing__card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .pricing__card--featured {
+      border-color: var(--amber-500);
+      box-shadow: 0 0 0 1px var(--amber-500);
+    }
+
+    .pricing__card--featured:hover {
+      box-shadow: 0 0 0 1px var(--amber-500), var(--shadow-lg);
+    }
+
+    .pricing__popular {
+      position: absolute;
+      top: 0;
+      left: var(--space-8);
+      background: var(--amber-500);
+      color: var(--navy-900);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      padding: var(--space-1) var(--space-3);
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pricing__tier {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--amber-600);
+      margin-bottom: var(--space-3);
+    }
+
+    .pricing__price {
+      font-size: var(--text-xl);
+      font-weight: 800;
+      color: var(--navy-800);
+      margin-bottom: var(--space-2);
+    }
+
+    .pricing__desc {
+      font-size: var(--text-base);
+      color: var(--navy-500);
+      margin-bottom: var(--space-6);
+      line-height: 1.5;
+    }
+
+    .pricing__features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-bottom: var(--space-8);
+      flex: 1;
+    }
+
+    .pricing__features li {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+      font-size: var(--text-sm);
+      color: var(--navy-600);
+      line-height: 1.5;
+    }
+
+    .pricing__features li svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: #16a34a;
+      margin-top: 2px;
+    }
+
+    .pricing__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-6);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      transition: background var(--transition), box-shadow var(--transition), color var(--transition), transform var(--transition);
+      text-align: center;
+    }
+
+    .pricing__cta--primary {
+      background: var(--amber-500);
+      color: var(--navy-900);
+    }
+
+    .pricing__cta--primary:hover {
+      background: var(--amber-400);
+      box-shadow: var(--shadow-amber);
+      transform: translateY(-1px);
+    }
+
+    .pricing__cta--secondary {
+      background: var(--navy-800);
+      color: var(--white);
+    }
+
+    .pricing__cta--secondary:hover {
+      background: var(--navy-700);
+      transform: translateY(-1px);
+    }
+
+    /* ========================================
+       SOCIAL PROOF
+       ======================================== */
+    .proof {
+      background: var(--white);
+      text-align: center;
+    }
+
+    .proof__inner {
+      max-width: 720px;
+      margin-inline: auto;
+    }
+
+    .proof__quote {
+      position: relative;
+      background: var(--off-white);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+
+    .proof__quote::before {
+      content: '\201C';
+      position: absolute;
+      top: -8px;
+      left: var(--space-6);
+      font-size: 4rem;
+      line-height: 1;
+      color: var(--amber-500);
+      font-family: Georgia, serif;
+    }
+
+    .proof__quote p {
+      font-size: var(--text-lg);
+      color: var(--navy-800);
+      font-weight: 500;
+      line-height: 1.6;
+      margin-inline: auto;
+      max-width: 56ch;
+      font-style: italic;
+    }
+
+    .proof__tagline {
+      font-size: var(--text-base);
+      color: var(--navy-500);
+      font-weight: 600;
+    }
+
+    .proof__tagline span {
+      color: var(--amber-600);
+      font-weight: 700;
+    }
+
+    /* ========================================
+       FINAL CTA
+       ======================================== */
+    .final-cta {
+      background: linear-gradient(165deg, var(--navy-900) 0%, var(--navy-800) 100%);
+      color: var(--white);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .final-cta__inner {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      margin-inline: auto;
+    }
+
+    .final-cta .section-title {
+      color: var(--white);
+      margin-bottom: var(--space-4);
+    }
+
+    .final-cta__desc {
+      font-size: var(--text-base);
+      color: var(--slate-300);
+      margin-bottom: var(--space-8);
+      max-width: 48ch;
+      margin-inline: auto;
+    }
+
+    .final-cta__actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      align-items: center;
+    }
+
+    .final-cta__email {
+      font-size: var(--text-sm);
+      color: var(--slate-400);
+    }
+
+    .final-cta__email a {
+      color: var(--amber-400);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color var(--transition);
+    }
+
+    .final-cta__email a:hover {
+      color: var(--amber-500);
+    }
+
+    /* ========================================
+       FOOTER
+       ======================================== */
+    .footer {
+      background: var(--navy-900);
+      color: var(--slate-400);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .footer__inner {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      align-items: center;
+      padding-block: var(--space-8);
+      text-align: center;
+    }
+
+    @media (min-width: 640px) {
+      .footer__inner {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+      }
+    }
+
+    .footer__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .footer__brand svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .footer__brand span {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--slate-300);
+    }
+
+    .footer__copy {
+      font-size: var(--text-xs);
+      color: var(--slate-400);
+    }
+
+    .footer__email {
+      font-size: var(--text-xs);
+      color: var(--slate-400);
+    }
+
+    .footer__email a {
+      color: var(--amber-400);
+      transition: color var(--transition);
+    }
+
+    .footer__email a:hover {
+      color: var(--amber-500);
+    }
+
+    /* ========================================
+       UTILITY
+       ======================================== */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- ===================== HEADER ===================== -->
+  <header class="header" role="banner">
+    <div class="container header__inner">
+      <a href="/" class="logo" aria-label="Garcar Enterprise home">
+        <!-- SVG Logo: Geometric hexagonal prism — precision + reliability -->
+        <svg class="logo__mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M18 3L31 10.5V25.5L18 33L5 25.5V10.5L18 3Z" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M18 3V33" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+          <path d="M5 10.5L18 18L31 10.5" stroke="#f59e0b" stroke-width="1.5" stroke-linejoin="round" opacity="0.5"/>
+          <path d="M18 18V33" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="18" cy="18" r="3" fill="#f59e0b" opacity="0.9"/>
+        </svg>
+        <span class="logo__text">Garcar</span>
+      </a>
+      <a href="mailto:carrolgarrett55@gmail.com?subject=I%20want%20to%20book%20an%20Operational%20Audit" class="header__cta">
+        Book Your Audit
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="hero">
+      <div class="container hero__inner">
+        <div class="hero__badge">Built for Roofing Companies</div>
+        <h1 class="hero__title">
+          Stop Losing Leads to <span>Missed Calls</span>
+        </h1>
+        <p class="hero__subtitle">
+          Your crews are on the roof. Your phone's ringing. Nobody picks up. That lead just called your competitor. We fix&nbsp;that.
+        </p>
+        <div class="hero__actions">
+          <a href="mailto:carrolgarrett55@gmail.com?subject=I%20want%20to%20book%20an%20Operational%20Audit&body=Hi%20Carrol%2C%0A%0AI%27m%20interested%20in%20the%20%24197%20Operational%20Audit%20for%20my%20roofing%20company.%0A%0ACompany%20name%3A%20%0APhone%3A%20%0ABest%20time%20to%20talk%3A%20" class="btn-primary" role="button">
+            Book Your $197 Audit
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+          <a href="#how-it-works" class="btn-ghost">
+            See How It Works
+          </a>
+        </div>
+        <div class="hero__stats">
+          <div class="stat">
+            <div class="stat__number">62%</div>
+            <div class="stat__label">of callers won't leave a voicemail</div>
+          </div>
+          <div class="stat">
+            <div class="stat__number">78%</div>
+            <div class="stat__label">of jobs go to the first responder</div>
+          </div>
+          <div class="stat">
+            <div class="stat__number">24/7</div>
+            <div class="stat__label">AI-powered call capture</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PROBLEM ===================== -->
+    <section class="problem section-padding" id="problem">
+      <div class="container">
+        <div class="section-label">The Problem</div>
+        <h2 class="section-title">You're Winning Jobs on the Roof — and Losing Them on the Phone</h2>
+        <p class="section-desc">
+          Growing roofing companies share three operational gaps that silently bleed revenue every month.
+        </p>
+
+        <div class="problem__grid">
+          <!-- Card 1 -->
+          <div class="problem__card">
+            <div class="problem__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                <line x1="1" y1="1" x2="23" y2="23" stroke="#dc2626" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <h3>Missed Calls After Hours</h3>
+            <p>Storm season doesn't stop at 5 PM. When a homeowner calls at 7 PM with a leaking roof, your voicemail isn't closing that deal. Someone else&nbsp;is.</p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="problem__card">
+            <div class="problem__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <h3>Slow Follow-Up Losing Jobs</h3>
+            <p>You got the lead. But it sat in a text thread for two days. By the time you called back, they already signed with the company that responded in 10&nbsp;minutes.</p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="problem__card">
+            <div class="problem__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="15" x2="15" y2="15"/>
+                <line x1="1" y1="1" x2="23" y2="23" stroke="#dc2626" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <h3>Leads Falling Through CRM Cracks</h3>
+            <p>Post-its, text messages, a spreadsheet your office manager updates when she remembers. Leads get lost between intake and estimate. You never even know what you&nbsp;missed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SOLUTION ===================== -->
+    <section class="solution section-padding" id="solution">
+      <div class="container">
+        <div class="section-label">The Fix</div>
+        <h2 class="section-title">An AI System That Never Misses a Call or Drops a Lead</h2>
+        <p class="section-desc">
+          We build the operational infrastructure that lets your team focus on selling and installing — not chasing paperwork.
+        </p>
+
+        <div class="solution__grid">
+          <!-- Solution 1 -->
+          <div class="solution__card">
+            <div class="solution__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <h3>24/7 Call Capture</h3>
+            <p>Every call answered, every time. AI handles after-hours calls, captures caller info, qualifies the lead, and books the appointment — so you wake up to a full schedule, not missed&nbsp;opportunities.</p>
+          </div>
+
+          <!-- Solution 2 -->
+          <div class="solution__card">
+            <div class="solution__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h3>Automated Lead Qualification</h3>
+            <p>Not every call is a $15K re-roof. The system asks the right questions, scores the lead, and routes hot prospects to your sales team first. No more wasting time on tire&nbsp;kickers.</p>
+          </div>
+
+          <!-- Solution 3 -->
+          <div class="solution__card">
+            <div class="solution__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+              </svg>
+            </div>
+            <h3>Intelligent Routing</h3>
+            <p>Emergency leak? Goes straight to your on-call crew. New construction inquiry? Routed to sales. Insurance claim follow-up? Your estimator gets it. Right lead, right person, right&nbsp;away.</p>
+          </div>
+
+          <!-- Solution 4 -->
+          <div class="solution__card">
+            <div class="solution__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <h3>CRM Integration</h3>
+            <p>Every lead lands in your CRM automatically — tagged, scored, and ready for follow-up. No manual entry. No lost post-its. Your pipeline stays clean and&nbsp;current.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HOW IT WORKS ===================== -->
+    <section class="how-it-works section-padding" id="how-it-works">
+      <div class="container">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">Three Steps. Fully Operational in Two Weeks.</h2>
+        <p class="section-desc">
+          No six-month implementation. No complicated software to learn. We handle everything.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step__number">1</div>
+            <h3>Audit</h3>
+            <p>We map your current call flow, lead sources, and follow-up process. You get a clear picture of exactly where leads are falling off — and how much it's costing&nbsp;you.</p>
+          </div>
+          <div class="step">
+            <div class="step__number">2</div>
+            <h3>Build</h3>
+            <p>We design and configure your AI-powered intake system. Custom call scripts, qualification logic, routing rules, and CRM connections — all built to match how your business actually&nbsp;runs.</p>
+          </div>
+          <div class="step">
+            <div class="step__number">3</div>
+            <h3>Launch</h3>
+            <p>We flip the switch, monitor performance, and fine-tune. Your phone lines are covered. Your leads are tracked. Your team focuses on selling and&nbsp;installing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING ===================== -->
+    <section class="pricing section-padding" id="pricing">
+      <div class="container">
+        <div class="section-label">Pricing</div>
+        <h2 class="section-title">Start With the Audit. See the Gaps for Yourself.</h2>
+        <p class="section-desc">
+          No contracts. No monthly fees to start. Pay once, get clarity on where you're losing leads.
+        </p>
+
+        <div class="pricing__grid">
+          <!-- Tier 1 -->
+          <div class="pricing__card">
+            <div class="pricing__tier">Step 1</div>
+            <div class="pricing__price">$197</div>
+            <h3 style="font-size: var(--text-lg); font-weight: 700; color: var(--navy-800); margin-bottom: var(--space-2);">Operational Audit</h3>
+            <p class="pricing__desc">We map your current call flow and show you exactly where leads are falling&nbsp;off.</p>
+            <ul class="pricing__features">
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Full call flow analysis
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Lead source mapping
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Follow-up gap identification
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Revenue leakage report
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Custom fix-it roadmap
+              </li>
+            </ul>
+            <a href="mailto:carrolgarrett55@gmail.com?subject=I%20want%20to%20book%20the%20%24197%20Operational%20Audit&body=Hi%20Carrol%2C%0A%0AI%27m%20interested%20in%20the%20%24197%20Operational%20Audit%20for%20my%20roofing%20company.%0A%0ACompany%20name%3A%20%0APhone%3A%20%0ABest%20time%20to%20talk%3A%20" class="pricing__cta pricing__cta--secondary">
+              Book Your Audit
+            </a>
+          </div>
+
+          <!-- Tier 2 -->
+          <div class="pricing__card pricing__card--featured">
+            <div class="pricing__popular">Most Popular</div>
+            <div class="pricing__tier" style="margin-top: var(--space-4);">Full Setup</div>
+            <div class="pricing__price">$497</div>
+            <h3 style="font-size: var(--text-lg); font-weight: 700; color: var(--navy-800); margin-bottom: var(--space-2);">AI Deal Desk Setup</h3>
+            <p class="pricing__desc">Full AI-powered intake system built and deployed for your&nbsp;business.</p>
+            <ul class="pricing__features">
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Everything in the Audit
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                AI call handling system built
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Custom lead qualification logic
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                CRM integration &amp; automation
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Intelligent call routing rules
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                2 weeks of monitoring &amp; tuning
+              </li>
+            </ul>
+            <a href="mailto:carrolgarrett55@gmail.com?subject=I%20want%20the%20%24497%20AI%20Deal%20Desk%20Setup&body=Hi%20Carrol%2C%0A%0AI%27m%20interested%20in%20the%20%24497%20AI%20Deal%20Desk%20Setup%20for%20my%20roofing%20company.%0A%0ACompany%20name%3A%20%0APhone%3A%20%0ABest%20time%20to%20talk%3A%20" class="pricing__cta pricing__cta--primary">
+              Get Your AI Deal Desk
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SOCIAL PROOF ===================== -->
+    <section class="proof section-padding" id="proof">
+      <div class="container">
+        <div class="proof__inner">
+          <div class="proof__quote">
+            <p>Growing roofing companies are using AI-powered operations to capture every lead, respond in seconds, and close more jobs — without hiring more office&nbsp;staff.</p>
+          </div>
+          <p class="proof__tagline">
+            Join the contractors who are <span>done leaving money on the table</span>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FINAL CTA ===================== -->
+    <section class="final-cta section-padding" id="contact">
+      <div class="container">
+        <div class="final-cta__inner">
+          <div class="section-label" style="color: var(--amber-400); justify-content: center;">Let's Talk</div>
+          <h2 class="section-title">Ready to Stop Losing Leads?</h2>
+          <p class="final-cta__desc">
+            The audit takes one call. We'll show you exactly where leads are falling off and what it's costing you. No pressure. No&nbsp;contracts.
+          </p>
+          <div class="final-cta__actions">
+            <a href="mailto:carrolgarrett55@gmail.com?subject=I%20want%20to%20book%20an%20Operational%20Audit&body=Hi%20Carrol%2C%0A%0AI%27m%20interested%20in%20the%20%24197%20Operational%20Audit%20for%20my%20roofing%20company.%0A%0ACompany%20name%3A%20%0APhone%3A%20%0ABest%20time%20to%20talk%3A%20" class="btn-primary">
+              Book Your $197 Audit
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+            <p class="final-cta__email">
+              Or email directly: <a href="mailto:carrolgarrett55@gmail.com">carrolgarrett55@gmail.com</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <svg width="24" height="24" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <path d="M18 3L31 10.5V25.5L18 33L5 25.5V10.5L18 3Z" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M18 18V33" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="18" cy="18" r="3" fill="#f59e0b" opacity="0.9"/>
+        </svg>
+        <span>Garcar Enterprise</span>
+      </div>
+      <p class="footer__email">
+        <a href="mailto:carrolgarrett55@gmail.com">carrolgarrett55@gmail.com</a>
+      </p>
+      <p class="footer__copy">&copy; 2026 Garcar Enterprise. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>
