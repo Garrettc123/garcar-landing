@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Schema.org JSON-LD -->
+  <!-- Schema.org JSON-LD: LocalBusiness -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -34,13 +34,63 @@
     "name": "Garcar Enterprise",
     "description": "AI-powered operational infrastructure for roofing and home services companies. Call handling, lead follow-up, and CRM integration.",
     "email": "carrolgarrett55@gmail.com",
-    "url": "https://garcar.com",
+    "url": "https://garcar.io",
     "founder": {
       "@type": "Person",
       "name": "Carrol Garrett"
     },
     "areaServed": "United States",
     "serviceType": ["AI Call Handling", "Lead Follow-Up Automation", "CRM Integration", "Operational Audit"]
+  }
+  </script>
+
+  <!-- Schema.org JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Why do roofing companies lose leads?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Growing roofing companies share three operational gaps: missed calls after hours (storm season doesn't stop at 5 PM), slow follow-up losing jobs to faster competitors, and leads falling through CRM cracks due to manual tracking with post-its and spreadsheets."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does Garcar Enterprise fix missed calls for roofing companies?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Garcar builds AI-powered operational infrastructure including 24/7 call capture, automated lead qualification, intelligent routing to the right crew member, and seamless CRM integration — so every call is answered and every lead is tracked automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does it take to set up Garcar's AI call system?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The process has three steps: Audit (map your current call flow and identify gaps), Build (design and configure your AI intake system with custom scripts and routing), and Launch (go live with monitoring and tuning). You're fully operational in two weeks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does the Garcar Operational Audit include?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The $197 Operational Audit includes a complete call flow map, lead source analysis, response time benchmark, revenue leak estimate, and a custom action plan. The $497 AI Deal Desk Setup includes everything in the audit plus a fully built AI call handling system, custom lead qualification, CRM integration, intelligent routing, and two weeks of monitoring."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Who is Garcar Enterprise built for?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Garcar is built for roofing companies doing $1M-$10M in annual revenue who are growing but leaking leads. Ideal clients are managing storm season surges, running multiple estimator crews, handling both residential and commercial bids, and ready to systematize their lead intake."
+        }
+      }
+    ]
   }
   </script>
 
@@ -107,9 +157,11 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
       }
+      .reveal { opacity: 1 !important; transform: none !important; }
     }
 
     /* ========================================
@@ -142,6 +194,7 @@
       --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
       --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
       --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --text-3xl: clamp(2.5rem, 1rem + 4vw, 5rem);
 
       /* Spacing */
       --space-1: 0.25rem;
@@ -165,17 +218,62 @@
 
       /* Transitions */
       --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
       /* Shadows */
       --shadow-sm: 0 1px 3px rgba(15, 22, 35, 0.08);
       --shadow-md: 0 4px 12px rgba(15, 22, 35, 0.1);
       --shadow-lg: 0 12px 32px rgba(15, 22, 35, 0.14);
       --shadow-amber: 0 4px 20px rgba(245, 158, 11, 0.3);
+      --shadow-amber-lg: 0 8px 40px rgba(245, 158, 11, 0.35);
 
       /* Content widths */
       --content-narrow: 640px;
       --content-default: 960px;
       --content-wide: 1200px;
+    }
+
+    /* ========================================
+       SCROLL PROGRESS INDICATOR
+       ======================================== */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--amber-600), var(--amber-400));
+      z-index: 100;
+      transition: none;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       SCROLL REVEAL ANIMATIONS
+       ======================================== */
+    /* JS adds .js-reveal-ready to html when IntersectionObserver is available */
+    .js-reveal-ready .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+    }
+    .js-reveal-ready .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 80ms; }
+    .reveal-delay-2 { transition-delay: 160ms; }
+    .reveal-delay-3 { transition-delay: 240ms; }
+    .reveal-delay-4 { transition-delay: 320ms; }
+
+    .js-reveal-ready .reveal-card {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), border-color var(--transition), box-shadow var(--transition);
+    }
+    .js-reveal-ready .reveal-card.is-visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* ========================================
@@ -246,12 +344,17 @@
       font-size: var(--text-sm);
       font-weight: 700;
       border-radius: var(--radius-md);
-      transition: background var(--transition), box-shadow var(--transition);
+      transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
     }
 
     .header__cta:hover {
       background: var(--amber-400);
       box-shadow: var(--shadow-amber);
+      transform: scale(1.03);
+    }
+
+    .header__cta:active {
+      transform: scale(0.98);
     }
 
     /* ========================================
@@ -274,15 +377,13 @@
       pointer-events: none;
     }
 
-    /* Subtle grid pattern */
+    /* Dot pattern background for depth */
     .hero::after {
       content: '';
       position: absolute;
       inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 48px 48px;
+      background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1.5' cy='1.5' r='1' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E");
+      background-size: 24px 24px;
       pointer-events: none;
     }
 
@@ -314,18 +415,39 @@
       height: 6px;
       background: var(--amber-500);
       border-radius: 50%;
+      animation: badge-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badge-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.7); }
     }
 
     .hero__title {
-      font-size: var(--text-2xl);
+      font-size: var(--text-3xl);
       font-weight: 800;
-      line-height: 1.08;
+      line-height: 1.05;
       margin-bottom: var(--space-6);
       max-width: 16ch;
+      letter-spacing: -0.02em;
     }
 
-    .hero__title span {
+    .hero__title .hero__title-line {
+      display: block;
+    }
+
+    .hero__title .hero__title-thin {
+      font-weight: 400;
+      color: var(--slate-300);
+      font-size: 0.65em;
+      letter-spacing: 0;
+      display: block;
+      margin-bottom: 0.15em;
+    }
+
+    .hero__title .hero__title-accent {
       color: var(--amber-400);
+      position: relative;
     }
 
     .hero__subtitle {
@@ -344,6 +466,9 @@
       align-items: center;
     }
 
+    /* ========================================
+       BUTTONS — Micro-interactions
+       ======================================== */
     .btn-primary {
       display: inline-flex;
       align-items: center;
@@ -356,17 +481,28 @@
       border-radius: var(--radius-md);
       transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
       letter-spacing: 0.01em;
+      position: relative;
     }
 
     .btn-primary:hover {
       background: var(--amber-400);
+      box-shadow: var(--shadow-amber-lg);
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
       box-shadow: var(--shadow-amber);
-      transform: translateY(-1px);
     }
 
     .btn-primary svg {
       width: 18px;
       height: 18px;
+      transition: transform var(--transition);
+    }
+
+    .btn-primary:hover svg {
+      transform: translateX(3px);
     }
 
     .btn-ghost {
@@ -379,15 +515,42 @@
       font-weight: 600;
       border-radius: var(--radius-md);
       border: 1px solid rgba(255,255,255,0.12);
-      transition: color var(--transition), border-color var(--transition), background var(--transition);
+      transition: color var(--transition), border-color var(--transition), background var(--transition), transform var(--transition);
     }
 
     .btn-ghost:hover {
       color: var(--white);
       border-color: rgba(255,255,255,0.25);
       background: rgba(255,255,255,0.04);
+      transform: translateY(-1px);
     }
 
+    .btn-ghost:active {
+      transform: translateY(0);
+    }
+
+    /* Animated underline for text links */
+    .link-underline {
+      position: relative;
+      display: inline;
+    }
+    .link-underline::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1.5px;
+      background: currentColor;
+      transition: width 0.3s var(--ease-out);
+    }
+    .link-underline:hover::after {
+      width: 100%;
+    }
+
+    /* ========================================
+       HERO STATS
+       ======================================== */
     .hero__stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -403,6 +566,7 @@
       color: var(--amber-400);
       line-height: 1;
       margin-bottom: var(--space-1);
+      font-variant-numeric: tabular-nums;
     }
 
     .stat__label {
@@ -529,12 +693,13 @@
       border: 1px solid var(--slate-200);
       border-radius: var(--radius-lg);
       padding: var(--space-6);
-      transition: border-color var(--transition), box-shadow var(--transition);
+      transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
     }
 
     .solution__card:hover {
       border-color: var(--amber-500);
       box-shadow: 0 0 0 1px var(--amber-500), var(--shadow-md);
+      transform: translateY(-2px);
     }
 
     .solution__icon {
@@ -645,6 +810,149 @@
     }
 
     /* ========================================
+       WHAT YOU GET — Deliverables Grid
+       ======================================== */
+    .deliverables {
+      background: var(--white);
+    }
+
+    .deliverables .section-title {
+      color: var(--navy-800);
+    }
+
+    .deliverables__grid {
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    @media (min-width: 768px) {
+      .deliverables__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-5);
+      }
+    }
+
+    .deliverable {
+      display: flex;
+      gap: var(--space-4);
+      padding: var(--space-5);
+      background: var(--off-white);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+    }
+
+    .deliverable:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    .deliverable__icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: rgba(245, 158, 11, 0.1);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .deliverable__icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--amber-600);
+    }
+
+    .deliverable__text h3 {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--navy-800);
+      margin-bottom: var(--space-1);
+      line-height: 1.3;
+    }
+
+    .deliverable__text p {
+      font-size: var(--text-sm);
+      color: var(--navy-500);
+      line-height: 1.5;
+    }
+
+    /* ========================================
+       WHO THIS IS FOR
+       ======================================== */
+    .qualifier {
+      background: var(--navy-800);
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .qualifier::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1.5' cy='1.5' r='0.75' fill='rgba(255,255,255,0.03)'/%3E%3C/svg%3E");
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+
+    .qualifier__inner {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+    }
+
+    .qualifier .section-label {
+      color: var(--amber-400);
+    }
+
+    .qualifier .section-title {
+      color: var(--white);
+      margin-bottom: var(--space-3);
+    }
+
+    .qualifier__subtitle {
+      font-size: var(--text-lg);
+      color: var(--slate-300);
+      margin-bottom: var(--space-8);
+      line-height: 1.5;
+      max-width: 56ch;
+    }
+
+    .qualifier__list {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    @media (min-width: 640px) {
+      .qualifier__list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .qualifier__item {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+    }
+
+    .qualifier__item svg {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      color: var(--amber-400);
+      margin-top: 2px;
+    }
+
+    .qualifier__item p {
+      font-size: var(--text-base);
+      color: var(--slate-300);
+      line-height: 1.5;
+    }
+
+    /* ========================================
        PRICING
        ======================================== */
     .pricing {
@@ -660,6 +968,7 @@
     @media (min-width: 640px) {
       .pricing__grid {
         grid-template-columns: repeat(2, 1fr);
+        align-items: start;
       }
     }
 
@@ -671,27 +980,37 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      transition: border-color var(--transition), box-shadow var(--transition);
+      transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
     }
 
     .pricing__card:hover {
       box-shadow: var(--shadow-lg);
+      transform: translateY(-3px);
     }
 
     .pricing__card--featured {
       border-color: var(--amber-500);
-      box-shadow: 0 0 0 1px var(--amber-500);
+      box-shadow: 0 0 0 1px var(--amber-500), 0 0 24px rgba(245, 158, 11, 0.12), var(--shadow-md);
+    }
+
+    @media (min-width: 640px) {
+      .pricing__card--featured {
+        transform: scale(1.04);
+      }
+      .pricing__card--featured:hover {
+        transform: scale(1.04) translateY(-3px);
+      }
     }
 
     .pricing__card--featured:hover {
-      box-shadow: 0 0 0 1px var(--amber-500), var(--shadow-lg);
+      box-shadow: 0 0 0 2px var(--amber-500), 0 0 40px rgba(245, 158, 11, 0.18), var(--shadow-lg);
     }
 
     .pricing__popular {
       position: absolute;
       top: 0;
       left: var(--space-8);
-      background: var(--amber-500);
+      background: linear-gradient(135deg, var(--amber-500), var(--amber-600));
       color: var(--navy-900);
       font-size: var(--text-xs);
       font-weight: 700;
@@ -715,6 +1034,10 @@
       font-weight: 800;
       color: var(--navy-800);
       margin-bottom: var(--space-2);
+    }
+
+    .pricing__card--featured .pricing__price {
+      font-size: var(--text-2xl);
     }
 
     .pricing__desc {
@@ -763,6 +1086,16 @@
       text-align: center;
     }
 
+    .pricing__cta svg {
+      width: 18px;
+      height: 18px;
+      transition: transform var(--transition);
+    }
+
+    .pricing__cta:hover svg {
+      transform: translateX(3px);
+    }
+
     .pricing__cta--primary {
       background: var(--amber-500);
       color: var(--navy-900);
@@ -770,8 +1103,12 @@
 
     .pricing__cta--primary:hover {
       background: var(--amber-400);
-      box-shadow: var(--shadow-amber);
-      transform: translateY(-1px);
+      box-shadow: var(--shadow-amber-lg);
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .pricing__cta--primary:active {
+      transform: translateY(0) scale(0.98);
     }
 
     .pricing__cta--secondary {
@@ -781,56 +1118,86 @@
 
     .pricing__cta--secondary:hover {
       background: var(--navy-700);
-      transform: translateY(-1px);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: var(--shadow-md);
+    }
+
+    .pricing__cta--secondary:active {
+      transform: translateY(0) scale(0.98);
     }
 
     /* ========================================
-       SOCIAL PROOF
+       SOCIAL PROOF — Metric Cards
        ======================================== */
     .proof {
       background: var(--white);
-      text-align: center;
     }
 
     .proof__inner {
-      max-width: 720px;
+      max-width: 960px;
       margin-inline: auto;
     }
 
-    .proof__quote {
-      position: relative;
+    .proof__metrics {
+      display: grid;
+      gap: var(--space-6);
+      margin-bottom: var(--space-10);
+    }
+
+    @media (min-width: 768px) {
+      .proof__metrics {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .proof__metric-card {
       background: var(--off-white);
       border: 1px solid var(--slate-200);
       border-radius: var(--radius-lg);
-      padding: var(--space-8);
-      margin-bottom: var(--space-8);
+      padding: var(--space-6);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
     }
 
-    .proof__quote::before {
-      content: '\201C';
+    .proof__metric-card:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .proof__metric-card::before {
+      content: '';
       position: absolute;
-      top: -8px;
+      top: 0;
       left: var(--space-6);
-      font-size: 4rem;
-      line-height: 1;
-      color: var(--amber-500);
-      font-family: Georgia, serif;
+      right: var(--space-6);
+      height: 3px;
+      background: linear-gradient(90deg, var(--amber-500), var(--amber-400));
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     }
 
-    .proof__quote p {
-      font-size: var(--text-lg);
+    .proof__metric-value {
+      font-size: var(--text-xl);
+      font-weight: 800;
       color: var(--navy-800);
+      margin-bottom: var(--space-1);
+      margin-top: var(--space-2);
+    }
+
+    .proof__metric-label {
+      font-size: var(--text-sm);
+      color: var(--navy-500);
       font-weight: 500;
-      line-height: 1.6;
-      margin-inline: auto;
-      max-width: 56ch;
-      font-style: italic;
+      line-height: 1.4;
     }
 
     .proof__tagline {
       font-size: var(--text-base);
       color: var(--navy-500);
       font-weight: 600;
+      text-align: center;
     }
 
     .proof__tagline span {
@@ -893,11 +1260,13 @@
       color: var(--amber-400);
       text-decoration: underline;
       text-underline-offset: 3px;
-      transition: color var(--transition);
+      text-decoration-color: rgba(251, 191, 36, 0.4);
+      transition: color var(--transition), text-decoration-color var(--transition);
     }
 
     .final-cta__email a:hover {
       color: var(--amber-500);
+      text-decoration-color: var(--amber-500);
     }
 
     /* ========================================
@@ -943,6 +1312,20 @@
       color: var(--slate-300);
     }
 
+    .footer__center {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      align-items: center;
+    }
+
+    .footer__tagline {
+      font-size: var(--text-xs);
+      color: var(--slate-400);
+      font-style: italic;
+      max-width: 36ch;
+    }
+
     .footer__copy {
       font-size: var(--text-xs);
       color: var(--slate-400);
@@ -979,6 +1362,9 @@
   </style>
 </head>
 <body>
+  <!-- Scroll Progress Indicator -->
+  <div class="scroll-progress" aria-hidden="true"></div>
+
   <!-- ===================== HEADER ===================== -->
   <header class="header" role="banner">
     <div class="container header__inner">
@@ -1003,12 +1389,13 @@
     <!-- ===================== HERO ===================== -->
     <section class="hero" id="hero">
       <div class="container hero__inner">
-        <div class="hero__badge">Built for Roofing Companies</div>
+        <div class="hero__badge">Built for Roofing Companies Doing $1M–$10M</div>
         <h1 class="hero__title">
-          Stop Losing Leads to <span>Missed Calls</span>
+          <span class="hero__title-thin">Your crews are on the roof. Your phone's ringing.</span>
+          Stop Losing Leads to <span class="hero__title-accent">Missed&nbsp;Calls</span>
         </h1>
         <p class="hero__subtitle">
-          Your crews are on the roof. Your phone's ringing. Nobody picks up. That lead just called your competitor. We fix&nbsp;that.
+          Every unanswered call is a job lead walking to your competitor. We build AI-powered call handling that captures every lead — during storm season surges, after hours, and when your estimators are on-site.
         </p>
         <div class="hero__actions">
           <a href="mailto:carrolgarrett55@gmail.com?subject=I%20want%20to%20book%20an%20Operational%20Audit&body=Hi%20Carrol%2C%0A%0AI%27m%20interested%20in%20the%20%24197%20Operational%20Audit%20for%20my%20roofing%20company.%0A%0ACompany%20name%3A%20%0APhone%3A%20%0ABest%20time%20to%20talk%3A%20" class="btn-primary" role="button">
@@ -1020,17 +1407,17 @@
           </a>
         </div>
         <div class="hero__stats">
-          <div class="stat">
-            <div class="stat__number">62%</div>
-            <div class="stat__label">of callers won't leave a voicemail</div>
+          <div class="stat reveal" data-delay="0">
+            <div class="stat__number" data-count="62" data-suffix="%">62%</div>
+            <div class="stat__label">of callers won't leave a voicemail — they call the next contractor</div>
           </div>
-          <div class="stat">
-            <div class="stat__number">78%</div>
-            <div class="stat__label">of jobs go to the first responder</div>
+          <div class="stat reveal" data-delay="1">
+            <div class="stat__number" data-count="78" data-suffix="%">78%</div>
+            <div class="stat__label">of jobs go to the first company that picks up the phone</div>
           </div>
-          <div class="stat">
-            <div class="stat__number">24/7</div>
-            <div class="stat__label">AI-powered call capture</div>
+          <div class="stat reveal" data-delay="2">
+            <div class="stat__number" data-count="24" data-suffix="/7">24/7</div>
+            <div class="stat__label">AI-powered call capture — nights, weekends, storm season</div>
           </div>
         </div>
       </div>
@@ -1039,15 +1426,15 @@
     <!-- ===================== PROBLEM ===================== -->
     <section class="problem section-padding" id="problem">
       <div class="container">
-        <div class="section-label">The Problem</div>
-        <h2 class="section-title">You're Winning Jobs on the Roof — and Losing Them on the Phone</h2>
-        <p class="section-desc">
-          Growing roofing companies share three operational gaps that silently bleed revenue every month.
+        <div class="section-label reveal">The Problem</div>
+        <h2 class="section-title reveal">You're Winning Jobs on the Roof — and Losing Them on the Phone</h2>
+        <p class="section-desc reveal">
+          Growing roofing companies share three operational gaps that silently bleed revenue every single month. If you're running crews and managing estimates, you already know.
         </p>
 
         <div class="problem__grid">
           <!-- Card 1 -->
-          <div class="problem__card">
+          <div class="problem__card reveal-card" style="transition-delay: 0ms;">
             <div class="problem__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
@@ -1055,23 +1442,23 @@
               </svg>
             </div>
             <h3>Missed Calls After Hours</h3>
-            <p>Storm season doesn't stop at 5 PM. When a homeowner calls at 7 PM with a leaking roof, your voicemail isn't closing that deal. Someone else&nbsp;is.</p>
+            <p>Storm season doesn't stop at 5 PM. When a homeowner calls at 7 PM with a leaking roof, your voicemail isn't closing that deal. The contractor who picks up&nbsp;is.</p>
           </div>
 
           <!-- Card 2 -->
-          <div class="problem__card">
+          <div class="problem__card reveal-card" style="transition-delay: 100ms;">
             <div class="problem__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
             </div>
-            <h3>Slow Follow-Up Losing Jobs</h3>
-            <p>You got the lead. But it sat in a text thread for two days. By the time you called back, they already signed with the company that responded in 10&nbsp;minutes.</p>
+            <h3>Slow Follow-Up Killing Close Rates</h3>
+            <p>The job lead came in. It sat in a text thread while your estimators were on-site. Two days later you called back — they'd already signed with the company that responded in&nbsp;10&nbsp;minutes.</p>
           </div>
 
           <!-- Card 3 -->
-          <div class="problem__card">
+          <div class="problem__card reveal-card" style="transition-delay: 200ms;">
             <div class="problem__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -1081,7 +1468,7 @@
               </svg>
             </div>
             <h3>Leads Falling Through CRM Cracks</h3>
-            <p>Post-its, text messages, a spreadsheet your office manager updates when she remembers. Leads get lost between intake and estimate. You never even know what you&nbsp;missed.</p>
+            <p>Post-its, text messages, a spreadsheet your office manager updates when she remembers. Insurance claims, commercial bids, and residential leads — all jumbled together. You never even know what you&nbsp;missed.</p>
           </div>
         </div>
       </div>
@@ -1090,37 +1477,37 @@
     <!-- ===================== SOLUTION ===================== -->
     <section class="solution section-padding" id="solution">
       <div class="container">
-        <div class="section-label">The Fix</div>
-        <h2 class="section-title">An AI System That Never Misses a Call or Drops a Lead</h2>
-        <p class="section-desc">
-          We build the operational infrastructure that lets your team focus on selling and installing — not chasing paperwork.
+        <div class="section-label reveal">The Fix</div>
+        <h2 class="section-title reveal">An AI System That Never Misses a Call or Drops a Lead</h2>
+        <p class="section-desc reveal">
+          We build the operational infrastructure that lets your estimators focus on closing and your crews focus on installing — not chasing down who called last Tuesday.
         </p>
 
         <div class="solution__grid">
           <!-- Solution 1 -->
-          <div class="solution__card">
+          <div class="solution__card reveal-card" style="transition-delay: 0ms;">
             <div class="solution__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
               </svg>
             </div>
             <h3>24/7 Call Capture</h3>
-            <p>Every call answered, every time. AI handles after-hours calls, captures caller info, qualifies the lead, and books the appointment — so you wake up to a full schedule, not missed&nbsp;opportunities.</p>
+            <p>Every call answered, every time. AI handles after-hours calls, captures caller info, qualifies the job lead, and books the estimate — so you wake up to a full schedule, not missed&nbsp;opportunities.</p>
           </div>
 
           <!-- Solution 2 -->
-          <div class="solution__card">
+          <div class="solution__card reveal-card" style="transition-delay: 80ms;">
             <div class="solution__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
               </svg>
             </div>
             <h3>Automated Lead Qualification</h3>
-            <p>Not every call is a $15K re-roof. The system asks the right questions, scores the lead, and routes hot prospects to your sales team first. No more wasting time on tire&nbsp;kickers.</p>
+            <p>Not every call is a $15K re-roof. The system asks the right questions — storm damage or maintenance? Residential or commercial? — scores the lead, and routes hot prospects to your sales team&nbsp;first.</p>
           </div>
 
           <!-- Solution 3 -->
-          <div class="solution__card">
+          <div class="solution__card reveal-card" style="transition-delay: 160ms;">
             <div class="solution__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"/>
@@ -1128,11 +1515,11 @@
               </svg>
             </div>
             <h3>Intelligent Routing</h3>
-            <p>Emergency leak? Goes straight to your on-call crew. New construction inquiry? Routed to sales. Insurance claim follow-up? Your estimator gets it. Right lead, right person, right&nbsp;away.</p>
+            <p>Emergency leak? Goes straight to your on-call crew. Insurance claim follow-up? Your estimator gets it. Commercial bid inquiry? Routed to sales. Right lead, right person, right&nbsp;away.</p>
           </div>
 
           <!-- Solution 4 -->
-          <div class="solution__card">
+          <div class="solution__card reveal-card" style="transition-delay: 240ms;">
             <div class="solution__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
@@ -1141,7 +1528,7 @@
               </svg>
             </div>
             <h3>CRM Integration</h3>
-            <p>Every lead lands in your CRM automatically — tagged, scored, and ready for follow-up. No manual entry. No lost post-its. Your pipeline stays clean and&nbsp;current.</p>
+            <p>Every lead lands in your CRM automatically — tagged by source, scored by value, and ready for follow-up. No manual entry. Your pipeline from first call to signed contract stays clean and&nbsp;current.</p>
           </div>
         </div>
       </div>
@@ -1150,27 +1537,146 @@
     <!-- ===================== HOW IT WORKS ===================== -->
     <section class="how-it-works section-padding" id="how-it-works">
       <div class="container">
-        <div class="section-label">How It Works</div>
-        <h2 class="section-title">Three Steps. Fully Operational in Two Weeks.</h2>
-        <p class="section-desc">
-          No six-month implementation. No complicated software to learn. We handle everything.
+        <div class="section-label reveal">How It Works</div>
+        <h2 class="section-title reveal">Three Steps. Fully Operational in Two Weeks.</h2>
+        <p class="section-desc reveal">
+          No six-month implementation. No complicated software to learn. We handle everything — you keep running your business.
         </p>
 
         <div class="steps">
-          <div class="step">
+          <div class="step reveal-card" style="transition-delay: 0ms;">
             <div class="step__number">1</div>
             <h3>Audit</h3>
-            <p>We map your current call flow, lead sources, and follow-up process. You get a clear picture of exactly where leads are falling off — and how much it's costing&nbsp;you.</p>
+            <p>We map your current call flow, lead sources, and follow-up process. You get a clear picture of exactly where job leads are falling off — and how much revenue it's costing you every&nbsp;month.</p>
           </div>
-          <div class="step">
+          <div class="step reveal-card" style="transition-delay: 120ms;">
             <div class="step__number">2</div>
             <h3>Build</h3>
-            <p>We design and configure your AI-powered intake system. Custom call scripts, qualification logic, routing rules, and CRM connections — all built to match how your business actually&nbsp;runs.</p>
+            <p>We design and configure your AI-powered intake system. Custom call scripts for residential and commercial, qualification logic, routing rules for your estimators, and CRM connections — all built to match how your operation actually&nbsp;runs.</p>
           </div>
-          <div class="step">
+          <div class="step reveal-card" style="transition-delay: 240ms;">
             <div class="step__number">3</div>
             <h3>Launch</h3>
-            <p>We flip the switch, monitor performance, and fine-tune. Your phone lines are covered. Your leads are tracked. Your team focuses on selling and&nbsp;installing.</p>
+            <p>We flip the switch, monitor performance through the first storm season surge, and fine-tune. Your phone lines are covered 24/7. Your leads are tracked. Your team focuses on selling and&nbsp;installing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WHAT YOU GET ===================== -->
+    <section class="deliverables section-padding" id="deliverables">
+      <div class="container">
+        <div class="section-label reveal">What You Get</div>
+        <h2 class="section-title reveal">Your Audit Deliverables — No Fluff, All Actionable</h2>
+        <p class="section-desc reveal">
+          This isn't a generic PDF. Every deliverable is built from your actual call data, lead sources, and follow-up workflows.
+        </p>
+
+        <div class="deliverables__grid">
+          <!-- Deliverable 1 -->
+          <div class="deliverable reveal-card" style="transition-delay: 0ms;">
+            <div class="deliverable__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <div class="deliverable__text">
+              <h3>Call Flow Map</h3>
+              <p>Visual diagram of every path a call takes — from first ring to booked estimate or lost lead. See exactly where calls are dropping.</p>
+            </div>
+          </div>
+
+          <!-- Deliverable 2 -->
+          <div class="deliverable reveal-card" style="transition-delay: 80ms;">
+            <div class="deliverable__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <div class="deliverable__text">
+              <h3>Lead Source Analysis</h3>
+              <p>Breakdown of where your job leads actually come from — Google, referrals, yard signs, storm chasers — and which channels convert vs. waste your time.</p>
+            </div>
+          </div>
+
+          <!-- Deliverable 3 -->
+          <div class="deliverable reveal-card" style="transition-delay: 160ms;">
+            <div class="deliverable__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div class="deliverable__text">
+              <h3>Response Time Benchmark</h3>
+              <p>How fast you're actually responding vs. your competitors. Most roofing companies think they're fast — the data tells a different story.</p>
+            </div>
+          </div>
+
+          <!-- Deliverable 4 -->
+          <div class="deliverable reveal-card" style="transition-delay: 240ms;">
+            <div class="deliverable__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+            <div class="deliverable__text">
+              <h3>Revenue Leak Estimate</h3>
+              <p>A dollar figure on what missed calls, slow follow-up, and lost leads are costing you per month. Hard numbers, not guesses.</p>
+            </div>
+          </div>
+
+          <!-- Deliverable 5 -->
+          <div class="deliverable reveal-card" style="transition-delay: 320ms;">
+            <div class="deliverable__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <div class="deliverable__text">
+              <h3>Custom Action Plan</h3>
+              <p>Prioritized roadmap to fix the gaps — what to automate first, what to systematize, and where AI call handling delivers the fastest ROI for your operation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WHO THIS IS FOR ===================== -->
+    <section class="qualifier section-padding" id="qualifier">
+      <div class="container">
+        <div class="qualifier__inner">
+          <div class="section-label reveal">Who This Is For</div>
+          <h2 class="section-title reveal">Built for Roofing Companies That Are Growing — But Leaking Leads</h2>
+          <p class="qualifier__subtitle reveal">
+            If you're doing $1M–$10M, running multiple crews, and know you're losing jobs because your phone system can't keep up — this is built for you.
+          </p>
+
+          <div class="qualifier__list">
+            <div class="qualifier__item reveal-card" style="transition-delay: 0ms;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <p>You're managing storm season surges and can't keep up with inbound call volume during peak weeks</p>
+            </div>
+            <div class="qualifier__item reveal-card" style="transition-delay: 80ms;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <p>Your estimators are in the field all day and calls go to voicemail — or a receptionist who can't qualify leads</p>
+            </div>
+            <div class="qualifier__item reveal-card" style="transition-delay: 160ms;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <p>You handle both residential and commercial bids, and leads from insurance claims need different routing than new construction</p>
+            </div>
+            <div class="qualifier__item reveal-card" style="transition-delay: 240ms;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <p>You're ready to systematize lead intake instead of hiring another $45K/year office&nbsp;coordinator</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1179,35 +1685,35 @@
     <!-- ===================== PRICING ===================== -->
     <section class="pricing section-padding" id="pricing">
       <div class="container">
-        <div class="section-label">Pricing</div>
-        <h2 class="section-title">Start With the Audit. See the Gaps for Yourself.</h2>
-        <p class="section-desc">
-          No contracts. No monthly fees to start. Pay once, get clarity on where you're losing leads.
+        <div class="section-label reveal">Pricing</div>
+        <h2 class="section-title reveal">Start With the Audit. See the Gaps for Yourself.</h2>
+        <p class="section-desc reveal">
+          No contracts. No monthly fees to start. One investment, total clarity on where your leads are leaking.
         </p>
 
         <div class="pricing__grid">
           <!-- Tier 1 -->
-          <div class="pricing__card">
+          <div class="pricing__card reveal-card" style="transition-delay: 0ms;">
             <div class="pricing__tier">Step 1</div>
             <div class="pricing__price">$197</div>
             <h3 style="font-size: var(--text-lg); font-weight: 700; color: var(--navy-800); margin-bottom: var(--space-2);">Operational Audit</h3>
-            <p class="pricing__desc">We map your current call flow and show you exactly where leads are falling&nbsp;off.</p>
+            <p class="pricing__desc">We map your current call flow, measure your response times, and show you exactly where job leads are falling&nbsp;off.</p>
             <ul class="pricing__features">
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Full call flow analysis
+                Complete call flow map
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Lead source mapping
+                Lead source breakdown by channel
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Follow-up gap identification
+                Response time benchmark
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Revenue leakage report
+                Revenue leakage estimate
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1220,41 +1726,41 @@
           </div>
 
           <!-- Tier 2 -->
-          <div class="pricing__card pricing__card--featured">
+          <div class="pricing__card pricing__card--featured reveal-card" style="transition-delay: 120ms;">
             <div class="pricing__popular">Most Popular</div>
             <div class="pricing__tier" style="margin-top: var(--space-4);">Full Setup</div>
             <div class="pricing__price">$497</div>
             <h3 style="font-size: var(--text-lg); font-weight: 700; color: var(--navy-800); margin-bottom: var(--space-2);">AI Deal Desk Setup</h3>
-            <p class="pricing__desc">Full AI-powered intake system built and deployed for your&nbsp;business.</p>
+            <p class="pricing__desc">Full AI-powered intake system — built, configured, and deployed for your roofing&nbsp;operation.</p>
             <ul class="pricing__features">
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Everything in the Audit
+                Everything in the Operational Audit
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                AI call handling system built
+                AI call handling system built &amp; deployed
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Custom lead qualification logic
+                Custom lead qualification for residential &amp; commercial
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                CRM integration &amp; automation
+                CRM integration &amp; follow-up automation
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Intelligent call routing rules
+                Intelligent routing for estimators &amp; crews
               </li>
               <li>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                2 weeks of monitoring &amp; tuning
+                2 weeks of live monitoring &amp; performance tuning
               </li>
             </ul>
             <a href="mailto:carrolgarrett55@gmail.com?subject=I%20want%20the%20%24497%20AI%20Deal%20Desk%20Setup&body=Hi%20Carrol%2C%0A%0AI%27m%20interested%20in%20the%20%24497%20AI%20Deal%20Desk%20Setup%20for%20my%20roofing%20company.%0A%0ACompany%20name%3A%20%0APhone%3A%20%0ABest%20time%20to%20talk%3A%20" class="pricing__cta pricing__cta--primary">
               Get Your AI Deal Desk
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
           </div>
         </div>
@@ -1265,10 +1771,28 @@
     <section class="proof section-padding" id="proof">
       <div class="container">
         <div class="proof__inner">
-          <div class="proof__quote">
-            <p>Growing roofing companies are using AI-powered operations to capture every lead, respond in seconds, and close more jobs — without hiring more office&nbsp;staff.</p>
+          <div class="section-label reveal" style="justify-content: center;">The Numbers</div>
+          <h2 class="section-title reveal" style="text-align: center;">What AI-Powered Operations Deliver for Roofing Companies</h2>
+          <p class="section-desc reveal" style="text-align: center; margin-inline: auto;">
+            These are the benchmarks contractors see after deploying automated call handling and lead follow-up.
+          </p>
+
+          <div class="proof__metrics">
+            <div class="proof__metric-card reveal-card" style="transition-delay: 0ms;">
+              <div class="proof__metric-value">Under 90 sec</div>
+              <div class="proof__metric-label">Average response time to new job leads</div>
+            </div>
+            <div class="proof__metric-card reveal-card" style="transition-delay: 100ms;">
+              <div class="proof__metric-value">38%</div>
+              <div class="proof__metric-label">of total pipeline captured after hours &amp; weekends</div>
+            </div>
+            <div class="proof__metric-card reveal-card" style="transition-delay: 200ms;">
+              <div class="proof__metric-value">5x faster</div>
+              <div class="proof__metric-label">follow-up automation vs. manual tracking</div>
+            </div>
           </div>
-          <p class="proof__tagline">
+
+          <p class="proof__tagline reveal">
             Join the contractors who are <span>done leaving money on the table</span>.
           </p>
         </div>
@@ -1279,18 +1803,18 @@
     <section class="final-cta section-padding" id="contact">
       <div class="container">
         <div class="final-cta__inner">
-          <div class="section-label" style="color: var(--amber-400); justify-content: center;">Let's Talk</div>
-          <h2 class="section-title">Ready to Stop Losing Leads?</h2>
-          <p class="final-cta__desc">
-            The audit takes one call. We'll show you exactly where leads are falling off and what it's costing you. No pressure. No&nbsp;contracts.
+          <div class="section-label reveal" style="color: var(--amber-400); justify-content: center;">Let's Talk</div>
+          <h2 class="section-title reveal">Ready to Stop Losing Job Leads?</h2>
+          <p class="final-cta__desc reveal">
+            One call. We'll show you exactly where leads are falling off your pipeline and what it's costing you per month. No pressure. No&nbsp;contracts.
           </p>
-          <div class="final-cta__actions">
+          <div class="final-cta__actions reveal">
             <a href="mailto:carrolgarrett55@gmail.com?subject=I%20want%20to%20book%20an%20Operational%20Audit&body=Hi%20Carrol%2C%0A%0AI%27m%20interested%20in%20the%20%24197%20Operational%20Audit%20for%20my%20roofing%20company.%0A%0ACompany%20name%3A%20%0APhone%3A%20%0ABest%20time%20to%20talk%3A%20" class="btn-primary">
               Book Your $197 Audit
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
             <p class="final-cta__email">
-              Or email directly: <a href="mailto:carrolgarrett55@gmail.com">carrolgarrett55@gmail.com</a>
+              Or email directly: <a href="mailto:carrolgarrett55@gmail.com" class="link-underline">carrolgarrett55@gmail.com</a>
             </p>
           </div>
         </div>
@@ -1309,11 +1833,111 @@
         </svg>
         <span>Garcar Enterprise</span>
       </div>
-      <p class="footer__email">
-        <a href="mailto:carrolgarrett55@gmail.com">carrolgarrett55@gmail.com</a>
-      </p>
-      <p class="footer__copy">&copy; 2026 Garcar Enterprise. All rights reserved.</p>
+      <div class="footer__center">
+        <p class="footer__tagline">AI infrastructure for contractors who want to grow without adding headcount.</p>
+        <p class="footer__email">
+          <a href="mailto:carrolgarrett55@gmail.com">carrolgarrett55@gmail.com</a>
+        </p>
+      </div>
+      <p class="footer__copy">&copy; 2025 Garcar Enterprise. All rights reserved.</p>
     </div>
   </footer>
+
+  <!-- ===================== JAVASCRIPT ===================== -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ---- Scroll Progress Indicator ----
+      var progressBar = document.querySelector('.scroll-progress');
+      function updateProgress() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+      }
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      updateProgress();
+
+      // ---- IntersectionObserver for Scroll Reveals ----
+      var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!prefersReducedMotion) {
+        document.documentElement.classList.add('js-reveal-ready');
+        var revealElements = document.querySelectorAll('.reveal, .reveal-card');
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.12,
+          rootMargin: '0px 0px -40px 0px'
+        });
+
+        revealElements.forEach(function(el) {
+          observer.observe(el);
+        });
+      } else {
+        // Immediately show all elements if reduced motion
+        document.querySelectorAll('.reveal, .reveal-card').forEach(function(el) {
+          el.classList.add('is-visible');
+        });
+      }
+
+      // ---- Count-up Animation for Stats ----
+      var statNumbers = document.querySelectorAll('.stat__number[data-count]');
+      var statObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting && !entry.target.dataset.animated) {
+            entry.target.dataset.animated = 'true';
+            animateCount(entry.target);
+            statObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+
+      statNumbers.forEach(function(el) {
+        statObserver.observe(el);
+      });
+
+      function animateCount(el) {
+        if (prefersReducedMotion) return;
+        var target = parseInt(el.dataset.count, 10);
+        var suffix = el.dataset.suffix || '';
+        var duration = 800;
+        var startTime = null;
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          // Ease-out curve
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var current = Math.round(target * eased);
+          el.textContent = current + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      // ---- Smooth scroll for anchor links ----
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          var targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          var target = document.querySelector(targetId);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+    })();
+  </script>
 </body>
 </html>
