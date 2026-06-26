@@ -138,6 +138,15 @@
     const form = document.getElementById('checkout-form');
     const submit = document.getElementById('submit');
     const statusBox = document.getElementById('status');
+    const planSelect = document.getElementById('plan');
+    const emailInput = document.getElementById('email');
+
+    const directPlan = params.get('plan');
+    if (directPlan && [...planSelect.options].some(option => option.value === directPlan)) {
+      planSelect.value = directPlan;
+    }
+    const directEmail = params.get('email');
+    if (directEmail) emailInput.value = directEmail;
 
     function setStatus(message) {
       statusBox.textContent = message;
@@ -149,8 +158,8 @@
       submit.disabled = true;
       setStatus('Creating secure Stripe checkout session...');
 
-      const plan = document.getElementById('plan').value;
-      const email = document.getElementById('email').value.trim();
+      const plan = planSelect.value;
+      const email = emailInput.value.trim();
 
       try {
         const response = await fetch(`${apiBase}/create-checkout-session`, {
