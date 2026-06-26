@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garcar Enterprise Checkout</title>
+  <meta name="description" content="Secure checkout for Garcar Enterprise operational audits, AI Deal Desk setup, and automation plans." />
+  <style>
+    :root {
+      --navy-900: #0f1623;
+      --navy-800: #1a2332;
+      --navy-700: #243042;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --off-white: #f8fafc;
+      --amber-500: #f59e0b;
+      --amber-400: #fbbf24;
+      --white: #fff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(155deg, var(--navy-900), var(--navy-800));
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    main {
+      width: 100%;
+      max-width: 760px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: clamp(24px, 5vw, 48px);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+    }
+    .eyebrow {
+      color: var(--amber-400);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: 12px;
+    }
+    h1 {
+      font-size: clamp(34px, 6vw, 64px);
+      line-height: .98;
+      margin: 12px 0 16px;
+      letter-spacing: -0.04em;
+    }
+    p { color: #cbd5e1; line-height: 1.6; max-width: 62ch; }
+    form { display: grid; gap: 18px; margin-top: 28px; }
+    label { display: grid; gap: 8px; color: #e2e8f0; font-weight: 700; }
+    input, select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.08);
+      color: var(--white);
+      border-radius: 14px;
+      padding: 15px 16px;
+      font: inherit;
+      outline: none;
+    }
+    select option { color: var(--navy-900); }
+    input:focus, select:focus { border-color: var(--amber-500); box-shadow: 0 0 0 3px rgba(245,158,11,.22); }
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 16px 18px;
+      background: var(--amber-500);
+      color: var(--navy-900);
+      font-weight: 900;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background: var(--amber-400); }
+    button:disabled { opacity: .62; cursor: wait; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .status {
+      display: none;
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+    .status.is-visible { display: block; }
+    .fineprint { font-size: 13px; color: #94a3b8; margin-top: 20px; }
+    a { color: var(--amber-400); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">Garcar Enterprise Secure Checkout</div>
+    <h1>Buy the audit. Start the revenue system.</h1>
+    <p>
+      Choose the offer, enter your email, and continue to Stripe Checkout. After payment, Garcar Enterprise receives the billing event for onboarding and fulfillment.
+    </p>
+
+    <form id="checkout-form">
+      <div class="grid">
+        <label>
+          Offer
+          <select id="plan" name="plan" required>
+            <option value="audit">Operational Audit — one-time</option>
+            <option value="dealdesk">AI Deal Desk Setup — one-time</option>
+            <option value="starter">Starter Automation — subscription</option>
+            <option value="pro">Pro Automation — subscription</option>
+            <option value="agency">Agency Automation — subscription</option>
+          </select>
+        </label>
+        <label>
+          Email
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="buyer@example.com" required />
+        </label>
+      </div>
+      <button id="submit" type="submit">Continue to Stripe</button>
+    </form>
+
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+
+    <p class="fineprint">
+      API base defaults to <code>https://garcar-payments.up.railway.app</code>. Override for testing with <code>?api=http://localhost:8000</code>.
+      Return to <a href="/">Garcar Enterprise</a>.
+    </p>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const apiBase = (params.get('api') || localStorage.getItem('GARCAR_PAYMENTS_API_BASE') || 'https://garcar-payments.up.railway.app').replace(/\/$/, '');
+    if (params.get('api')) localStorage.setItem('GARCAR_PAYMENTS_API_BASE', apiBase);
+
+    const form = document.getElementById('checkout-form');
+    const submit = document.getElementById('submit');
+    const statusBox = document.getElementById('status');
+
+    function setStatus(message) {
+      statusBox.textContent = message;
+      statusBox.classList.add('is-visible');
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      submit.disabled = true;
+      setStatus('Creating secure Stripe checkout session...');
+
+      const plan = document.getElementById('plan').value;
+      const email = document.getElementById('email').value.trim();
+
+      try {
+        const response = await fetch(`${apiBase}/create-checkout-session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            plan,
+            email,
+            source: 'garcar-landing-checkout',
+            success_url: `${window.location.origin}/checkout.html?success=1`,
+            cancel_url: window.location.href
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || 'Checkout failed. Confirm Stripe price IDs and Railway environment variables.');
+        }
+        window.location.href = data.checkout_url;
+      } catch (error) {
+        setStatus(`Checkout error: ${error.message}`);
+        submit.disabled = false;
+      }
+    });
+
+    if (params.get('success') === '1') {
+      setStatus('Payment received. Check your email and begin onboarding.');
+    }
+  </script>
+</body>
+</html>
