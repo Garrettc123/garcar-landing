@@ -1,0 +1,8 @@
+# Static site — no build step. Free hosting on Netlify.
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/checkout"
+  to = "/checkout.html"
+  status = 200
