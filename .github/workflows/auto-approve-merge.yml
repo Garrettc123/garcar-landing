@@ -2,7 +2,7 @@ name: Auto Approve & Merge
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened, synchronize, ready_for_review]
   workflow_run:
     workflows: ["*"]
     types: [completed]
@@ -14,20 +14,78 @@ permissions:
 jobs:
   auto-approve-merge:
     runs-on: ubuntu-latest
-    if: github.event.pull_request || github.event.workflow_run.conclusion == 'success'
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.name != github.workflow)
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
     steps:
-      - name: Approve PR
-        uses: hmarr/auto-approve-action@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Auto Merge PR
-        uses: pascalgn/automerge-action@v0.15.6
+      - name: Resolve pull request
+        id: pr
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MERGE_LABELS: ""
-          MERGE_METHOD: squash
-          MERGE_DELETE_BRANCH: true
-          UPDATE_METHOD: rebase
-          MERGE_COMMIT_MESSAGE: "auto"
-          MERGE_RETRY_SLEEP: 5000
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            number="$EVENT_PR_NUMBER"
+          else
+            number="$(gh pr list --head "$HEAD_BRANCH" --state open \
+              --json number --jq '.[0].number // empty')"
+          fi
+
+          if [ -z "$number" ]; then
+            echo "No open pull request for this event; nothing to approve or merge."
+            echo "number=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          state="$(gh pr view "$number" --json isDraft,isCrossRepository \
+            --jq '"\(.isDraft) \(.isCrossRepository)"')"
+          read -r is_draft is_fork <<< "$state"
+
+          if [ "$is_draft" = "true" ]; then
+            echo "Pull request #$number is a draft; skipping."
+            echo "number=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$is_fork" = "true" ]; then
+            echo "Pull request #$number comes from a fork; skipping automatic approval and merge."
+            echo "number=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Pull request #$number is ready for auto approve and merge."
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      - name: Approve pull request
+        if: steps.pr.outputs.number != ''
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          set -euo pipefail
+
+          if gh pr review "$PR_NUMBER" --approve --body "Automatically approved."; then
+            echo "Approved pull request #$PR_NUMBER."
+          else
+            echo "::warning::Could not approve pull request #$PR_NUMBER. It may already be approved, or GitHub Actions approvals may be disabled for this repository."
+          fi
+
+      - name: Squash merge pull request
+        if: steps.pr.outputs.number != ''
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          set -euo pipefail
+
+          if gh pr merge "$PR_NUMBER" --squash --delete-branch --auto; then
+            echo "Merged (or queued for auto merge) pull request #$PR_NUMBER."
+          else
+            echo "Auto merge unavailable; attempting an immediate squash merge."
+            gh pr merge "$PR_NUMBER" --squash --delete-branch
+          fi
