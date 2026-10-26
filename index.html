@@ -317,6 +317,22 @@
         transition: none !important;
       }
     }
+
+    /* Allow future long text to wrap without widening the page. */
+    h1,
+    h2,
+    h3,
+    p,
+    li,
+    .eyebrow {
+      overflow-wrap: anywhere;
+    }
+
+    /* Explicitly allow button labels to wrap on narrow screens. */
+    .btn {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
   </style>
 </head>
 
