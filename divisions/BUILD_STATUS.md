@@ -22,13 +22,14 @@ Pull request: #6 (open, draft; not merged)
 - Eight unique divisions are present.
 - Forty-six offer IDs are present and unique.
 - Twelve digital product entries have first-edition preview status.
-- Sixteen Python unit tests have been added.
+- Sixteen Python unit tests and a 12-check loopback HTTP smoke test have been added.
 - A GitHub Actions test workflow has been added to the branch.
 - The Platform Checks runs have failed before any job steps were recorded (GitHub reports runner_id 0 and an empty steps array); the logs endpoint returned no job log. This means there is no usable test execution output yet. Tests are authored, but not verified as passed.
 - A 46-offer release readiness register now tracks evidence references and explicit release states. References are operator-entered and are not independently verified.
-- The digital-product landing page now lists all twelve guides and links to individual preview pages.
+- The digital-product landing page now lists all twelve guides and links to individual preview pages; eight individual preview pages were added.
 - Eight additional individual HTML preview pages were created; all twelve pages remain preview-only with proposed prices and no checkout links.
 - The release board exposes per-product states from specified through deployed-and-verified; recording a state does not itself validate the evidence.
+- A platform threat model documents the local security boundary, implemented controls, known gaps, and production-hardening requirements.
 - All new and changed files should be checked again after merge and deployment.
 
 ## External actions and commercial state
@@ -43,7 +44,7 @@ Pull request: #6 (open, draft; not merged)
 
 ## Immediate remaining release gates
 
-1. Obtain a usable GitHub Actions runner or execute the tests in a local Python 3.10+ environment; verify all sixteen unit tests and the catalog validator.
+1. Obtain a usable GitHub Actions runner or execute the tests and smoke test in a local Python 3.10+ environment; verify all sixteen unit tests, twelve HTTP smoke checks, and the catalog validator.
 2. Perform an independent security review of authentication, local data storage, backup handling, and audit integrity.
 3. Proofread and fact-check every digital manuscript; verify licensing and source rights.
 4. Build and test the separate digital-product checkout and signed-download entitlement service.
