@@ -105,6 +105,10 @@ Production release still requires independent authentication and authorization, 
 
 See [TERMUX_SETUP.md](TERMUX_SETUP.md) for device-local setup, test, and run instructions.
 
+## CI runner troubleshooting
+
+See [CI_TROUBLESHOOTING.md](CI_TROUBLESHOOTING.md) for the latest runner ID, job ID, diagnostics, and Termux local verification path.
+
 ## Security boundary
 
 See [SECURITY_MODEL.md](SECURITY_MODEL.md) for the local threat model, implemented controls, known gaps, and production hardening requirements.
