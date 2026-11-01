@@ -1,4 +1,4 @@
-# Garcar Enterprise — Build Status
+# Garcar Enterprise — Full-Scale Build Status
 
 Checkpoint: 2026-11-01  
 Branch: `build/eight-division-operating-system-20261101`  
@@ -6,53 +6,57 @@ Pull request: #6 (open, draft; not merged)
 
 ## Implemented and read back from GitHub
 
-| Division | Current implementation | Not yet implemented / verified |
+| Division | Implemented local assets/modules | Remaining before production |
 |---|---|---|
-| 1. Digital Products | Twelve first-edition PDF preview manuscripts in a private local ZIP; catalog and landing page; twelve individual preview pages; manuscript inventory and delivery architecture. | Separate digital checkout, signed/expiring downloads, paid entitlements, refund/dispute flow, customer support operation, commercial release. |
-| 2. Revenue Automation | Local lead CRM, status tracking, offer-linked opportunity pipeline, interview log, lead-response scenario calculator, audit preview page, delivery report template, starter installation SOW, synthetic sample audit, and discovery guide. | Customer CRM connector, live lead ingestion, calls, SMS, email, calendar integration, automated routing, customer pilot, and verified buyer demand. |
-| 3. AI Operations Studio | Deterministic invoice/work-order text extraction, human-reviewed source-linked support drafts, and work queues for document intake/support. | AI model inference, scanned-image OCR, autonomous ticket decisions, customer helpdesk integration, or outbound response. |
-| 4. Wealth Forge | Manual inflow/outflow ledger, revenue-class/collection-state recording, revenue-quality summary, category expense review, runway scenario, and 13-week forecast. | Bank feed, accounting integration, processor-reconciled balances, tax outputs, or individualized financial advice. |
-| 5. Enterprise Intelligence | Local document register, manually curated evidence relationships, one-hop related-source search, and six versioned workflow templates with human-controlled run/advance/block/resume/cancel states. | Embeddings/vector retrieval, GraphRAG, model inference, enterprise SSO, source-permission sync, or multi-tenant isolation. |
-| 6. Industry Solutions | Work-item queues and typed workflow templates for dispatch exceptions, maintenance requests, and shift handoffs. | Live dispatch, CMMS/MES integration, routing, equipment control, and customer deployment. |
-| 7. Infrastructure | SQLite WAL, health/diagnostic endpoint, quick integrity check, local backup creation/inventory/checksum verification, and SQLite backup integrity check. | Cloud deployment, encrypted off-site backups, restore drill, monitoring service, or production SLO. |
-| 8. Governance & Security | Local action approval register, explicit no-execution decisions, SHA-256 event hash chain, evidence-verification status board for all 46 offers, and security/threat model. | WORM storage, FIDO2/WebAuthn enforcement, real multi-user RBAC, production policy execution gateway, independent security review. |
+| 1. Digital Products | 12 first-edition PDF preview manuscripts in a private ZIP; 12 catalog cards and 12 individual preview pages; inventory and delivery specification. | Fact/source/rights review, copy edit, separate digital checkout, payment webhook, paid entitlements, signed/expiring downloads, refund/dispute handling, support operation. |
+| 2. Revenue Automation | Local lead CRM; status tracking; offer-linked opportunity pipeline; discovery/interview log; response scenario calculator; $497 audit preview; delivery template; starter installation SOW; synthetic example and discovery guide. | Live ingestion and CRM/calendar connector, authorized customer data, customer acceptance, outbound messaging if separately approved, pilot results and verified demand. |
+| 3. AI Operations Studio | Deterministic invoice/work-order text extraction; source-linked support reply draft; human-reviewed document/support work queues. | AI model integration, scanned-document OCR, customer-helpdesk integration, production monitoring; no automatic replies. |
+| 4. Wealth Forge | Manual inflow/outflow ledger, revenue class and collection-state tracking, expense review, revenue-quality summary, runway scenario, 13-week scenario. | Bank/accounting feeds, reconciled processor and bank balances, secure personal data handling, tax/legal advice boundaries. |
+| 5. Enterprise Intelligence | Local knowledge store, source references, manually curated supports/contradicts/supersedes/related-to relationships, one-hop source retrieval, six workflow templates with run/advance/block/resume/cancel states. | Embeddings, vector retrieval, GraphRAG/model integration, source ACL sync, enterprise SSO and multi-tenant isolation. |
+| 6. Industry Solutions | Work-item types and templates for dispatch exceptions, maintenance, and shift handoffs. | Live dispatch/CMMS/MES integrations, routing, equipment control, customer pilot and safety review. |
+| 7. Infrastructure | SQLite WAL; local diagnostics; integrity checks; local backup creation, inventory, checksum verification, and backup SQLite quick-check. | Encrypted off-site backup, restore drill, monitoring, production runtime, SLOs, deployment hardening. |
+| 8. Governance & Security | Local approval register with no execution path; SHA-256 hash-chained event ledger; 46-offer release board; local threat model; manual-release workflow on this branch. | Real individual identity/MFA/RBAC, tenant isolation, WORM or externally anchored audit, production policy gateway, independent security review. |
 
-## Catalog and quality checks
+## Portfolio and content verification
 
-- Eight unique divisions and 46 unique offer IDs are present in the canonical catalog.
-- All 46 offers have product-level requirements and a product-readiness record.
-- Twelve digital products have first-edition preview PDFs in a private local ZIP; the ZIP integrity check reported no errors.
-- The digital-product landing page links to all twelve product preview pages; eight new individual HTML pages were added. All twelve are preview-only and have no purchase/download activation.
-- Revenue Automation has a separate $497 audit preview offer; no existing service checkout URL is reused.
-- Twenty-nine Python unit tests are authored.
-- Nineteen loopback HTTP smoke checks are authored. They start a local server with a temporary database and synthetic records.
-- GitHub Actions is configured to compile the backend, run unit tests, run the HTTP smoke suite, and validate the catalog.
-- Multiple Platform Checks jobs have failed before any job steps were recorded (GitHub reports runner_id 0, an empty steps array, and no available job log). The most recent observed run was queued. Consequently, tests are authored but have not yet been observed passing.
-- A 46-offer readiness board records manual evidence references and release states. The references are not independently verified.
-- The branch replaces the automatic approve/merge workflow with a manual release-gate workflow.
-- A platform threat model and Android/Termux setup guide are included.
-- GitGuardian previously reported no secrets in the commit range it scanned; that scan did not cover every subsequent commit.
+- Canonical catalog: 8 unique divisions and 46 unique offer IDs.
+- 46 product-level requirements and release-readiness rows are defined.
+- Digital Products page: 12 product cards and 12 unique preview links, fetched back from GitHub.
+- Eight new digital product preview HTML pages were read back and confirmed preview-only; existing four preview pages remain separate.
+- Private 12-PDF preview ZIP passed `unzip -t` with no errors. The ZIP is not committed to the public repository.
+- Revenue Automation: audit page, discovery guide, delivery report template, SOW, and synthetic sample report are present.
+- Full local platform has a browser console, Python standard-library backend, SQLite local database, Android/Termux setup guide, and security model.
 
-## External actions and commercial state
+## Authored verification
 
-- No email, SMS, or outbound prospect message was sent.
-- No customer system or bank feed was accessed or changed.
-- No payment, refund, subscription, payout, digital checkout, or paid entitlement was initiated.
-- No new paid service or infrastructure was activated.
-- No production deployment or merge to `master` was made.
-- No new customer, successful charge, or verified revenue is established by this build.
-- Existing service checkout is intentionally separate from digital-product previews.
+- 29 Python unit tests.
+- 19 isolated loopback HTTP smoke checks using temporary SQLite and synthetic records.
+- GitHub Actions workflow runs compile, unit tests, smoke checks, and catalog validator.
+- The most recent Platform Checks run (run ID `41278625620`) ended in failure before job steps were recorded. GitHub returned runner ID 0, no steps, and no job log. This is not evidence of a test assertion failure or a passing test run. Tests are authored but remain unverified by CI.
+- GitGuardian previously reported no secrets in a prior 37-commit scan; that result does not cover every later commit.
+- Product-readiness states/evidence references are operator-entered, not independently verified.
 
-## Immediate remaining release gates
+## Safety and commercial state
 
-1. Obtain a usable GitHub Actions runner or execute the tests and smoke suite locally with Python 3.10+; verify all 29 unit tests, 19 HTTP smoke checks, and catalog validator.
-2. Review any test failures and carry out an independent security review of local auth, storage, backup, and audit logic.
-3. Proofread and fact-check each digital manuscript; verify licensing and source rights.
-4. Implement and test separate digital checkout, signed file delivery, entitlement, refund, dispute, and access-revocation flows.
-5. Add hardened identity, authorization, tenant isolation, retention/deletion, monitoring, and encrypted off-site backups before hosted use.
-6. Run authorized synthetic/sandbox and customer acceptance tests.
-7. Obtain explicit release approval before merge/deploy, customer messaging, customer-data access, or live payments.
+- No prospect or customer email/SMS was sent.
+- No customer CRM, bank account, or customer data system was accessed or changed.
+- No payment, subscription, refund, payout, or digital checkout was activated.
+- No new paid service or infrastructure was purchased.
+- No public production deployment was made.
+- No new customer, successful charge, payout, or verified revenue has been established.
+- The service checkout was not reused for digital products.
+- The current PR is still draft and unmerged; master was not changed.
+
+## Remaining release gates
+
+1. Get a functioning GitHub runner or run all checks locally on Python 3.10+; confirm 29 unit tests, 19 HTTP checks, and catalog validation.
+2. Fix any actual test failures once test output is available.
+3. Proofread, fact-check, and verify rights/licensing for every manuscript.
+4. Implement and independently test the separate digital checkout, payment webhooks, access entitlements, signed downloads, refunds, and revocations.
+5. Implement production identity, authorization, tenant isolation, encryption, retention/deletion, monitoring, and off-site backup/recovery.
+6. Test customer-data access and integrations only in an explicitly authorized sandbox; define support, rollback, and acceptance criteria.
+7. Obtain explicit release approval before merge, production deployment, outbound messages, customer-data access, or live payment activation.
 
 ## Release statement
 
-This checkpoint includes local operating modules spanning all eight divisions, a 46-offer readiness board, six controlled workflow templates, twelve private PDF preview manuscripts, and corresponding digital preview pages. It is not a claim that 46 independent products are production-complete, deployed, commercially validated, or generating revenue.
+This build now contains substantial local functionality covering all eight divisions, a 46-offer product register, 12 private digital preview manuscripts, 12 preview pages, a local CRM/sales pipeline, manual cash and forecast tools, source-linked knowledge and workflows, operations work queues, and local governance/infrastructure controls. It is not 46 independently production-complete applications; production readiness, customer validation, deployment, and revenue are not established.
