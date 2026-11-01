@@ -148,7 +148,10 @@ def _secret(env_name: str, filename: str, db_path: Path | str) -> bytes:
             raise ApiError(503, "Local digital service secret file is invalid.")
         return raw
     raw = secrets.token_bytes(48)
-    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        return path.read_bytes()
     with os.fdopen(descriptor, "wb") as stream:
         stream.write(raw)
         stream.flush()
@@ -233,14 +236,14 @@ def _signed_body(payload: dict[str, Any], db_path: Path | str) -> tuple[bytes, s
 
 def process_test_webhook(raw_body: bytes, signature: str, db_path: Path | str) -> dict[str, Any]:
     init_digital_schema(db_path)
+    if len(raw_body) > 32768:
+        raise ApiError(413, "Test webhook body exceeds 32 KiB.")
     expected_prefix = "sha256="
     if not isinstance(signature, str) or not signature.startswith(expected_prefix):
         raise ApiError(401, "Missing or malformed test webhook signature.")
     expected = hmac.new(_webhook_secret(db_path), raw_body, hashlib.sha256).hexdigest()
     if not hmac.compare_digest(expected, signature[len(expected_prefix):]):
         raise ApiError(401, "Test webhook signature is invalid.")
-    if len(raw_body) > 32768:
-        raise ApiError(413, "Test webhook body exceeds 32 KiB.")
     try:
         event = json.loads(raw_body)
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
