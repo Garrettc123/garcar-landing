@@ -49,4 +49,37 @@ class PlatformTests(unittest.TestCase):
         db.commit();db.close()
         self.assertFalse(verify_ledger(self.db)["valid"])
 
+
+    def test_finance_ledger_and_summary(self):
+        from server import create_finance_entry,finance_summary
+        create_finance_entry({"entry_type":"inflow","label":"Synthetic invoice","category":"sales","amount_cents":100000,"source":"synthetic"},self.db)
+        create_finance_entry({"entry_type":"outflow","label":"Synthetic expense","category":"tools","amount_cents":25000,"source":"manual"},self.db)
+        summary=finance_summary(db_path=self.db)
+        self.assertEqual(summary["inflows_cents"],100000)
+        self.assertEqual(summary["outflows_cents"],25000)
+        self.assertEqual(summary["net_cents"],75000)
+    def test_cash_forecast_is_thirteen_weeks(self):
+        from server import forecast_cash
+        result=forecast_cash({"opening_cash_cents":100000,"weekly_inflows_cents":50000,"weekly_outflows_cents":40000})
+        self.assertEqual(len(result["weeks"]),13)
+        self.assertEqual(result["week_13_closing_cash_cents"],230000)
+        self.assertIn("not financial",result["disclaimer"])
+    def test_knowledge_doc_search_has_local_citation(self):
+        from server import create_knowledge_doc,search_knowledge
+        doc=create_knowledge_doc({"title":"Lead response SOP","division_id":"revenue-automation","source_ref":"docs/lead-response.md","content":"A fast lead response needs a clear owner and a measured response time."},self.db)
+        result=search_knowledge("lead response",self.db)
+        self.assertEqual(result["items"][0]["id"],doc["id"])
+        self.assertTrue(result["items"][0]["citation"].startswith("local-document:"))
+    def test_industry_work_item_lifecycle(self):
+        from server import create_work_item,update_work_item
+        item=create_work_item({"division_id":"industry-solutions","workflow_type":"dispatch_exception","title":"Synthetic delayed shipment","priority":"high"},self.db)
+        changed=update_work_item(item["id"],{"status":"in_progress"},self.db)
+        self.assertEqual(changed["status"],"in_progress")
+    def test_system_diagnostics_sees_full_catalog(self):
+        from server import system_diagnostics
+        result=system_diagnostics(self.db)
+        self.assertEqual(result["division_count"],8)
+        self.assertEqual(result["offer_count"],46)
+        self.assertEqual(result["database_integrity"],"ok")
+
 if __name__=="__main__":unittest.main()
