@@ -113,4 +113,25 @@ class PlatformTests(unittest.TestCase):
         self.assertTrue(result["sources"])
         self.assertIn("supervisor",result["draft"])
 
+
+    def test_revenue_quality_classifies_manual_inflows(self):
+        from server import create_finance_entry,revenue_quality_summary
+        create_finance_entry({"entry_type":"inflow","label":"Monthly service","category":"service","amount_cents":50000,"revenue_class":"recurring","collection_state":"collected_manual","source":"manual"},self.db)
+        result=revenue_quality_summary(self.db)
+        self.assertEqual(result["inflow_class_totals_cents"]["recurring"],50000)
+        self.assertIn("not independently processor-verified",result["disclaimer"])
+    def test_expense_review_groups_outflows(self):
+        from server import create_finance_entry,expense_review_summary
+        create_finance_entry({"entry_type":"outflow","label":"Hosting","category":"tools","amount_cents":10000},self.db)
+        create_finance_entry({"entry_type":"outflow","label":"Phone","category":"tools","amount_cents":20000},self.db)
+        result=expense_review_summary(self.db)
+        self.assertEqual(result["recorded_outflows_cents"],30000)
+        self.assertEqual(result["categories"][0]["share_of_recorded_outflows"],1.0)
+    def test_runway_scenario_uses_manual_entries_and_cash_input(self):
+        from server import create_finance_entry,runway_scenario
+        create_finance_entry({"entry_type":"outflow","label":"Demo expenses","category":"operations","amount_cents":30000},self.db)
+        result=runway_scenario({"available_cash_cents":90000,"period_days":30},self.db)
+        self.assertEqual(result["estimated_monthly_net_burn_cents"],30000)
+        self.assertEqual(result["runway_months_at_assumed_cash_and_burn"],3.0)
+
 if __name__=="__main__":unittest.main()
