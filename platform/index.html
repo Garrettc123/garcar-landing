@@ -213,6 +213,8 @@ label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}input,se
 <div class="head"><div><h1>Infrastructure & Governance — local health</h1><p>Database integrity, catalog integrity, and local backup. No deployment or cloud changes.</p></div><button id="diagnostics" class="btn secondary">Run diagnostics</button></div>
 <div class="panel"><h2>System diagnostics</h2><pre id="diagnosticOutput" class="mono muted">Connect to inspect local system.</pre></div>
 <div class="panel" style="margin-top:13px"><h2>Local backup</h2><p>Create a SQLite backup under platform/backups on the machine running the server.</p><button id="backup" class="btn">Create local backup</button><div id="backupOutput" class="mono tiny muted" style="margin-top:12px"></div></div>
+
+<div class="panel" style="margin-top:13px"><div class="head"><h2>Backup inventory</h2><button id="refreshBackups" class="btn secondary">Refresh backups</button></div><div id="backupList" class="muted">Connect to load.</div></div>
 <div class="banner">This local app is not yet a hardened, multi-tenant production platform. A backup here is local-file protection only; it is not off-site disaster recovery.</div>
 </section>
 </main></div><div id="notice" role="status" aria-live="polite"></div>
@@ -266,7 +268,9 @@ $("knowledgeLinks").innerHTML=links.map(function(x){return '<div class="offer" s
 }
 async function loadWorkItems(){var d=await api("/api/work-items");$("workRows").innerHTML=d.items.map(function(x){return '<div class="offer" style="margin-bottom:9px"><strong>'+esc(x.title)+'</strong><p>'+esc(x.division_id)+' · '+esc(x.workflow_type)+' · '+esc(x.priority)+'</p><p>'+esc(x.description)+'</p><div class="toolbar"><label>Status <select data-work="'+esc(x.id)+'"><option '+(x.status==="open"?"selected":"")+' value="open">Open</option><option '+(x.status==="in_progress"?"selected":"")+' value="in_progress">In progress</option><option '+(x.status==="blocked"?"selected":"")+' value="blocked">Blocked</option><option '+(x.status==="done"?"selected":"")+' value="done">Done</option></select></label><span class="tiny muted">Due '+esc(x.due_date||"not set")+'</span></div></div>';}).join("")||"No work items yet.";
 document.querySelectorAll("[data-work]").forEach(function(sel){sel.onchange=async function(){try{await api("/api/work-items/"+sel.dataset.work+"/update",{method:"POST",body:JSON.stringify({status:sel.value})});notify("Work item updated.");await loadWorkItems();}catch(e){notify(e.message,true);}};});}
-async function loadSystem(){var d=await api("/api/system/diagnostics");$("diagnosticOutput").textContent=JSON.stringify(d,null,2);}
+async function loadBackups(){var d=await api("/api/system/backups");$("backupList").innerHTML=d.items.map(function(x){return '<div class="offer" style="margin-bottom:8px"><strong>'+esc(x.filename)+'</strong><div class="tiny muted">'+dt(x.created_at)+' · '+(x.exists?"File exists":"File missing")+'</div><div class="tiny mono">'+esc(x.sha256_recorded||"")+'</div>'+(x.exists?'<button class="btn secondary" data-verify-backup="'+esc(x.filename)+'" style="margin-top:8px">Verify checksum + SQLite</button>':'')+'</div>';}).join("")||"No local backups recorded.";
+document.querySelectorAll("[data-verify-backup]").forEach(function(b){b.onclick=async function(){try{var d=await api("/api/system/backup/verify",{method:"POST",body:JSON.stringify({filename:b.dataset.verifyBackup})});notify(d.valid?"Backup hash and SQLite integrity passed.":"Backup verification failed.",!d.valid);await loadBackups();}catch(e){notify(e.message,true);}};});}
+async function loadSystem(){var d=await api("/api/system/diagnostics");$("diagnosticOutput").textContent=JSON.stringify(d,null,2);await loadBackups();}
 
 async function refreshAll(){if(!token)throw new Error("Connect with the local admin token first.");await loadCatalog();await Promise.all([loadDashboard(),loadLeads(),loadInterviews(),loadApprovals(),loadAudit(),loadFinance(),loadKnowledge(),loadWorkItems(),loadSystem(),loadRelease()]);await loadOpps();}
 $("refresh").onclick=async function(){try{await refreshAll();notify("Data refreshed.");}catch(e){notify(e.message,true);}};$("refreshLeads").onclick=loadLeads;$("refreshOpps").onclick=async function(){await loadLeads();await loadOpps();};$("verify").onclick=loadAudit;
@@ -287,7 +291,8 @@ $("knowledgeLinkForm").onsubmit=async function(e){e.preventDefault();try{await a
 $("workForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);if(!d.due_date)delete d.due_date;await api("/api/work-items",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Work item created.");await loadWorkItems();}catch(err){notify(err.message,true);}};
 $("refreshRelease").onclick=loadRelease;
 $("diagnostics").onclick=async function(){try{await loadSystem();notify("Diagnostics completed.");}catch(err){notify(err.message,true);}};
-$("backup").onclick=async function(){try{var b=await api("/api/system/backup",{method:"POST",body:JSON.stringify({})});$("backupOutput").textContent=JSON.stringify(b,null,2);notify("Local backup created.");}catch(err){notify(err.message,true);}};
+$("refreshBackups").onclick=loadBackups;
+$("backup").onclick=async function(){try{var b=await api("/api/system/backup",{method:"POST",body:JSON.stringify({})});$("backupOutput").textContent=JSON.stringify(b,null,2);notify("Local backup created.");await loadBackups();}catch(err){notify(err.message,true);}};
 
 health();if(token)connect();
 </script></body></html>
