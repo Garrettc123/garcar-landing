@@ -852,6 +852,19 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options","nosniff");self.send_header("Referrer-Policy","no-referrer");self.send_header("Cache-Control","no-store")
         if ctype=="text/html": self.send_header("Content-Security-Policy","default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
         self.end_headers();self.wfile.write(raw)
+    def send_file(self,path:Path,download_name:str)->None:
+        raw=path.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type","application/pdf")
+        self.send_header("Content-Length",str(len(raw)))
+        self.send_header("Content-Disposition",'attachment; filename="'+download_name.replace('"',"")+'"')
+        self.send_header("X-Content-Type-Options","nosniff")
+        self.send_header("Cache-Control","no-store, private")
+        self.send_header("Pragma","no-cache")
+        self.send_header("Referrer-Policy","no-referrer")
+        self.end_headers()
+        self.wfile.write(raw)
+
     def read_json(self):
         try:n=int(self.headers.get("Content-Length","0"))
         except ValueError:raise ApiError(400,"Invalid content length.")
@@ -870,7 +883,27 @@ class Handler(BaseHTTPRequestHandler):
             if path in {"/","/index.html"}:return self.send_body(200,(HERE/"index.html").read_text(encoding="utf-8"),"text/html")
             if path=="/api/health":return self.send_body(200,{"ok":True,"mode":"local_only","external_actions_enabled":False,"database":"sqlite_wal"})
             if path=="/api/catalog":return self.send_body(200,load_catalog())
+
+            if path.startswith("/digital/download/"):
+                parts=path.split("/")
+                if len(parts)!=4 or not parts[3]:raise ApiError(404,"Download route not found.")
+                from digital_delivery import consume_download_token,ASSET_FILES
+                asset,meta=consume_download_token(parts[3])
+                self.send_file(asset,ASSET_FILES[meta["product_id"]])
+                return
+
             self.auth()
+
+            if path=="/api/digital/health":
+                from digital_delivery import digital_delivery_health
+                return self.send_body(200,digital_delivery_health(DB_PATH))
+            if path=="/api/digital/orders":
+                from digital_delivery import list_digital_orders
+                return self.send_body(200,{"items":list_digital_orders(DB_PATH)})
+            if path=="/api/digital/entitlements":
+                from digital_delivery import list_digital_entitlements
+                return self.send_body(200,{"items":list_digital_entitlements(DB_PATH)})
+
             if path=="/api/dashboard":return self.send_body(200,dashboard())
             if path=="/api/leads":return self.send_body(200,{"items":list_records("leads")})
             if path=="/api/opportunities":return self.send_body(200,{"items":list_records("opportunities")})
@@ -905,7 +938,20 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:sys.stderr.write("[garcar] GET error "+repr(e)+"\n");self.send_body(500,{"error":"Internal server error."})
     def do_POST(self):
         try:
+
             self.auth();path,_=self.route();data=self.read_json()
+            if path=="/api/digital/test-checkout":
+                from digital_delivery import create_test_checkout
+                return self.send_body(201,create_test_checkout(data,DB_PATH))
+            if path=="/api/digital/test-payment":
+                from digital_delivery import simulate_test_payment
+                order_id=clean_text(data.get("order_id"),"order_id",100,True)
+                return self.send_body(200,simulate_test_payment(order_id,DB_PATH))
+            if path=="/api/digital/test-refund":
+                from digital_delivery import simulate_test_refund
+                order_id=clean_text(data.get("order_id"),"order_id",100,True)
+                return self.send_body(200,simulate_test_refund(order_id,DB_PATH))
+
             if path=="/api/leads":return self.send_body(201,create_lead(data))
             if path=="/api/opportunities":return self.send_body(201,create_opportunity(data))
             if path=="/api/interviews":return self.send_body(201,create_interview(data))
