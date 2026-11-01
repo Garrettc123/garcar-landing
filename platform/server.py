@@ -63,7 +63,8 @@ def init_db(db_path:Path|str=DB_PATH)->None:
         CREATE TABLE IF NOT EXISTS finance_entries(
           id TEXT PRIMARY KEY, entry_type TEXT NOT NULL, label TEXT NOT NULL, category TEXT NOT NULL,
           amount_cents INTEGER NOT NULL, happened_on TEXT NOT NULL, source TEXT NOT NULL DEFAULT 'manual',
-          notes TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL);
+          notes TEXT NOT NULL DEFAULT '', revenue_class TEXT NOT NULL DEFAULT 'unknown',
+          collection_state TEXT NOT NULL DEFAULT 'unknown', created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS knowledge_docs(
           id TEXT PRIMARY KEY, title TEXT NOT NULL, division_id TEXT NOT NULL, source_ref TEXT NOT NULL,
           content TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
@@ -78,7 +79,11 @@ def init_db(db_path:Path|str=DB_PATH)->None:
           offer_id TEXT PRIMARY KEY, state TEXT NOT NULL DEFAULT 'specified',
           evidence_ref TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL);
         CREATE INDEX IF NOT EXISTS idx_product_readiness_state ON product_readiness(state);
-
+        finance_columns = {row["name"] for row in db.execute("PRAGMA table_info(finance_entries)")}
+        if "revenue_class" not in finance_columns:
+            db.execute("ALTER TABLE finance_entries ADD COLUMN revenue_class TEXT NOT NULL DEFAULT 'unknown'")
+        if "collection_state" not in finance_columns:
+            db.execute("ALTER TABLE finance_entries ADD COLUMN collection_state TEXT NOT NULL DEFAULT 'unknown'")
 
         """)
 
@@ -410,12 +415,18 @@ def create_finance_entry(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,
     happened=_date_value(data.get("happened_on") or now_iso()[:10],"happened_on")
     source=clean_text(data.get("source","manual"),"source",30,True)
     if source not in {"manual","synthetic"}: raise ApiError(400,"source must be manual or synthetic.")
-    notes=clean_text(data.get("notes"),"notes",500);rid=str(uuid.uuid4());stamp=now_iso()
+    notes=clean_text(data.get("notes"),"notes",500)
+    revenue_class=clean_text(data.get("revenue_class","unknown"),"revenue_class",20,True)
+    collection_state=clean_text(data.get("collection_state","unknown"),"collection_state",20,True)
+    if revenue_class not in {"one_time","recurring","unknown"}:raise ApiError(400,"revenue_class must be one_time, recurring, or unknown.")
+    if collection_state not in {"collected_manual","invoiced","pending","disputed","unknown"}:raise ApiError(400,"Invalid collection_state.")
+    if entry_type=="outflow" and (revenue_class!="unknown" or collection_state!="unknown"):raise ApiError(400,"Revenue classification applies only to inflows.")
+    rid=str(uuid.uuid4());stamp=now_iso()
     with connect(db_path) as db:
         db.execute("BEGIN IMMEDIATE")
-        db.execute("""INSERT INTO finance_entries(id,entry_type,label,category,amount_cents,happened_on,source,notes,created_at)
-          VALUES(?,?,?,?,?,?,?,?,?)""",(rid,entry_type,label,category,amount,happened,source,notes,stamp))
-        append_audit(db,"finance.entry.created","finance_entry",rid,{"entry_type":entry_type,"amount_cents":amount,"happened_on":happened,"source":source})
+        db.execute("""INSERT INTO finance_entries(id,entry_type,label,category,amount_cents,happened_on,source,notes,revenue_class,collection_state,created_at)
+          VALUES(?,?,?,?,?,?,?,?,?,?,?)""",(rid,entry_type,label,category,amount,happened,source,notes,revenue_class,collection_state,stamp))
+        append_audit(db,"finance.entry.created","finance_entry",rid,{"entry_type":entry_type,"amount_cents":amount,"happened_on":happened,"source":source,"revenue_class":revenue_class,"collection_state":collection_state})
         result=dict(db.execute("SELECT * FROM finance_entries WHERE id=?",(rid,)).fetchone())
     return result
 
@@ -435,6 +446,45 @@ def finance_summary(start:str|None=None,end:str|None=None,db_path:Path|str=DB_PA
     return {"inflows_cents":inflows,"outflows_cents":outflows,"net_cents":inflows-outflows,
       "entry_count":sum(x["count"] for x in sums.values()),"by_type":sums,"items":[dict(r) for r in rows],
       "disclaimer":"Manual ledger totals only; not bank-verified balances, financial statements, or tax advice."}
+
+
+def revenue_quality_summary(db_path:Path|str=DB_PATH)->dict[str,Any]:
+    with connect(db_path) as db:
+        classes=db.execute("SELECT revenue_class,collection_state,COALESCE(SUM(amount_cents),0) total,COUNT(*) count FROM finance_entries WHERE entry_type='inflow' GROUP BY revenue_class,collection_state ORDER BY total DESC").fetchall()
+    class_totals={};state_totals={}
+    for row in classes:
+        class_totals[row["revenue_class"]]=class_totals.get(row["revenue_class"],0)+row["total"]
+        state_totals[row["collection_state"]]=state_totals.get(row["collection_state"],0)+row["total"]
+    return {"inflow_class_totals_cents":class_totals,"collection_state_totals_cents":state_totals,
+      "items":[dict(r) for r in classes],"total_manual_inflows_cents":sum(class_totals.values()),
+      "disclaimer":"Based only on manually entered ledger records. 'Collected manual' is not independently processor-verified; no bank or payment provider is connected."}
+
+def expense_review_summary(db_path:Path|str=DB_PATH)->dict[str,Any]:
+    with connect(db_path) as db:
+        rows=db.execute("SELECT category,COALESCE(SUM(amount_cents),0) total,COUNT(*) count FROM finance_entries WHERE entry_type='outflow' GROUP BY category ORDER BY total DESC").fetchall()
+    total=sum(r["total"] for r in rows)
+    items=[{"category":r["category"],"amount_cents":r["total"],"count":r["count"],
+            "share_of_recorded_outflows":round(r["total"]/total,4) if total else 0} for r in rows]
+    return {"recorded_outflows_cents":total,"categories":items,
+      "disclaimer":"Manual ledger review only. Categories and amounts may be incomplete and are not bank-verified."}
+
+def runway_scenario(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    cash=data.get("available_cash_cents")
+    period=data.get("period_days",30)
+    if isinstance(cash,bool) or not isinstance(cash,int) or not 0<=cash<=10_000_000_000:raise ApiError(400,"available_cash_cents must be a non-negative integer.")
+    if isinstance(period,bool) or not isinstance(period,int) or not 7<=period<=365:raise ApiError(400,"period_days must be between 7 and 365.")
+    start=(datetime.now(timezone.utc)-timedelta(days=period)).date().isoformat()
+    with connect(db_path) as db:
+        totals=db.execute("SELECT entry_type,COALESCE(SUM(amount_cents),0) total FROM finance_entries WHERE happened_on>=? AND happened_on<=? GROUP BY entry_type",(start,now_iso()[:10])).fetchall()
+    by={r["entry_type"]:r["total"] for r in totals}
+    inflows=by.get("inflow",0);outflows=by.get("outflow",0);net_burn=outflows-inflows
+    monthly_burn=max(0,round(net_burn*30/period))
+    runway=None if monthly_burn<=0 else round(cash/monthly_burn,2)
+    return {"period_days":period,"available_cash_cents":cash,"recorded_inflows_cents":inflows,
+      "recorded_outflows_cents":outflows,"net_burn_for_period_cents":net_burn,
+      "estimated_monthly_net_burn_cents":monthly_burn,"runway_months_at_assumed_cash_and_burn":runway,
+      "disclaimer":"Scenario only. Available cash is manually supplied and ledger activity may be incomplete; not bank-verified or financial advice."}
+
 
 def forecast_cash(data:dict[str,Any])->dict[str,Any]:
     def cents(key:str)->int:
@@ -586,6 +636,8 @@ class Handler(BaseHTTPRequestHandler):
 
             if path=="/api/finance/entries":return self.send_body(200,{"items":list_records("finance_entries")})
             if path=="/api/finance/summary":return self.send_body(200,finance_summary(q.get("start",[None])[0],q.get("end",[None])[0]))
+            if path=="/api/finance/quality":return self.send_body(200,revenue_quality_summary())
+            if path=="/api/finance/expense-review":return self.send_body(200,expense_review_summary())
             if path=="/api/knowledge/docs":return self.send_body(200,{"items":list_records("knowledge_docs")})
             if path=="/api/knowledge/search":return self.send_body(200,search_knowledge(q.get("q",[""])[0]))
             if path=="/api/work-items":return self.send_body(200,{"items":list_records("work_items")})
@@ -612,6 +664,7 @@ class Handler(BaseHTTPRequestHandler):
 
             if path=="/api/finance/entries":return self.send_body(201,create_finance_entry(data))
             if path=="/api/finance/forecast":return self.send_body(200,forecast_cash(data))
+            if path=="/api/finance/runway":return self.send_body(200,runway_scenario(data))
             if path=="/api/knowledge/docs":return self.send_body(201,create_knowledge_doc(data))
             if path=="/api/work-items":return self.send_body(201,create_work_item(data))
             if path=="/api/documents/extract":return self.send_body(200,extract_document_fields(data))
