@@ -74,6 +74,14 @@ def init_db(db_path:Path|str=DB_PATH)->None:
           due_date TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
         CREATE INDEX IF NOT EXISTS idx_finance_date ON finance_entries(happened_on);
         CREATE INDEX IF NOT EXISTS idx_knowledge_division ON knowledge_docs(division_id);
+        CREATE TABLE IF NOT EXISTS knowledge_links(
+          id TEXT PRIMARY KEY, from_doc_id TEXT NOT NULL REFERENCES knowledge_docs(id) ON DELETE RESTRICT,
+          to_doc_id TEXT NOT NULL REFERENCES knowledge_docs(id) ON DELETE RESTRICT,
+          relation TEXT NOT NULL, created_at TEXT NOT NULL,
+          UNIQUE(from_doc_id,to_doc_id,relation));
+        CREATE INDEX IF NOT EXISTS idx_knowledge_links_from ON knowledge_links(from_doc_id);
+        CREATE INDEX IF NOT EXISTS idx_knowledge_links_to ON knowledge_links(to_doc_id);
+
         CREATE INDEX IF NOT EXISTS idx_work_status ON work_items(status);
         CREATE TABLE IF NOT EXISTS product_readiness(
           offer_id TEXT PRIMARY KEY, state TEXT NOT NULL DEFAULT 'specified',
@@ -351,6 +359,67 @@ def list_product_readiness(db_path:Path|str=DB_PATH)->dict[str,Any]:
     return {"total":len(items),"counts":counts,"items":items,
       "disclaimer":"Release states and evidence references are operator-entered records. They are not independently verified by this local register."}
 
+
+
+
+KNOWLEDGE_RELATIONS={"supports","contradicts","supersedes","related_to"}
+
+def create_knowledge_link(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    source=clean_text(data.get("from_doc_id"),"from_doc_id",64,True)
+    target=clean_text(data.get("to_doc_id"),"to_doc_id",64,True)
+    relation=clean_text(data.get("relation"),"relation",30,True)
+    if source==target:raise ApiError(400,"A document cannot link to itself.")
+    if relation not in KNOWLEDGE_RELATIONS:raise ApiError(400,"Unsupported knowledge relation.")
+    rid=str(uuid.uuid4());stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        ids={r["id"] for r in db.execute("SELECT id FROM knowledge_docs WHERE id IN (?,?)",(source,target)).fetchall()}
+        if source not in ids or target not in ids:raise ApiError(404,"Both documents must exist.")
+        try:
+            db.execute("INSERT INTO knowledge_links(id,from_doc_id,to_doc_id,relation,created_at) VALUES(?,?,?,?,?)",(rid,source,target,relation,stamp))
+        except sqlite3.IntegrityError as exc:raise ApiError(409,"This document relationship already exists.") from exc
+        append_audit(db,"knowledge.link.created","knowledge_link",rid,{"from_doc_id":source,"to_doc_id":target,"relation":relation})
+        result=dict(db.execute("""SELECT l.*,a.title AS from_title,b.title AS to_title
+          FROM knowledge_links l JOIN knowledge_docs a ON a.id=l.from_doc_id
+          JOIN knowledge_docs b ON b.id=l.to_doc_id WHERE l.id=?""",(rid,)).fetchone())
+    return result
+
+def list_knowledge_links(db_path:Path|str=DB_PATH)->list[dict[str,Any]]:
+    with connect(db_path) as db:
+        rows=db.execute("""SELECT l.*,a.title AS from_title,b.title AS to_title
+          FROM knowledge_links l JOIN knowledge_docs a ON a.id=l.from_doc_id
+          JOIN knowledge_docs b ON b.id=l.to_doc_id ORDER BY l.created_at DESC LIMIT 250""").fetchall()
+    return [dict(r) for r in rows]
+
+def search_knowledge_graph(query:str,db_path:Path|str=DB_PATH)->dict[str,Any]:
+    base=search_knowledge(query,db_path)
+    matched={x["id"]:x for x in base["items"][:10]}
+    if not matched:return {"query":query,"matches":[],"related":[],"method":"keyword_plus_one_hop_evidence_links",
+      "disclaimer":"No matching local sources were found. This is not vector search or AI-generated analysis."}
+    placeholders=",".join("?" for _ in matched)
+    with connect(db_path) as db:
+        links=db.execute(f"""SELECT l.id,l.from_doc_id,l.to_doc_id,l.relation,
+          a.title AS from_title,a.source_ref AS from_source,b.title AS to_title,b.source_ref AS to_source,
+          a.content AS from_content,b.content AS to_content
+          FROM knowledge_links l JOIN knowledge_docs a ON a.id=l.from_doc_id
+          JOIN knowledge_docs b ON b.id=l.to_doc_id
+          WHERE l.from_doc_id IN ({placeholders}) OR l.to_doc_id IN ({placeholders})""",
+          (*matched.keys(),*matched.keys())).fetchall()
+    related={}
+    edges=[]
+    for link in links:
+        source_match=link["from_doc_id"] in matched
+        other_id=link["to_doc_id"] if source_match else link["from_doc_id"]
+        if other_id not in matched:
+            related[other_id]={"id":other_id,"title":link["to_title"] if source_match else link["from_title"],
+              "source_ref":link["to_source"] if source_match else link["from_source"],
+              "excerpt":(link["to_content"] if source_match else link["from_content"])[:500],
+              "citation":"local-document:"+other_id}
+        edges.append({"from_doc_id":link["from_doc_id"],"to_doc_id":link["to_doc_id"],"relation":link["relation"],
+          "from_title":link["from_title"],"to_title":link["to_title"]})
+    return {"query":query,"matches":list(matched.values()),"related":list(related.values())[:20],"edges":edges,
+      "method":"keyword_plus_one_hop_evidence_links",
+      "disclaimer":"Lexical matching plus one-hop manually curated document links. This is not vector search, GraphRAG, or AI inference. Review sources directly."}
 
 
 def extract_document_fields(data:dict[str,Any])->dict[str,Any]:
@@ -640,6 +709,8 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/finance/expense-review":return self.send_body(200,expense_review_summary())
             if path=="/api/knowledge/docs":return self.send_body(200,{"items":list_records("knowledge_docs")})
             if path=="/api/knowledge/search":return self.send_body(200,search_knowledge(q.get("q",[""])[0]))
+            if path=="/api/knowledge/links":return self.send_body(200,{"items":list_knowledge_links()})
+            if path=="/api/knowledge/graph-search":return self.send_body(200,search_knowledge_graph(q.get("q",[""])[0]))
             if path=="/api/work-items":return self.send_body(200,{"items":list_records("work_items")})
             if path=="/api/product-readiness":return self.send_body(200,list_product_readiness())
             if path=="/api/system/diagnostics":return self.send_body(200,system_diagnostics())
@@ -666,6 +737,7 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/finance/forecast":return self.send_body(200,forecast_cash(data))
             if path=="/api/finance/runway":return self.send_body(200,runway_scenario(data))
             if path=="/api/knowledge/docs":return self.send_body(201,create_knowledge_doc(data))
+            if path=="/api/knowledge/links":return self.send_body(201,create_knowledge_link(data))
             if path=="/api/work-items":return self.send_body(201,create_work_item(data))
             if path=="/api/documents/extract":return self.send_body(200,extract_document_fields(data))
             if path=="/api/support/draft":return self.send_body(200,draft_support_reply(data))
