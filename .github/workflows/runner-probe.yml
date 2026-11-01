@@ -1,0 +1,23 @@
+name: Hosted runner startup diagnostic
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  runner-startup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Confirm runner startup without checkout or external actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'Runner started at '
+          date -u '+%Y-%m-%dT%H:%M:%SZ'
+          printf 'OS: %s\n' "$RUNNER_OS"
+          printf 'Architecture: %s\n' "$RUNNER_ARCH"
+          printf 'This diagnostic does not execute repository code, access secrets, or run platform tests.\n'

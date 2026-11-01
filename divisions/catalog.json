@@ -1,0 +1,379 @@
+{
+  "schema_version": "1.0",
+  "company": "Garcar Enterprise",
+  "status": "requirements_and_validation_only",
+  "currency": "USD",
+  "divisions": [
+    {
+      "id": "digital-products",
+      "name": "Garcar Digital Products",
+      "offers": [
+        {
+          "id": "IA-001",
+          "name": "The Third Eye: Science & Spirituality",
+          "price": 27,
+          "status": "introductory_first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "IA-002",
+          "name": "The 30-Second Mindful Reset",
+          "price": 9,
+          "status": "first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "IA-003",
+          "name": "The Consciousness Workbook",
+          "price": 19,
+          "status": "first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "WA-001",
+          "name": "The Abundance Blueprint",
+          "price": 37,
+          "status": "introductory_first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "WA-002",
+          "name": "The Money Mindset Reset",
+          "price": 17,
+          "status": "first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "WA-003",
+          "name": "The Personal Wealth Operating Manual",
+          "price": 47,
+          "status": "first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "MP-001",
+          "name": "The Mind Reprogramming Method",
+          "price": 29,
+          "status": "introductory_first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "MP-002",
+          "name": "The Focus Protocol",
+          "price": 17,
+          "status": "first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "MP-003",
+          "name": "The 30-Day Mental Performance Workbook",
+          "price": 27,
+          "status": "first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "HC-001",
+          "name": "The Connection Blueprint",
+          "price": 27,
+          "status": "introductory_first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "HC-002",
+          "name": "The Relationship Intelligence Workbook",
+          "price": 19,
+          "status": "first_edition_preview_created_not_for_sale"
+        },
+        {
+          "id": "HC-003",
+          "name": "The Communication Mastery Guide",
+          "price": 37,
+          "status": "first_edition_preview_created_not_for_sale"
+        }
+      ]
+    },
+    {
+      "id": "revenue-automation",
+      "name": "Garcar Revenue Automation",
+      "offers": [
+        {
+          "id": "RA-001",
+          "name": "DFW Real-Estate Lead-List Review (\"Mark the leads that sat\")",
+          "price": 497,
+          "status": "live_public_offer",
+          "public_page": "https://garrettc123.github.io/",
+          "checkout_url": "https://buy.stripe.com/8x2eVddjf0hQ86Tf0f43S2h",
+          "stripe_payment_link": "plink_1UEcv4FKGbk21LK57hRic0dR",
+          "stripe_price": "price_1UEcuyFKGbk21LK5mqhbKQWZ",
+          "sku": "MLS-497",
+          "market": "DFW real-estate teams",
+          "note": "Live public offer verified on github.io and Stripe livemode 2026-11-01; $497 credits toward RA-002 if the buyer continues."
+        },
+        {
+          "id": "RA-002",
+          "name": "DFW Real-Estate Lead Timer / Backup Install (\"Lead backup — callback clock\")",
+          "price": 2500,
+          "status": "live_public_offer",
+          "public_page": "https://garrettc123.github.io/",
+          "checkout_url": "https://buy.stripe.com/6oUaEX4MJ0hQevhf0f43S2i",
+          "stripe_payment_link": "plink_1UExqpFKGbk21LK5PHxGbDRd",
+          "stripe_price": "price_1UExqgFKGbk21LK5MWTXsSZr",
+          "sku": "LB-2500",
+          "alternate_payment_links": [
+            "plink_1UGpMIFKGbk21LK5RHl8asRI (https://buy.stripe.com/14AdR95QN3u2af14lB43S2j, sku LB-2500, not linked from github.io)"
+          ],
+          "market": "DFW real-estate teams",
+          "note": "Live public offer verified on github.io and Stripe livemode 2026-11-01."
+        },
+        {
+          "id": "RA-003",
+          "name": "Managed Lead Response",
+          "price": null,
+          "status": "scope_and_price_hypothesis"
+        },
+        {
+          "id": "RA-004",
+          "name": "Missed Call Recovery Pilot",
+          "price": null,
+          "status": "scope_and_price_after_discovery"
+        }
+      ]
+    },
+    {
+      "id": "ai-operations-studio",
+      "name": "Garcar AI Operations Studio",
+      "offers": [
+        {
+          "id": "AO-001",
+          "name": "Workflow Discovery & Automation Map",
+          "price": null,
+          "status": "quote_after_discovery"
+        },
+        {
+          "id": "AO-002",
+          "name": "Document Intake Assistant",
+          "price": null,
+          "status": "quote_after_discovery"
+        },
+        {
+          "id": "AO-003",
+          "name": "Customer Support Drafting Assistant",
+          "price": null,
+          "status": "quote_after_discovery"
+        },
+        {
+          "id": "AO-004",
+          "name": "Internal Knowledge Assistant",
+          "price": null,
+          "status": "quote_after_discovery"
+        },
+        {
+          "id": "AO-005",
+          "name": "Managed Workflow Reliability",
+          "price": null,
+          "status": "quote_after_discovery"
+        }
+      ]
+    },
+    {
+      "id": "wealth-forge",
+      "name": "Garcar Wealth Forge",
+      "offers": [
+        {
+          "id": "WF-001",
+          "name": "Founder Cash-Flow Snapshot",
+          "price": null,
+          "status": "planned"
+        },
+        {
+          "id": "WF-002",
+          "name": "13-Week Business Cash Forecast",
+          "price": null,
+          "status": "planned"
+        },
+        {
+          "id": "WF-003",
+          "name": "Revenue Quality Dashboard",
+          "price": null,
+          "status": "planned"
+        },
+        {
+          "id": "WF-004",
+          "name": "Business Runway & Expense Review",
+          "price": null,
+          "status": "planned"
+        },
+        {
+          "id": "WF-005",
+          "name": "Wealth & Business Fundamentals Library",
+          "price": null,
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "enterprise-intelligence",
+      "name": "Garcar Enterprise Intelligence",
+      "offers": [
+        {
+          "id": "EI-001",
+          "name": "Enterprise Knowledge Fabric Assessment",
+          "price": null,
+          "status": "commercial_hypothesis"
+        },
+        {
+          "id": "EI-002",
+          "name": "Governed Knowledge Assistant",
+          "price": null,
+          "status": "commercial_hypothesis"
+        },
+        {
+          "id": "EI-003",
+          "name": "Workflow Orchestration Layer",
+          "price": null,
+          "status": "commercial_hypothesis"
+        },
+        {
+          "id": "EI-004",
+          "name": "Evidence & Decision Ledger",
+          "price": null,
+          "status": "commercial_hypothesis"
+        },
+        {
+          "id": "EI-005",
+          "name": "RHNS Architecture Evaluation",
+          "price": null,
+          "status": "commercial_hypothesis"
+        }
+      ]
+    },
+    {
+      "id": "industry-solutions",
+      "name": "Garcar Industry Solutions",
+      "offers": [
+        {
+          "id": "IS-001",
+          "name": "Construction & Home Services Workflow",
+          "price": null,
+          "status": "vertical_hypothesis"
+        },
+        {
+          "id": "IS-002",
+          "name": "Logistics Dispatch Exception Desk",
+          "price": null,
+          "status": "vertical_hypothesis"
+        },
+        {
+          "id": "IS-003",
+          "name": "Manufacturing Shift & Maintenance Intelligence",
+          "price": null,
+          "status": "vertical_hypothesis"
+        }
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "name": "Garcar Infrastructure",
+      "offers": [
+        {
+          "id": "INF-001",
+          "name": "Source Control & Release Records",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-002",
+          "name": "Application Runtime",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-003",
+          "name": "Data Persistence & Recovery",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-004",
+          "name": "Integration Gateway",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-005",
+          "name": "Secret Management",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-006",
+          "name": "Observability",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-007",
+          "name": "Backup & Recovery",
+          "price": null,
+          "status": "internal_capability_spec"
+        }
+      ]
+    },
+    {
+      "id": "governance-security",
+      "name": "Garcar Governance & Security",
+      "offers": [
+        {
+          "id": "GS-001",
+          "name": "Policy & Access-Control Baseline",
+          "price": null,
+          "status": "specification"
+        },
+        {
+          "id": "GS-002",
+          "name": "Evidence & Audit Ledger",
+          "price": null,
+          "status": "specification"
+        },
+        {
+          "id": "GS-003",
+          "name": "Security & Privacy Assessment",
+          "price": null,
+          "status": "specification"
+        },
+        {
+          "id": "GS-004",
+          "name": "Release & Change Approval Workflow",
+          "price": null,
+          "status": "specification"
+        },
+        {
+          "id": "GS-005",
+          "name": "Incident & Recovery Playbook",
+          "price": null,
+          "status": "specification"
+        }
+      ]
+    }
+  ],
+  "constraints": {
+    "paid_services_activation_authorized": false,
+    "live_payment_activation_authorized": false,
+    "outbound_email_authorized": false,
+    "production_deployment_authorized": false,
+    "customer_data_access_authorized": false
+  },
+  "retired_offers": [
+    {
+      "id": "LLA-47",
+      "name": "Lead Leak Audit ($47, trades)",
+      "status": "retired",
+      "stripe_payment_links_inactive": [
+        "plink_1UKUvNFKGbk21LK5jhAXBaLz",
+        "plink_1UKUueFKGbk21LK5cN36aXtN",
+        "plink_1UR1E1FKGbk21LK5OGHNlbJ8",
+        "plink_1UR1CAFKGbk21LK5Z02t1ITK",
+        "plink_1UCgkNFKGbk21LK59hrFMAUO",
+        "plink_1U5nf6FKGbk21LK52bXOQOEy",
+        "plink_1TmyiTFKGbk21LK5sUk8BmUr"
+      ],
+      "note": "All $47 audit / GC-WRITE-47 payment links confirmed active=false in Stripe livemode 2026-11-01."
+    },
+    {
+      "id": "VACANT-PACK",
+      "name": "Vacant pack ($997 / $1,497)",
+      "status": "redirected_not_live",
+      "note": "garrettc123.github.io/vacant.html meta-refreshes to / (the DFW real-estate offer). Not a live public offer. Stripe links plink_1UR1GYFKGbk21LK5tOYYQ5V2 (vacant_pack_997), plink_1UBiCcFKGbk21LK5BQU0YnSP (vacant_pack_monthly), plink_1UBiCBFKGbk21LK57t7LVwC8 (vacant_pack_johnson) remain active in Stripe but are not linked from the public site; deactivation not in approved scope."
+    }
+  ]
+}
