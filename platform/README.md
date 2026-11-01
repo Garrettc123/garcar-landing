@@ -25,12 +25,19 @@ Run checks:
 python -m py_compile server.py
 python -m unittest discover -s tests -v
 python smoke_test.py
+python ../divisions/validate_catalog.py ../divisions/catalog.json
 \`\`\`
 
 Environment:
 - GARCAR_PORT: local port (default 8788)
 - GARCAR_DB_PATH: alternate SQLite database path
 - GARCAR_ADMIN_TOKEN: stable local token; otherwise a random token is generated at startup
+
+## Test coverage
+
+- 25 standard-library unit tests are authored.
+- 18 loopback HTTP smoke checks are authored; they use synthetic records and a temporary database.
+- GitHub Actions is configured to run Python compile, unit tests, smoke tests, and catalog validation. See the PR status; a GitHub runner has not yet successfully executed those jobs.
 
 ## Working local modules
 
@@ -40,7 +47,7 @@ Environment:
 - **Wealth Forge:** manual inflow/outflow ledger, revenue-quality classification, expense review, runway scenario, and 13-week cash scenario; no bank connection or financial advice.
 - **Enterprise Intelligence:** local document register and keyword search with source references; no embeddings, model, or GraphRAG.
 - **Industry Solutions:** task/exception queues for dispatch, maintenance, and shift handoffs; no operational equipment control.
-- **Infrastructure:** SQLite WAL, quick integrity diagnostics, and local backup.
+- **Infrastructure:** SQLite WAL, diagnostics, local backup inventory, checksum verification, and backup SQLite integrity checks.
 - **Governance & Security:** local action approval register and SHA-256 event hash chain; approval decisions do not execute actions.
 
 ## API
