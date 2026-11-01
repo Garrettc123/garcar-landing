@@ -897,6 +897,9 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/digital/health":
                 from digital_delivery import digital_delivery_health
                 return self.send_body(200,digital_delivery_health(DB_PATH))
+            if path=="/api/digital/catalog":
+                from digital_delivery import list_digital_products
+                return self.send_body(200,{"items":list_digital_products(DB_PATH)})
             if path=="/api/digital/orders":
                 from digital_delivery import list_digital_orders
                 return self.send_body(200,{"items":list_digital_orders(DB_PATH)})
