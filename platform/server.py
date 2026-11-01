@@ -74,6 +74,11 @@ def init_db(db_path:Path|str=DB_PATH)->None:
         CREATE INDEX IF NOT EXISTS idx_finance_date ON finance_entries(happened_on);
         CREATE INDEX IF NOT EXISTS idx_knowledge_division ON knowledge_docs(division_id);
         CREATE INDEX IF NOT EXISTS idx_work_status ON work_items(status);
+        CREATE TABLE IF NOT EXISTS product_readiness(
+          offer_id TEXT PRIMARY KEY, state TEXT NOT NULL DEFAULT 'specified',
+          evidence_ref TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL);
+        CREATE INDEX IF NOT EXISTS idx_product_readiness_state ON product_readiness(state);
+
 
         """)
 
@@ -293,6 +298,55 @@ def demo_seed(db_path:Path|str=DB_PATH)->int:
     return len(rows)
 
 
+
+RELEASE_STATES={"specified","built_local","tested_local","sandbox_verified","approved_for_production","deployed_and_verified"}
+
+def sync_product_readiness(db_path:Path|str=DB_PATH)->int:
+    offers=offer_index();stamp=now_iso();created=0
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        for oid,offer in offers.items():
+            initial="built_local" if "preview_created" in str(offer.get("status","")) else "specified"
+            evidence="Private preview manuscript bundle; not for sale and not deployed." if initial=="built_local" else ""
+            cur=db.execute("INSERT OR IGNORE INTO product_readiness(offer_id,state,evidence_ref,updated_at) VALUES(?,?,?,?)",
+                           (oid,initial,evidence,stamp))
+            created+=cur.rowcount
+    return created
+
+def update_product_readiness(offer_id:str,data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    if offer_id not in offer_index():raise ApiError(404,"Unknown product/offer ID.")
+    if not data or set(data)-{"state","evidence_ref","notes"}:raise ApiError(400,"Only state, evidence_ref, and notes may be updated.")
+    state=clean_text(data.get("state"),"state",40,True)
+    if state not in RELEASE_STATES:raise ApiError(400,"Invalid release state.")
+    evidence=clean_text(data.get("evidence_ref"),"evidence_ref",500)
+    notes=clean_text(data.get("notes"),"notes",1000)
+    if state!="specified" and not evidence:raise ApiError(400,"A reference to evidence is required for states beyond specified.")
+    stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        db.execute("INSERT OR IGNORE INTO product_readiness(offer_id,state,updated_at) VALUES(?,'specified',?)",(offer_id,stamp))
+        db.execute("UPDATE product_readiness SET state=?,evidence_ref=?,notes=?,updated_at=? WHERE offer_id=?",
+                   (state,evidence,notes,stamp,offer_id))
+        append_audit(db,"product.readiness.updated","product",offer_id,{"state":state,"evidence_ref":evidence})
+        row=dict(db.execute("SELECT * FROM product_readiness WHERE offer_id=?",(offer_id,)).fetchone())
+    row["evidence_is_independently_verified"]=False
+    return row
+
+def list_product_readiness(db_path:Path|str=DB_PATH)->dict[str,Any]:
+    sync_product_readiness(db_path)
+    offers=offer_index()
+    with connect(db_path) as db:rows=db.execute("SELECT * FROM product_readiness ORDER BY offer_id").fetchall()
+    items=[]
+    for row in rows:
+        item=dict(row);offer=offers.get(item["offer_id"],{})
+        item["name"]=offer.get("name","");item["division_id"]=offer.get("division_id","");item["division_name"]=offer.get("division_name","")
+        item["catalog_status"]=offer.get("status","");item["price"]=offer.get("price")
+        items.append(item)
+    counts={state:sum(1 for item in items if item["state"]==state) for state in sorted(RELEASE_STATES)}
+    return {"total":len(items),"counts":counts,"items":items,
+      "disclaimer":"Release states and evidence references are operator-entered records. They are not independently verified by this local register."}
+
+
 def _date_value(value:Any,field:str)->str:
     text=clean_text(value,field,10,True)
     try:
@@ -490,6 +544,7 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/knowledge/docs":return self.send_body(200,{"items":list_records("knowledge_docs")})
             if path=="/api/knowledge/search":return self.send_body(200,search_knowledge(q.get("q",[""])[0]))
             if path=="/api/work-items":return self.send_body(200,{"items":list_records("work_items")})
+            if path=="/api/product-readiness":return self.send_body(200,list_product_readiness())
             if path=="/api/system/diagnostics":return self.send_body(200,system_diagnostics())
 
             if path=="/api/audit/verify":return self.send_body(200,verify_ledger())
@@ -514,6 +569,8 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/finance/forecast":return self.send_body(200,forecast_cash(data))
             if path=="/api/knowledge/docs":return self.send_body(201,create_knowledge_doc(data))
             if path=="/api/work-items":return self.send_body(201,create_work_item(data))
+            if len(path.strip("/").split("/"))==4 and path.strip("/").split("/")[0:2]==["api","product-readiness"] and path.strip("/").split("/")[3]=="update":
+                parts=path.strip("/").split("/");return self.send_body(200,update_product_readiness(parts[2],data))
             if path=="/api/system/backup":return self.send_body(201,create_local_backup())
 
             if path=="/api/approvals":return self.send_body(201,create_approval(data))
