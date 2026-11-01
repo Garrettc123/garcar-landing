@@ -32,10 +32,7 @@ No GitHub token is required for this public repository. Do not put passwords or 
 ## 3. Run the checks
 
 ```bash
-python -m py_compile server.py
-python -m unittest discover -s tests -v
-python smoke_test.py
-python ../divisions/validate_catalog.py ../divisions/catalog.json
+bash run_checks.sh
 ```
 
 The smoke test starts a temporary loopback-only server, uses a temporary database and synthetic records, then stops the server. It does not use live customer data.
@@ -73,7 +70,7 @@ Paste the token from the Termux terminal into the Local Operator Access box. The
 - Record a contractor lead and track its status.
 - Create an opportunity linked to one of the 46 catalog offers.
 - Record voluntary product/customer discovery interviews.
-- View all eight divisions and the twelve digital product previews.
+- View all eight divisions and the twelve digital product previews; exercise the test-mode digital entitlement sandbox.
 - Track build/release states for all 46 offers and attach evidence references.
 - Enter manual inflows/outflows and calculate a 13-week cash scenario.
 - Save approved internal reference text and run local keyword search.
