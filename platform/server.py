@@ -87,6 +87,17 @@ def init_db(db_path:Path|str=DB_PATH)->None:
           offer_id TEXT PRIMARY KEY, state TEXT NOT NULL DEFAULT 'specified',
           evidence_ref TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL);
         CREATE INDEX IF NOT EXISTS idx_product_readiness_state ON product_readiness(state);
+        CREATE TABLE IF NOT EXISTS workflow_definitions(
+          workflow_key TEXT PRIMARY KEY, title TEXT NOT NULL, division_id TEXT NOT NULL,
+          description TEXT NOT NULL, steps_json TEXT NOT NULL, version TEXT NOT NULL,
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS workflow_runs(
+          id TEXT PRIMARY KEY, workflow_key TEXT NOT NULL REFERENCES workflow_definitions(workflow_key) ON DELETE RESTRICT,
+          status TEXT NOT NULL DEFAULT 'active', current_step_index INTEGER NOT NULL DEFAULT 0,
+          context_json TEXT NOT NULL DEFAULT '{}', notes TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+        CREATE INDEX IF NOT EXISTS idx_workflow_runs_status ON workflow_runs(status);
+
         finance_columns = {row["name"] for row in db.execute("PRAGMA table_info(finance_entries)")}
         if "revenue_class" not in finance_columns:
             db.execute("ALTER TABLE finance_entries ADD COLUMN revenue_class TEXT NOT NULL DEFAULT 'unknown'")
@@ -363,6 +374,122 @@ def list_product_readiness(db_path:Path|str=DB_PATH)->dict[str,Any]:
 
 
 KNOWLEDGE_RELATIONS={"supports","contradicts","supersedes","related_to"}
+
+
+WORKFLOW_TEMPLATES=[
+ {"workflow_key":"lead_response_v1","title":"Lead Response","division_id":"revenue-automation",
+  "description":"Record, qualify, assign, and review a lead without sending messages.",
+  "steps":["lead_intake","source_validation","owner_assignment","human_response_record","outcome_record"]},
+ {"workflow_key":"document_review_v1","title":"Document Intake Review","division_id":"ai-operations-studio",
+  "description":"Extract candidate text fields, require human verification, and record disposition.",
+  "steps":["document_received","field_extraction","human_verification","record_complete"]},
+ {"workflow_key":"support_reply_v1","title":"Support Reply Review","division_id":"ai-operations-studio",
+  "description":"Find approved sources, prepare a draft, require owner review, and record outcome.",
+  "steps":["knowledge_lookup","draft_prepared","human_review","response_outcome_record"]},
+ {"workflow_key":"dispatch_exception_v1","title":"Dispatch Exception Desk","division_id":"industry-solutions",
+  "description":"Record an exception, require dispatcher review, and record a resolution.",
+  "steps":["event_recorded","dispatcher_review","resolution_recorded","closed"]},
+ {"workflow_key":"maintenance_request_v1","title":"Maintenance Request","division_id":"industry-solutions",
+  "description":"Record a maintenance issue, require technician review, and record supervisor closure.",
+  "steps":["request_recorded","technician_review","work_completed","supervisor_close"]},
+ {"workflow_key":"release_gate_v1","title":"Product Release Gate","division_id":"governance-security",
+  "description":"Record source, tests, security review, owner decision, and deployment evidence.",
+  "steps":["artifact_recorded","tests_verified","security_review","owner_release_decision","deployment_verification"]}
+]
+
+def ensure_workflow_definitions(db_path:Path|str=DB_PATH)->int:
+    stamp=now_iso();created=0
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        for item in WORKFLOW_TEMPLATES:
+            cur=db.execute("""INSERT OR IGNORE INTO workflow_definitions
+              (workflow_key,title,division_id,description,steps_json,version,created_at,updated_at)
+              VALUES(?,?,?,?,?,'1.0',?,?)""",
+              (item["workflow_key"],item["title"],item["division_id"],item["description"],canonical(item["steps"]),stamp,stamp))
+            created+=cur.rowcount
+    return created
+
+def list_workflow_definitions(db_path:Path|str=DB_PATH)->list[dict[str,Any]]:
+    ensure_workflow_definitions(db_path)
+    with connect(db_path) as db:rows=db.execute("SELECT * FROM workflow_definitions ORDER BY division_id,title").fetchall()
+    result=[]
+    for row in rows:
+        item=dict(row);item["steps"]=json.loads(item.pop("steps_json"));result.append(item)
+    return result
+
+def _safe_workflow_context(value:Any)->dict[str,Any]:
+    if value is None:return {}
+    if not isinstance(value,dict):raise ApiError(400,"context must be an object.")
+    allowed={"summary","source_ref","record_ref","business_unit"}
+    if set(value)-allowed:raise ApiError(400,"context allows only summary, source_ref, record_ref, and business_unit.")
+    result={}
+    for key,limit in (("summary",500),("source_ref",300),("record_ref",120),("business_unit",100)):
+        if key in value:result[key]=clean_text(value[key],key,limit)
+    return result
+
+def start_workflow(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    key=clean_text(data.get("workflow_key"),"workflow_key",80,True)
+    ensure_workflow_definitions(db_path)
+    context=_safe_workflow_context(data.get("context",{}))
+    notes=clean_text(data.get("notes"),"notes",500)
+    rid=str(uuid.uuid4());stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        definition=db.execute("SELECT * FROM workflow_definitions WHERE workflow_key=?",(key,)).fetchone()
+        if not definition:raise ApiError(404,"Workflow definition not found.")
+        db.execute("""INSERT INTO workflow_runs(id,workflow_key,status,current_step_index,context_json,notes,created_at,updated_at)
+          VALUES(?,?,'active',0,?,?,?,?)""",(rid,key,canonical(context),notes,stamp,stamp))
+        append_audit(db,"workflow.started","workflow_run",rid,{"workflow_key":key,"context":context})
+        row=dict(db.execute("SELECT * FROM workflow_runs WHERE id=?",(rid,)).fetchone())
+    row["context"]=json.loads(row.pop("context_json"));row["steps"]=json.loads(definition["steps_json"])
+    return row
+
+def list_workflow_runs(db_path:Path|str=DB_PATH)->list[dict[str,Any]]:
+    ensure_workflow_definitions(db_path)
+    with connect(db_path) as db:
+        rows=db.execute("""SELECT r.*,d.title,d.division_id,d.steps_json,d.version
+          FROM workflow_runs r JOIN workflow_definitions d ON d.workflow_key=r.workflow_key
+          ORDER BY r.created_at DESC LIMIT 200""").fetchall()
+    result=[]
+    for row in rows:
+        item=dict(row);steps=json.loads(item.pop("steps_json"));item["steps"]=steps
+        item["context"]=json.loads(item.pop("context_json"));item["current_step"]=steps[item["current_step_index"]] if item["current_step_index"]<len(steps) else "complete"
+        result.append(item)
+    return result
+
+def act_on_workflow_run(run_id:str,data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    action=clean_text(data.get("action"),"action",20,True)
+    if action not in {"advance","block","resume","cancel"}:raise ApiError(400,"Action must be advance, block, resume, or cancel.")
+    note=clean_text(data.get("note"),"note",500)
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        row=db.execute("""SELECT r.*,d.steps_json FROM workflow_runs r JOIN workflow_definitions d
+          ON d.workflow_key=r.workflow_key WHERE r.id=?""",(run_id,)).fetchone()
+        if not row:raise ApiError(404,"Workflow run not found.")
+        status=row["status"];index=row["current_step_index"];steps=json.loads(row["steps_json"])
+        if action=="advance":
+            if status!="active":raise ApiError(409,"Only an active workflow run can advance.")
+            index+=1
+            if index>=len(steps):status="completed"
+        elif action=="block":
+            if status!="active":raise ApiError(409,"Only an active workflow run can be blocked.")
+            status="blocked"
+        elif action=="resume":
+            if status!="blocked":raise ApiError(409,"Only a blocked workflow run can resume.")
+            status="active"
+        elif action=="cancel":
+            if status not in {"active","blocked"}:raise ApiError(409,"This workflow run cannot be cancelled.")
+            status="cancelled"
+        stamp=now_iso()
+        db.execute("UPDATE workflow_runs SET status=?,current_step_index=?,notes=?,updated_at=? WHERE id=?",
+          (status,index,note,stamp,run_id))
+        append_audit(db,"workflow."+action,"workflow_run",run_id,{"action":action,"status":status,"step_index":index,"note":note})
+        result=dict(db.execute("SELECT * FROM workflow_runs WHERE id=?",(run_id,)).fetchone())
+        result["context"]=json.loads(result.pop("context_json"));result["steps"]=steps
+        result["current_step"]=steps[index] if index<len(steps) else "complete"
+        result["external_actions_executed"]=False
+    return result
+
 
 def create_knowledge_link(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
     source=clean_text(data.get("from_doc_id"),"from_doc_id",64,True)
@@ -759,6 +886,8 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/knowledge/links":return self.send_body(200,{"items":list_knowledge_links()})
             if path=="/api/knowledge/graph-search":return self.send_body(200,search_knowledge_graph(q.get("q",[""])[0]))
             if path=="/api/work-items":return self.send_body(200,{"items":list_records("work_items")})
+            if path=="/api/workflows/definitions":return self.send_body(200,{"items":list_workflow_definitions()})
+            if path=="/api/workflows/runs":return self.send_body(200,{"items":list_workflow_runs()})
             if path=="/api/product-readiness":return self.send_body(200,list_product_readiness())
             if path=="/api/system/diagnostics":return self.send_body(200,system_diagnostics())
             if path=="/api/system/backups":return self.send_body(200,list_local_backups())
@@ -787,8 +916,11 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/knowledge/docs":return self.send_body(201,create_knowledge_doc(data))
             if path=="/api/knowledge/links":return self.send_body(201,create_knowledge_link(data))
             if path=="/api/work-items":return self.send_body(201,create_work_item(data))
+            if path=="/api/workflows/runs":return self.send_body(201,start_workflow(data))
             if path=="/api/documents/extract":return self.send_body(200,extract_document_fields(data))
             if path=="/api/support/draft":return self.send_body(200,draft_support_reply(data))
+            if len(path.strip("/").split("/"))==5 and path.strip("/").split("/")[0:2]==["api","workflows"] and path.strip("/").split("/")[2]=="runs" and path.strip("/").split("/")[4]=="action":
+                parts=path.strip("/").split("/");return self.send_body(200,act_on_workflow_run(parts[3],data))
             if len(path.strip("/").split("/"))==4 and path.strip("/").split("/")[0:2]==["api","product-readiness"] and path.strip("/").split("/")[3]=="update":
                 parts=path.strip("/").split("/");return self.send_body(200,update_product_readiness(parts[2],data))
             if path=="/api/system/backup":return self.send_body(201,create_local_backup())
