@@ -88,15 +88,32 @@
       "offers": [
         {
           "id": "RA-001",
-          "name": "Revenue Leak / Lead Response Audit",
+          "name": "DFW Real-Estate Lead-List Review (\"Mark the leads that sat\")",
           "price": 497,
-          "status": "proposed_price_hypothesis"
+          "status": "live_public_offer",
+          "public_page": "https://garrettc123.github.io/",
+          "checkout_url": "https://buy.stripe.com/8x2eVddjf0hQ86Tf0f43S2h",
+          "stripe_payment_link": "plink_1UEcv4FKGbk21LK57hRic0dR",
+          "stripe_price": "price_1UEcuyFKGbk21LK5mqhbKQWZ",
+          "sku": "MLS-497",
+          "market": "DFW real-estate teams",
+          "note": "Live public offer verified on github.io and Stripe livemode 2026-11-01; $497 credits toward RA-002 if the buyer continues."
         },
         {
           "id": "RA-002",
-          "name": "Speed-to-Lead Starter Installation",
+          "name": "DFW Real-Estate Lead Timer / Backup Install (\"Lead backup — callback clock\")",
           "price": 2500,
-          "status": "proposed_price_hypothesis"
+          "status": "live_public_offer",
+          "public_page": "https://garrettc123.github.io/",
+          "checkout_url": "https://buy.stripe.com/6oUaEX4MJ0hQevhf0f43S2i",
+          "stripe_payment_link": "plink_1UExqpFKGbk21LK5PHxGbDRd",
+          "stripe_price": "price_1UExqgFKGbk21LK5MWTXsSZr",
+          "sku": "LB-2500",
+          "alternate_payment_links": [
+            "plink_1UGpMIFKGbk21LK5RHl8asRI (https://buy.stripe.com/14AdR95QN3u2af14lB43S2j, sku LB-2500, not linked from github.io)"
+          ],
+          "market": "DFW real-estate teams",
+          "note": "Live public offer verified on github.io and Stripe livemode 2026-11-01."
         },
         {
           "id": "RA-003",
@@ -335,5 +352,28 @@
     "outbound_email_authorized": false,
     "production_deployment_authorized": false,
     "customer_data_access_authorized": false
-  }
+  },
+  "retired_offers": [
+    {
+      "id": "LLA-47",
+      "name": "Lead Leak Audit ($47, trades)",
+      "status": "retired",
+      "stripe_payment_links_inactive": [
+        "plink_1UKUvNFKGbk21LK5jhAXBaLz",
+        "plink_1UKUueFKGbk21LK5cN36aXtN",
+        "plink_1UR1E1FKGbk21LK5OGHNlbJ8",
+        "plink_1UR1CAFKGbk21LK5Z02t1ITK",
+        "plink_1UCgkNFKGbk21LK59hrFMAUO",
+        "plink_1U5nf6FKGbk21LK52bXOQOEy",
+        "plink_1TmyiTFKGbk21LK5sUk8BmUr"
+      ],
+      "note": "All $47 audit / GC-WRITE-47 payment links confirmed active=false in Stripe livemode 2026-11-01."
+    },
+    {
+      "id": "VACANT-PACK",
+      "name": "Vacant pack ($997 / $1,497)",
+      "status": "redirected_not_live",
+      "note": "garrettc123.github.io/vacant.html meta-refreshes to / (the DFW real-estate offer). Not a live public offer. Stripe links plink_1UR1GYFKGbk21LK5tOYYQ5V2 (vacant_pack_997), plink_1UBiCcFKGbk21LK5BQU0YnSP (vacant_pack_monthly), plink_1UBiCBFKGbk21LK57t7LVwC8 (vacant_pack_johnson) remain active in Stripe but are not linked from the public site; deactivation not in approved scope."
+    }
+  ]
 }

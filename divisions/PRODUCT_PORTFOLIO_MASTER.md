@@ -113,14 +113,14 @@ Each product must have: target user; user problem; primary outcome; MVP scope; e
 - Excludes: guaranteed revenue lift; unauthorized access; live messaging.
 - Acceptance: sample coverage stated; baseline calculation reproducible; every recommendation linked to evidence.
 - Delivery: fixed-scope audit with written acceptance.
-- Proposed price hypothesis: $497.
+- **Status: LIVE public offer** — $497 DFW real-estate lead-list review ("Mark the leads that sat", SKU MLS-497) on https://garrettc123.github.io/ ; checkout https://buy.stripe.com/8x2eVddjf0hQ86Tf0f43S2h . Price is live, not a hypothesis.
 
 ### RA-002 — Speed-to-Lead Starter Installation
 - Buyer: contractor with an existing lead source and named workflow owner.
 - MVP: one lead source, deduplication, acknowledgement draft/approved message, staff assignment, status tracking, exception queue, audit log.
 - Excludes: multi-CRM migrations, autonomous quoting, unapproved SMS/email, guaranteed bookings.
 - Acceptance: synthetic test leads route correctly; duplicate and timeout cases handled; staff can override; rollback tested.
-- Proposed price hypothesis: $2,500.
+- **Status: LIVE public offer** — $2,500 DFW real-estate lead timer/backup install ("Lead backup — callback clock", SKU LB-2500) on https://garrettc123.github.io/ ; checkout https://buy.stripe.com/6oUaEX4MJ0hQevhf0f43S2i . Price is live, not a hypothesis.
 
 ### RA-003 — Managed Lead Response
 - Buyer: business with a proven starter workflow and support owner.

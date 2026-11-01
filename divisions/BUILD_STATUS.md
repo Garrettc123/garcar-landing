@@ -66,3 +66,14 @@ Pull request: #6 (open, draft; not merged)
 ## Release statement
 
 This is a substantial local implementation foundation spanning all eight divisions, a 46-offer portfolio, 12 private digital preview manuscripts, a local CRM and operating console, finance/knowledge/operations modules, a test-mode digital entitlement simulator, and local governance/infrastructure controls. It is not a claim that all 46 offers are production-complete, deployed, commercially validated, or generating revenue.
+
+## Live public product line (verified 2026-11-01)
+
+| Offer | Price | Status | Public page | Checkout |
+|---|---|---|---|---|
+| RA-001 / MLS-497 — DFW real-estate lead-list review ("Mark the leads that sat") | $497 | **Live** | https://garrettc123.github.io/ | https://buy.stripe.com/8x2eVddjf0hQ86Tf0f43S2h |
+| RA-002 / LB-2500 — DFW real-estate lead timer/backup install | $2,500 | **Live** | https://garrettc123.github.io/ | https://buy.stripe.com/6oUaEX4MJ0hQevhf0f43S2i |
+| LLA-47 / GC-WRITE-47 / $47 trades audits | $47 | **Retired** — every related Stripe payment link is `active=false` | — | none |
+| Vacant pack | $997 / $1,497 | **Redirected / not live** — `vacant.html` meta-refreshes to `/` (the real-estate offer) | — | not linked publicly |
+
+All other catalog offers remain previews / price hypotheses.
