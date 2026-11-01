@@ -63,7 +63,7 @@ class PlatformTests(unittest.TestCase):
         result=forecast_cash({"opening_cash_cents":100000,"weekly_inflows_cents":50000,"weekly_outflows_cents":40000})
         self.assertEqual(len(result["weeks"]),13)
         self.assertEqual(result["week_13_closing_cash_cents"],230000)
-        self.assertIn("not financial",result["disclaimer"])
+        self.assertIn("Not financial",result["disclaimer"])
     def test_knowledge_doc_search_has_local_citation(self):
         from server import create_knowledge_doc,search_knowledge
         doc=create_knowledge_doc({"title":"Lead response SOP","division_id":"revenue-automation","source_ref":"docs/lead-response.md","content":"A fast lead response needs a clear owner and a measured response time."},self.db)
