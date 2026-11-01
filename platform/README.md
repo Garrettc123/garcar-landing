@@ -112,3 +112,16 @@ See [CI_TROUBLESHOOTING.md](CI_TROUBLESHOOTING.md) for the latest runner ID, job
 ## Security boundary
 
 See [SECURITY_MODEL.md](SECURITY_MODEL.md) for the local threat model, implemented controls, known gaps, and production hardening requirements.
+
+
+## Independent local CI runner
+
+Run the independent Garcar build pipeline:
+
+```bash
+bash run_garcar_ci.sh
+```
+
+It executes compile, unit tests, loopback HTTP smoke tests, and catalog validation in order. It stops on the first failure, writes per-stage logs, a JSON report, and a SHA-256 manifest under `.garcar-builds/`, and returns a non-zero exit code unless every stage passes. Build subprocesses receive a minimal environment rather than inherited API keys or service credentials.
+
+This pipeline does not require a GitHub-hosted runner. It does not deploy, access customer systems, send messages, or process payments. A successful run verifies only the exact local checkout; it is not production approval. The simpler `run_checks.sh` remains available.
