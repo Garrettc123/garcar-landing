@@ -59,6 +59,22 @@ def init_db(db_path:Path|str=DB_PATH)->None:
         CREATE INDEX IF NOT EXISTS idx_opportunities_stage ON opportunities(stage);
         CREATE INDEX IF NOT EXISTS idx_approvals_status ON approvals(status);
         CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_events(entity_type,entity_id);
+
+        CREATE TABLE IF NOT EXISTS finance_entries(
+          id TEXT PRIMARY KEY, entry_type TEXT NOT NULL, label TEXT NOT NULL, category TEXT NOT NULL,
+          amount_cents INTEGER NOT NULL, happened_on TEXT NOT NULL, source TEXT NOT NULL DEFAULT 'manual',
+          notes TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS knowledge_docs(
+          id TEXT PRIMARY KEY, title TEXT NOT NULL, division_id TEXT NOT NULL, source_ref TEXT NOT NULL,
+          content TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS work_items(
+          id TEXT PRIMARY KEY, division_id TEXT NOT NULL, workflow_type TEXT NOT NULL, title TEXT NOT NULL,
+          description TEXT NOT NULL DEFAULT '', priority TEXT NOT NULL DEFAULT 'normal', status TEXT NOT NULL DEFAULT 'open',
+          due_date TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+        CREATE INDEX IF NOT EXISTS idx_finance_date ON finance_entries(happened_on);
+        CREATE INDEX IF NOT EXISTS idx_knowledge_division ON knowledge_docs(division_id);
+        CREATE INDEX IF NOT EXISTS idx_work_status ON work_items(status);
+
         """)
 
 def canonical(value:Any)->str:
@@ -276,6 +292,165 @@ def demo_seed(db_path:Path|str=DB_PATH)->int:
     for row in rows:create_lead(row,db_path)
     return len(rows)
 
+
+def _date_value(value:Any,field:str)->str:
+    text=clean_text(value,field,10,True)
+    try:
+        from datetime import date
+        date.fromisoformat(text)
+    except ValueError: raise ApiError(400,field+" must use YYYY-MM-DD.")
+    return text
+
+def create_finance_entry(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    entry_type=clean_text(data.get("entry_type"),"entry_type",20,True)
+    if entry_type not in {"inflow","outflow"}: raise ApiError(400,"entry_type must be inflow or outflow.")
+    label=clean_text(data.get("label"),"label",140,True)
+    category=clean_text(data.get("category"),"category",80,True)
+    amount=data.get("amount_cents")
+    if isinstance(amount,bool) or not isinstance(amount,int) or not 0<amount<=10_000_000_000: raise ApiError(400,"amount_cents must be a positive integer.")
+    happened=_date_value(data.get("happened_on") or now_iso()[:10],"happened_on")
+    source=clean_text(data.get("source","manual"),"source",30,True)
+    if source not in {"manual","synthetic"}: raise ApiError(400,"source must be manual or synthetic.")
+    notes=clean_text(data.get("notes"),"notes",500);rid=str(uuid.uuid4());stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        db.execute("""INSERT INTO finance_entries(id,entry_type,label,category,amount_cents,happened_on,source,notes,created_at)
+          VALUES(?,?,?,?,?,?,?,?,?)""",(rid,entry_type,label,category,amount,happened,source,notes,stamp))
+        append_audit(db,"finance.entry.created","finance_entry",rid,{"entry_type":entry_type,"amount_cents":amount,"happened_on":happened,"source":source})
+        result=dict(db.execute("SELECT * FROM finance_entries WHERE id=?",(rid,)).fetchone())
+    return result
+
+def finance_summary(start:str|None=None,end:str|None=None,db_path:Path|str=DB_PATH)->dict[str,Any]:
+    if start:start=_date_value(start,"start")
+    if end:end=_date_value(end,"end")
+    if start and end and start>end: raise ApiError(400,"start must be on or before end.")
+    clauses=[];params=[]
+    if start:clauses.append("happened_on>=?");params.append(start)
+    if end:clauses.append("happened_on<=?");params.append(end)
+    where=(" WHERE "+" AND ".join(clauses)) if clauses else ""
+    with connect(db_path) as db:
+        totals=db.execute("SELECT entry_type,COALESCE(SUM(amount_cents),0) total,COUNT(*) count FROM finance_entries"+where+" GROUP BY entry_type",params).fetchall()
+        rows=db.execute("SELECT * FROM finance_entries"+where+" ORDER BY happened_on DESC,created_at DESC LIMIT 100",params).fetchall()
+    sums={r["entry_type"]:{"amount_cents":r["total"],"count":r["count"]} for r in totals}
+    inflows=sums.get("inflow",{}).get("amount_cents",0);outflows=sums.get("outflow",{}).get("amount_cents",0)
+    return {"inflows_cents":inflows,"outflows_cents":outflows,"net_cents":inflows-outflows,
+      "entry_count":sum(x["count"] for x in sums.values()),"by_type":sums,"items":[dict(r) for r in rows],
+      "disclaimer":"Manual ledger totals only; not bank-verified balances, financial statements, or tax advice."}
+
+def forecast_cash(data:dict[str,Any])->dict[str,Any]:
+    def cents(key:str)->int:
+        value=data.get(key)
+        if isinstance(value,bool) or not isinstance(value,int) or not 0<=value<=10_000_000_000: raise ApiError(400,key+" must be a non-negative integer in cents.")
+        return value
+    opening=cents("opening_cash_cents");inflow=cents("weekly_inflows_cents");outflow=cents("weekly_outflows_cents")
+    start=_date_value(data.get("start_date") or now_iso()[:10],"start_date")
+    balance=opening;weeks=[];lowest=opening;lowest_week=0
+    for i in range(1,14):
+        balance=balance+inflow-outflow
+        if balance<lowest:lowest=balance;lowest_week=i
+        weeks.append({"week":i,"closing_cash_cents":balance,"net_change_cents":inflow-outflow})
+    burn=outflow-inflow
+    runway=None if burn<=0 else round(opening/burn,2)
+    return {"opening_cash_cents":opening,"weekly_inflows_cents":inflow,"weekly_outflows_cents":outflow,
+      "weekly_net_cents":inflow-outflow,"week_13_closing_cash_cents":balance,"lowest_cash_cents":lowest,
+      "lowest_cash_week":lowest_week,"runway_weeks_at_assumed_net_burn":runway,"weeks":weeks,
+      "disclaimer":"Scenario only. Assumptions are not bank-connected or processor-verified. Not financial, tax, or investment advice."}
+
+def create_knowledge_doc(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    title=clean_text(data.get("title"),"title",180,True)
+    division=clean_text(data.get("division_id"),"division_id",60,True)
+    if division not in DIVISION_IDS: raise ApiError(400,"Unknown division_id.")
+    source=clean_text(data.get("source_ref"),"source_ref",300,True)
+    content=clean_text(data.get("content"),"content",20000,True)
+    rid=str(uuid.uuid4());stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        db.execute("INSERT INTO knowledge_docs(id,title,division_id,source_ref,content,created_at,updated_at) VALUES(?,?,?,?,?,?,?)",
+          (rid,title,division,source,content,stamp,stamp))
+        append_audit(db,"knowledge.document.created","knowledge_doc",rid,{"title":title,"division_id":division,"source_ref":source,"content_sha256":hashlib.sha256(content.encode()).hexdigest()})
+        result=dict(db.execute("SELECT id,title,division_id,source_ref,created_at,updated_at FROM knowledge_docs WHERE id=?",(rid,)).fetchone())
+    return result
+
+def search_knowledge(query:str,db_path:Path|str=DB_PATH)->dict[str,Any]:
+    query=clean_text(query,"q",200,True)
+    terms=[x.lower() for x in query.split() if len(x)>1]
+    if not terms: raise ApiError(400,"Search query needs at least one term longer than one character.")
+    with connect(db_path) as db: rows=db.execute("SELECT id,title,division_id,source_ref,content,created_at FROM knowledge_docs ORDER BY created_at DESC LIMIT 500").fetchall()
+    found=[]
+    for row in rows:
+        hay=(row["title"]+" "+row["content"]).lower()
+        score=sum(hay.count(term) for term in terms)
+        if score:
+            excerpt=row["content"][:500]
+            found.append({"id":row["id"],"title":row["title"],"division_id":row["division_id"],"source_ref":row["source_ref"],
+              "score":score,"excerpt":excerpt,"citation":"local-document:"+row["id"]})
+    found.sort(key=lambda item:(-item["score"],item["title"]))
+    return {"query":query,"items":found[:50],"method":"local_keyword_search","disclaimer":"Search is lexical, not an AI model. Verify the cited source before relying on a result."}
+
+def create_work_item(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    division=clean_text(data.get("division_id"),"division_id",60,True)
+    if division not in {"ai-operations-studio","industry-solutions","infrastructure","governance-security"}: raise ApiError(400,"Work items must use an operations, industry, infrastructure, or governance division.")
+    wtype=clean_text(data.get("workflow_type"),"workflow_type",60,True)
+    if wtype not in {"document_intake","support_review","dispatch_exception","maintenance_request","shift_handoff","release_task","security_finding","workflow_map"}: raise ApiError(400,"Unsupported workflow_type.")
+    title=clean_text(data.get("title"),"title",180,True);description=clean_text(data.get("description"),"description",1500)
+    priority=clean_text(data.get("priority","normal"),"priority",20,True)
+    if priority not in {"low","normal","high","critical"}: raise ApiError(400,"Invalid priority.")
+    due=clean_text(data.get("due_date"),"due_date",10)
+    if due:_date_value(due,"due_date")
+    rid=str(uuid.uuid4());stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        db.execute("""INSERT INTO work_items(id,division_id,workflow_type,title,description,priority,status,due_date,created_at,updated_at)
+          VALUES(?,?,?,?,?,?,'open',?,?,?)""",(rid,division,wtype,title,description,priority,due,stamp,stamp))
+        append_audit(db,"work_item.created","work_item",rid,{"division_id":division,"workflow_type":wtype,"priority":priority})
+        result=dict(db.execute("SELECT * FROM work_items WHERE id=?",(rid,)).fetchone())
+    return result
+
+def update_work_item(rid:str,data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    if not data or set(data)-{"status","priority","description"}: raise ApiError(400,"Only status, priority, and description may be updated.")
+    updates={}
+    if "status" in data:
+        status=clean_text(data["status"],"status",20,True)
+        if status not in {"open","in_progress","blocked","done"}: raise ApiError(400,"Invalid work item status.")
+        updates["status"]=status
+    if "priority" in data:
+        priority=clean_text(data["priority"],"priority",20,True)
+        if priority not in {"low","normal","high","critical"}: raise ApiError(400,"Invalid priority.")
+        updates["priority"]=priority
+    if "description" in data:updates["description"]=clean_text(data["description"],"description",1500)
+    updates["updated_at"]=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        if not db.execute("SELECT 1 FROM work_items WHERE id=?",(rid,)).fetchone(): raise ApiError(404,"Work item not found.")
+        db.execute("UPDATE work_items SET "+",".join(k+"=?" for k in updates)+" WHERE id=?",(*updates.values(),rid))
+        append_audit(db,"work_item.updated","work_item",rid,updates)
+        result=dict(db.execute("SELECT * FROM work_items WHERE id=?",(rid,)).fetchone())
+    return result
+
+def system_diagnostics(db_path:Path|str=DB_PATH)->dict[str,Any]:
+    import platform as py_platform
+    with connect(db_path) as db:
+        mode=db.execute("PRAGMA journal_mode").fetchone()[0]
+        tables=[r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
+        integrity=db.execute("PRAGMA quick_check").fetchone()[0]
+    catalog=load_catalog();offer_count=sum(len(d.get("offers",[])) for d in catalog["divisions"])
+    return {"python":py_platform.python_version(),"sqlite":sqlite3.sqlite_version,"database_journal_mode":mode,
+      "database_integrity":integrity,"tables":tables,"division_count":len(catalog["divisions"]),"offer_count":offer_count,
+      "external_integrations_enabled":False,"deployment_state":"local_only","backup_path":"platform/backups (local only)"}
+
+def create_local_backup(db_path:Path|str=DB_PATH)->dict[str,Any]:
+    backup_dir=HERE/"backups";backup_dir.mkdir(parents=True,exist_ok=True)
+    stamp=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    destination=backup_dir/("garcar-"+stamp+".sqlite3")
+    source=connect(db_path);target=sqlite3.connect(destination)
+    try:source.backup(target)
+    finally:target.close();source.close()
+    digest=hashlib.sha256(destination.read_bytes()).hexdigest()
+    with connect(db_path) as db:
+        append_audit(db,"system.backup.created","backup",destination.name,{"sha256":digest,"bytes":destination.stat().st_size})
+    return {"filename":destination.name,"bytes":destination.stat().st_size,"sha256":digest,"location":"platform/backups","external_upload":False}
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version="GarcarLocal/1.0"
     def log_message(self,fmt,*args): sys.stderr.write("[garcar] "+fmt%args+"\n")
@@ -310,6 +485,14 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/opportunities":return self.send_body(200,{"items":list_records("opportunities")})
             if path=="/api/approvals":return self.send_body(200,{"items":list_records("approvals")})
             if path=="/api/interviews":return self.send_body(200,{"items":list_records("validation_interviews")})
+
+            if path=="/api/finance/entries":return self.send_body(200,{"items":list_records("finance_entries")})
+            if path=="/api/finance/summary":return self.send_body(200,finance_summary(q.get("start",[None])[0],q.get("end",[None])[0]))
+            if path=="/api/knowledge/docs":return self.send_body(200,{"items":list_records("knowledge_docs")})
+            if path=="/api/knowledge/search":return self.send_body(200,search_knowledge(q.get("q",[""])[0]))
+            if path=="/api/work-items":return self.send_body(200,{"items":list_records("work_items")})
+            if path=="/api/system/diagnostics":return self.send_body(200,system_diagnostics())
+
             if path=="/api/audit/verify":return self.send_body(200,verify_ledger())
             if path=="/api/audit":
                 with connect() as db:rows=db.execute("SELECT seq,event_type,entity_type,entity_id,actor,occurred_at,previous_hash,event_hash FROM audit_events ORDER BY seq DESC LIMIT 100").fetchall()
@@ -327,10 +510,18 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/leads":return self.send_body(201,create_lead(data))
             if path=="/api/opportunities":return self.send_body(201,create_opportunity(data))
             if path=="/api/interviews":return self.send_body(201,create_interview(data))
+
+            if path=="/api/finance/entries":return self.send_body(201,create_finance_entry(data))
+            if path=="/api/finance/forecast":return self.send_body(200,forecast_cash(data))
+            if path=="/api/knowledge/docs":return self.send_body(201,create_knowledge_doc(data))
+            if path=="/api/work-items":return self.send_body(201,create_work_item(data))
+            if path=="/api/system/backup":return self.send_body(201,create_local_backup())
+
             if path=="/api/approvals":return self.send_body(201,create_approval(data))
             parts=path.strip("/").split("/")
             if len(parts)==4 and parts[:2]==["api","leads"] and parts[3]=="update":return self.send_body(200,update_lead(parts[2],data))
             if len(parts)==4 and parts[:2]==["api","opportunities"] and parts[3]=="update":return self.send_body(200,update_opportunity(parts[2],data))
+            if len(parts)==4 and parts[:2]==["api","work-items"] and parts[3]=="update":return self.send_body(200,update_work_item(parts[2],data))
             if len(parts)==4 and parts[:2]==["api","approvals"] and parts[3]=="decision":return self.send_body(200,decide_approval(parts[2],data))
             return self.send_body(404,{"error":"Route not found."})
         except ApiError as e:self.send_body(e.status,{"error":e.message})
