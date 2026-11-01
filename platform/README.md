@@ -63,6 +63,12 @@ Environment:
 
 For local download testing, place the reviewed 12-PDF archive contents in `platform/private_assets/`. Both `private_assets/` and `private_state/` are git-ignored. The local secret files are created with restrictive file permissions where supported.
 
+## Digital delivery sandbox
+
+The local digital sandbox creates synthetic pending orders at server-side catalog prices. A locally HMAC-signed test event grants an entitlement only after test-mode, non-live, order-reference, product, currency, and amount checks pass. A 30-minute download token permits up to three downloads from a fixed product-ID-to-filename allow-list under the ignored `private_assets/` folder. A synthetic refund revokes entitlement and token access.
+
+This is not Stripe integration or a live checkout. No payment, customer purchase, email receipt, or revenue is created. See [TEST_MODE_DELIVERY.md](../digital-products/TEST_MODE_DELIVERY.md).
+
 ## API
 
 Public read-only:
