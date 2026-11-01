@@ -22,7 +22,7 @@ python server.py --demo
 Run checks:
 
 \`\`\`bash
-python -m py_compile server.py
+python -m py_compile server.py digital_delivery.py
 python -m unittest discover -s tests -v
 python smoke_test.py
 python ../divisions/validate_catalog.py ../divisions/catalog.json
@@ -35,7 +35,7 @@ Environment:
 
 ## Test coverage
 
-- 39 standard-library unit tests are authored.
+- 41 standard-library unit tests are authored.
 - 23 loopback HTTP smoke checks are authored; they use synthetic records and a temporary database.
 - GitHub Actions is configured to run Python compile, unit tests, smoke tests, and catalog validation. See the PR status; a GitHub runner has not yet successfully executed those jobs.
 
@@ -49,6 +49,19 @@ Environment:
 - **Industry Solutions:** task/exception queues for dispatch, maintenance, and shift handoffs; no operational equipment control.
 - **Infrastructure:** SQLite WAL, diagnostics, local backup inventory, checksum verification, and backup SQLite integrity checks.
 - **Governance & Security:** local action approval register and SHA-256 event hash chain; approval decisions do not execute actions.
+
+
+### Digital delivery sandbox
+
+- Create a synthetic pending order with a server-fixed catalog amount.
+- Simulate a signed test-mode payment event bound to that order's test checkout reference.
+- Grant one entitlement only after the signed event passes signature, mode, product, currency, and amount checks.
+- Generate a hashed, expiring download token; raw token is returned only on the successful local test call.
+- Serve only fixed product-ID-to-filename PDF assets from the ignored private asset directory.
+- Limit each token to three downloads and 30 minutes; simulate a refund to revoke the entitlement and every associated token.
+- No Stripe SDK, real payment endpoint, card form, customer email, live webhook, or actual money movement is present.
+
+For local download testing, place the reviewed 12-PDF archive contents in `platform/private_assets/`. Both `private_assets/` and `private_state/` are git-ignored. The local secret files are created with restrictive file permissions where supported.
 
 ## API
 
