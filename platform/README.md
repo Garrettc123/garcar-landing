@@ -125,3 +125,14 @@ bash run_garcar_ci.sh
 It executes compile, unit tests, loopback HTTP smoke tests, and catalog validation in order. It stops on the first failure, writes per-stage logs, a JSON report, and a SHA-256 manifest under `.garcar-builds/`, and returns a non-zero exit code unless every stage passes. Build subprocesses receive a minimal environment rather than inherited API keys or service credentials.
 
 This pipeline does not require a GitHub-hosted runner. It does not deploy, access customer systems, send messages, or process payments. A successful run verifies only the exact local checkout; it is not production approval. The simpler `run_checks.sh` remains available.
+
+
+## Release evidence gate (review only)
+
+After a successful local CI run, validate its evidence:
+
+```bash
+python release_gate.py .garcar-builds/<BUILD_ID>/report.json
+```
+
+The gate verifies that all four required stages passed, referenced logs exist and match their SHA-256 values, the manifest matches the report and logs, and external actions were disabled. It fails closed if evidence is missing or inconsistent. A valid result means the build evidence is ready for human release review only; it does not merge the PR, deploy software, or authorize customer-facing use.
