@@ -69,6 +69,10 @@ This is a local single-operator foundation, not a production multi-tenant SaaS. 
 
 Production release still requires independent authentication and authorization, tenant isolation, secure hosting, CSRF protections if cookie auth is introduced, encrypted off-site backups, retention/deletion controls, security monitoring, formal migrations, recovery exercises, payment webhook and digital entitlement integrations, and external security review.
 
+## Android / Termux
+
+See [TERMUX_SETUP.md](TERMUX_SETUP.md) for device-local setup, test, and run instructions.
+
 ## Security boundary
 
 See [SECURITY_MODEL.md](SECURITY_MODEL.md) for the local threat model, implemented controls, known gaps, and production hardening requirements.
