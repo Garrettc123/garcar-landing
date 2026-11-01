@@ -30,7 +30,7 @@ label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}input,se
 <header><div><div class="brand">GARCAR ENTERPRISE</div><div class="muted tiny">Local operating console · eight divisions · external actions disabled</div></div><div id="connection" class="status">Checking local service…</div></header>
 <div class="layout">
 <nav aria-label="Console sections">
-<button class="active" data-view="overview">Overview</button><button data-view="leads">Lead desk</button><button data-view="pipeline">Sales pipeline</button><button data-view="catalog">Product catalog</button><button data-view="interviews">Market validation</button><button data-view="approvals">Approvals</button><button data-view="audit">Audit ledger</button><button data-view="calculator">Opportunity model</button>
+<button class="active" data-view="overview">Overview</button><button data-view="finance">Finance</button><button data-view="knowledge">Knowledge</button><button data-view="operations">Operations queue</button><button data-view="system">Infrastructure</button><button data-view="leads">Lead desk</button><button data-view="pipeline">Sales pipeline</button><button data-view="catalog">Product catalog</button><button data-view="interviews">Market validation</button><button data-view="approvals">Approvals</button><button data-view="audit">Audit ledger</button><button data-view="calculator">Opportunity model</button>
 </nav>
 <main>
 <section id="access" class="panel" style="margin-bottom:15px">
@@ -114,6 +114,61 @@ label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}input,se
 <button class="btn" type="submit">Calculate scenario</button></form>
 <div class="panel"><h2>Illustrative output</h2><div class="metric"><span>Additional leads contacted</span><strong id="calcLeads">—</strong></div><div class="metric" style="margin-top:9px"><span>Expected bookings (scenario)</span><strong id="calcBookings">—</strong></div><div class="metric" style="margin-top:9px"><span>Gross job value scenario</span><strong id="calcValue">—</strong></div><p class="tiny">Not profit, forecast, guarantee, or verified revenue. Excludes capacity, cancellations, margin, costs, seasonality, and causality.</p></div>
 </div></section>
+
+<section id="finance" class="view">
+<div class="head"><div><h1>Wealth Forge — cash tools</h1><p>Manual-entry cash tracking and scenario forecasts. Nothing is linked to a bank account.</p></div></div>
+<div class="cols">
+<form id="financeEntryForm" class="panel"><h2>Record cash movement</h2>
+<div class="field"><label>Type</label><select name="entry_type"><option value="inflow">Inflow</option><option value="outflow">Outflow</option></select></div>
+<div class="field"><label>Label *</label><input name="label" required maxlength="140"></div>
+<div class="field"><label>Category *</label><input name="category" required maxlength="80" placeholder="Sales, materials, payroll, rent…"></div>
+<div class="field"><label>Amount ($) *</label><input name="amount" type="number" min=".01" step=".01" required></div>
+<div class="field"><label>Date</label><input name="happened_on" type="date"></div>
+<div class="field"><label>Source</label><select name="source"><option>manual</option><option>synthetic</option></select></div>
+<div class="field"><label>Notes</label><input name="notes" maxlength="500"></div><button class="btn" type="submit">Save ledger entry</button></form>
+<form id="forecastForm" class="panel"><h2>13-week cash scenario</h2>
+<div class="field"><label>Opening cash ($)</label><input name="opening_cash" type="number" min="0" step=".01" value="0"></div>
+<div class="field"><label>Expected weekly inflows ($)</label><input name="weekly_inflows" type="number" min="0" step=".01" value="0"></div>
+<div class="field"><label>Expected weekly outflows ($)</label><input name="weekly_outflows" type="number" min="0" step=".01" value="0"></div>
+<div class="field"><label>Forecast start date</label><input name="start_date" type="date"></div>
+<button class="btn" type="submit">Build forecast</button><div id="forecastOutput" class="tiny muted" style="margin-top:12px">Enter assumptions to calculate a 13-week cash scenario.</div></form>
+</div>
+<div class="panel" style="margin-top:13px"><h2>Manual cash ledger</h2><div id="financeSummary" class="muted">Connect to load.</div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Label</th><th>Category</th><th>Amount</th><th>Source</th></tr></thead><tbody id="financeRows"></tbody></table></div></div>
+</section>
+<section id="knowledge" class="view">
+<div class="head"><div><h1>Enterprise Intelligence — knowledge library</h1><p>Local document register and keyword search with source references. This is not an AI/GraphRAG assistant.</p></div></div>
+<div class="cols">
+<form id="knowledgeForm" class="panel"><h2>Add approved document</h2>
+<div class="field"><label>Document title *</label><input name="title" required maxlength="180"></div>
+<div class="field"><label>Division *</label><select name="division_id"><option>digital-products</option><option>revenue-automation</option><option>ai-operations-studio</option><option>wealth-forge</option><option>enterprise-intelligence</option><option>industry-solutions</option><option>infrastructure</option><option>governance-security</option></select></div>
+<div class="field"><label>Source reference *</label><input name="source_ref" required placeholder="Repository path, document ID, or owner-approved source"></div>
+<div class="field"><label>Content *</label><textarea name="content" required maxlength="20000" style="min-height:180px"></textarea></div>
+<button class="btn" type="submit">Save local document</button></form>
+<div class="panel"><h2>Search approved local content</h2><form id="knowledgeSearch"><div class="field"><label>Keywords</label><input name="q" required placeholder="Search terms"></div><button class="btn" type="submit">Search</button></form><div id="knowledgeResults" style="margin-top:12px" class="muted">No search performed.</div><p class="tiny">Search uses local keyword matching. Results must be checked against the cited source.</p></div>
+</div>
+<div class="panel" style="margin-top:13px"><h2>Saved document inventory</h2><div id="knowledgeRows"></div></div>
+</section>
+<section id="operations" class="view">
+<div class="head"><div><h1>AI Operations & Industry Solutions — work queue</h1><p>Track document reviews, support drafts, dispatch exceptions, maintenance requests, shift handoffs, releases, and security findings.</p></div></div>
+<div class="cols">
+<form id="workForm" class="panel"><h2>Create work item</h2>
+<div class="field"><label>Division</label><select name="division_id"><option>ai-operations-studio</option><option>industry-solutions</option><option>infrastructure</option><option>governance-security</option></select></div>
+<div class="field"><label>Workflow type</label><select name="workflow_type"><option value="document_intake">Document intake</option><option value="support_review">Support response review</option><option value="dispatch_exception">Dispatch exception</option><option value="maintenance_request">Maintenance request</option><option value="shift_handoff">Shift handoff</option><option value="release_task">Release task</option><option value="security_finding">Security finding</option><option value="workflow_map">Workflow map</option></select></div>
+<div class="field"><label>Title *</label><input name="title" required maxlength="180"></div>
+<div class="field"><label>Priority</label><select name="priority"><option>low</option><option selected>normal</option><option>high</option><option>critical</option></select></div>
+<div class="field"><label>Due date</label><input name="due_date" type="date"></div>
+<div class="field"><label>Description</label><textarea name="description" maxlength="1500"></textarea></div>
+<button class="btn" type="submit">Create work item</button></form>
+<div class="panel"><h2>Operational boundaries</h2><ul class="muted"><li>No autonomous dispatch or equipment control.</li><li>No customer support auto-send.</li><li>No production connector writes.</li><li>Human owners remain responsible for decisions and safety escalations.</li><li>Use synthetic records for demos until data permission is documented.</li></ul></div>
+</div>
+<div class="panel" style="margin-top:13px"><h2>Work items</h2><div id="workRows"></div></div>
+</section>
+<section id="system" class="view">
+<div class="head"><div><h1>Infrastructure & Governance — local health</h1><p>Database integrity, catalog integrity, and local backup. No deployment or cloud changes.</p></div><button id="diagnostics" class="btn secondary">Run diagnostics</button></div>
+<div class="panel"><h2>System diagnostics</h2><pre id="diagnosticOutput" class="mono muted">Connect to inspect local system.</pre></div>
+<div class="panel" style="margin-top:13px"><h2>Local backup</h2><p>Create a SQLite backup under platform/backups on the machine running the server.</p><button id="backup" class="btn">Create local backup</button><div id="backupOutput" class="mono tiny muted" style="margin-top:12px"></div></div>
+<div class="banner">This local app is not yet a hardened, multi-tenant production platform. A backup here is local-file protection only; it is not off-site disaster recovery.</div>
+</section>
 </main></div><div id="notice" role="status" aria-live="polite"></div>
 <script>
 var $=function(id){return document.getElementById(id);};
@@ -149,12 +204,28 @@ async function loadInterviews(){var d=await api("/api/interviews");$("interviewR
 async function loadApprovals(){var d=await api("/api/approvals");$("approvalRows").innerHTML=d.items.map(function(a){var actions=a.status==="pending"?'<div class="toolbar"><button class="btn" data-approval="'+esc(a.id)+'" data-decision="approved">Record approval</button><button class="btn danger" data-approval="'+esc(a.id)+'" data-decision="rejected">Reject</button></div>':"";return '<div class="offer" style="margin-bottom:9px"><strong>'+esc(a.action_type)+' — '+esc(a.status)+'</strong><p>'+esc(a.resource)+'</p><div class="tiny muted">'+esc(a.scope)+'</div><div class="tiny muted">Expires '+dt(a.expires_at)+'</div>'+actions+'<p class="tiny">Decision only; no external execution.</p></div>';}).join("")||"No approval requests.";
 document.querySelectorAll("[data-approval]").forEach(function(b){b.onclick=async function(){try{await api("/api/approvals/"+b.dataset.approval+"/decision",{method:"POST",body:JSON.stringify({decision:b.dataset.decision,comment:"Recorded by local operator."})});notify("Decision recorded. No external action executed.");await loadApprovals();await loadDashboard();}catch(e){notify(e.message,true);}};});}
 async function loadAudit(){var pair=await Promise.all([api("/api/audit/verify"),api("/api/audit")]);var v=pair[0],d=pair[1];$("ledgerCheck").innerHTML='<strong class="'+(v.valid?"good":"bad")+'">'+(v.valid?"HASH CHAIN VALID":"HASH CHAIN INVALID")+'</strong><p>'+v.events+' events checked</p><div class="mono tiny">'+esc(v.head_hash||v.reason||"")+'</div>';$("auditRows").innerHTML=d.items.map(function(x){return '<tr><td>'+x.seq+'</td><td>'+esc(x.event_type)+'</td><td>'+esc(x.entity_type)+'<div class="tiny muted">'+esc(x.entity_id)+'</div></td><td>'+esc(x.actor)+'</td><td>'+dt(x.occurred_at)+'</td><td class="mono">'+esc(x.event_hash.slice(0,18))+'…</td></tr>';}).join("")||'<tr><td colspan="6">No events yet.</td></tr>';}
-async function refreshAll(){if(!token)throw new Error("Connect with the local admin token first.");await loadCatalog();await Promise.all([loadDashboard(),loadLeads(),loadInterviews(),loadApprovals(),loadAudit()]);await loadOpps();}
+
+async function loadFinance(){var d=await api("/api/finance/summary");$("financeSummary").innerHTML='<p>Inflows <strong>'+money(d.inflows_cents)+'</strong> · Outflows <strong>'+money(d.outflows_cents)+'</strong> · Net <strong>'+money(d.net_cents)+'</strong> · Entries '+d.entry_count+'</p><p class="tiny">'+esc(d.disclaimer)+'</p>';$("financeRows").innerHTML=d.items.map(function(x){return '<tr><td>'+esc(x.happened_on)+'</td><td>'+esc(x.entry_type)+'</td><td>'+esc(x.label)+'</td><td>'+esc(x.category)+'</td><td>'+money(x.amount_cents)+'</td><td>'+esc(x.source)+'</td></tr>';}).join("")||'<tr><td colspan="6">No ledger entries recorded.</td></tr>';}
+async function loadKnowledge(){var d=await api("/api/knowledge/docs");$("knowledgeRows").innerHTML=d.items.map(function(x){return '<div class="offer" style="margin-bottom:8px"><strong>'+esc(x.title)+'</strong><div class="tiny muted">'+esc(x.division_id)+' · '+esc(x.source_ref)+'</div><div class="tiny mono">'+esc(x.id)+'</div></div>';}).join("")||"No local documents yet.";}
+async function loadWorkItems(){var d=await api("/api/work-items");$("workRows").innerHTML=d.items.map(function(x){return '<div class="offer" style="margin-bottom:9px"><strong>'+esc(x.title)+'</strong><p>'+esc(x.division_id)+' · '+esc(x.workflow_type)+' · '+esc(x.priority)+'</p><p>'+esc(x.description)+'</p><div class="toolbar"><label>Status <select data-work="'+esc(x.id)+'"><option '+(x.status==="open"?"selected":"")+' value="open">Open</option><option '+(x.status==="in_progress"?"selected":"")+' value="in_progress">In progress</option><option '+(x.status==="blocked"?"selected":"")+' value="blocked">Blocked</option><option '+(x.status==="done"?"selected":"")+' value="done">Done</option></select></label><span class="tiny muted">Due '+esc(x.due_date||"not set")+'</span></div></div>';}).join("")||"No work items yet.";
+document.querySelectorAll("[data-work]").forEach(function(sel){sel.onchange=async function(){try{await api("/api/work-items/"+sel.dataset.work+"/update",{method:"POST",body:JSON.stringify({status:sel.value})});notify("Work item updated.");await loadWorkItems();}catch(e){notify(e.message,true);}};});}
+async function loadSystem(){var d=await api("/api/system/diagnostics");$("diagnosticOutput").textContent=JSON.stringify(d,null,2);}
+
+async function refreshAll(){if(!token)throw new Error("Connect with the local admin token first.");await loadCatalog();await Promise.all([loadDashboard(),loadLeads(),loadInterviews(),loadApprovals(),loadAudit(),loadFinance(),loadKnowledge(),loadWorkItems(),loadSystem()]);await loadOpps();}
 $("refresh").onclick=async function(){try{await refreshAll();notify("Data refreshed.");}catch(e){notify(e.message,true);}};$("refreshLeads").onclick=loadLeads;$("refreshOpps").onclick=async function(){await loadLeads();await loadOpps();};$("verify").onclick=loadAudit;
 $("leadForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.estimated_value_cents=Math.round(Number(d.estimated_value||0)*100);delete d.estimated_value;await api("/api/leads",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Lead recorded.");await refreshAll();}catch(err){notify(err.message,true);}};
 $("oppForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.amount_cents=Math.round(Number(d.amount)*100);delete d.amount;await api("/api/opportunities",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Opportunity recorded.");await refreshAll();}catch(err){notify(err.message,true);}};
 $("interviewForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.follow_up_permission=d.follow_up_permission==="true";await api("/api/interviews",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Interview recorded.");await refreshAll();}catch(err){notify(err.message,true);}};
 $("approvalForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.expires_minutes=Number(d.expires_minutes);await api("/api/approvals",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Approval request recorded.");await refreshAll();}catch(err){notify(err.message,true);}};
 $("calcForm").onsubmit=function(e){e.preventDefault();var d=formData(e.target);var keys=["inbound_leads","missed_rate","recovery_of_missed","booking_rate","average_job_value"];var v={};for(var i=0;i<keys.length;i++){v[keys[i]]=Number(d[keys[i]]);if(!Number.isFinite(v[keys[i]])){notify("Enter valid numbers.",true);return;}}if(v.inbound_leads<0||v.inbound_leads>100000||v.missed_rate<0||v.missed_rate>1||v.recovery_of_missed<0||v.recovery_of_missed>1||v.booking_rate<0||v.booking_rate>1||v.average_job_value<0){notify("One or more assumptions are outside valid bounds.",true);return;}var leads=v.inbound_leads*v.missed_rate*v.recovery_of_missed;var bookings=leads*v.booking_rate;var value=bookings*v.average_job_value;$("calcLeads").textContent=leads.toFixed(1);$("calcBookings").textContent=bookings.toFixed(1);$("calcValue").textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(value);};
+
+$("financeEntryForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.amount_cents=Math.round(Number(d.amount)*100);delete d.amount;if(!d.happened_on)delete d.happened_on;await api("/api/finance/entries",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Ledger entry saved.");await loadFinance();}catch(err){notify(err.message,true);}};
+$("forecastForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.opening_cash_cents=Math.round(Number(d.opening_cash)*100);d.weekly_inflows_cents=Math.round(Number(d.weekly_inflows)*100);d.weekly_outflows_cents=Math.round(Number(d.weekly_outflows)*100);delete d.opening_cash;delete d.weekly_inflows;delete d.weekly_outflows;if(!d.start_date)delete d.start_date;var x=await api("/api/finance/forecast",{method:"POST",body:JSON.stringify(d)});$("forecastOutput").innerHTML='<strong>Week 13 closing cash: '+money(x.week_13_closing_cash_cents)+'</strong><p>Lowest cash: '+money(x.lowest_cash_cents)+' (week '+x.lowest_cash_week+')</p><p>Estimated runway at assumed net burn: '+(x.runway_weeks_at_assumed_net_burn===null?"No net burn in these assumptions":x.runway_weeks_at_assumed_net_burn+" weeks")+'</p><p class="tiny">'+esc(x.disclaimer)+'</p>';}catch(err){notify(err.message,true);}};
+$("knowledgeForm").onsubmit=async function(e){e.preventDefault();try{await api("/api/knowledge/docs",{method:"POST",body:JSON.stringify(formData(e.target))});e.target.reset();notify("Local knowledge document saved.");await loadKnowledge();}catch(err){notify(err.message,true);}};
+$("knowledgeSearch").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);var r=await api("/api/knowledge/search?q="+encodeURIComponent(d.q));$("knowledgeResults").innerHTML=r.items.map(function(x){return '<div class="offer" style="margin-bottom:8px"><strong>'+esc(x.title)+'</strong><div class="tiny muted">'+esc(x.source_ref)+' · score '+x.score+'</div><p>'+esc(x.excerpt)+'</p><div class="tiny mono">'+esc(x.citation)+'</div></div>';}).join("")||"No local keyword matches."; }catch(err){notify(err.message,true);}};
+$("workForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);if(!d.due_date)delete d.due_date;await api("/api/work-items",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Work item created.");await loadWorkItems();}catch(err){notify(err.message,true);}};
+$("diagnostics").onclick=async function(){try{await loadSystem();notify("Diagnostics completed.");}catch(err){notify(err.message,true);}};
+$("backup").onclick=async function(){try{var b=await api("/api/system/backup",{method:"POST",body:JSON.stringify({})});$("backupOutput").textContent=JSON.stringify(b,null,2);notify("Local backup created.");}catch(err){notify(err.message,true);}};
+
 health();if(token)connect();
 </script></body></html>
