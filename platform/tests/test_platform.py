@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 from server import ApiError,create_approval,create_interview,create_lead,create_opportunity,decide_approval,init_db,simulate_lead_value,verify_ledger,offer_index
 
@@ -269,7 +270,7 @@ class PlatformTests(unittest.TestCase):
         assets=Path(self.tmp.name)/"private_assets";assets.mkdir()
         for pid,filename in ASSET_FILES.items():
             if pid=="IA-002":(assets/filename).write_bytes(b"%PDF-1.4 synthetic fixture")
-        with unittest.mock.patch.dict(os.environ,{"GARCAR_DIGITAL_ASSET_DIR":str(assets)}):
+        with mock.patch.dict(os.environ,{"GARCAR_DIGITAL_ASSET_DIR":str(assets)}):
             order=create_test_checkout({"product_id":"IA-002"},self.db)
             paid=simulate_test_payment(order["order_id"],self.db)
             path,meta=consume_download_token(paid["download_token"],self.db)
