@@ -428,13 +428,12 @@ def update_work_item(rid:str,data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[
     return result
 
 def system_diagnostics(db_path:Path|str=DB_PATH)->dict[str,Any]:
-    import platform as py_platform
     with connect(db_path) as db:
         mode=db.execute("PRAGMA journal_mode").fetchone()[0]
         tables=[r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
         integrity=db.execute("PRAGMA quick_check").fetchone()[0]
     catalog=load_catalog();offer_count=sum(len(d.get("offers",[])) for d in catalog["divisions"])
-    return {"python":py_platform.python_version(),"sqlite":sqlite3.sqlite_version,"database_journal_mode":mode,
+    return {"python":sys.version.split()[0],"sqlite":sqlite3.sqlite_version,"database_journal_mode":mode,
       "database_integrity":integrity,"tables":tables,"division_count":len(catalog["divisions"]),"offer_count":offer_count,
       "external_integrations_enabled":False,"deployment_state":"local_only","backup_path":"platform/backups (local only)"}
 
