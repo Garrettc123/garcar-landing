@@ -79,6 +79,7 @@ Paste the token from the Termux terminal into the Local Operator Access box. The
 - Save approved internal reference text and run local keyword search.
 - Create dispatch, maintenance, support-review, and shift-handoff work items.
 - Record action approval requests and inspect the hash-chain audit ledger.
+- Run the digital test-mode order, entitlement, protected PDF download, and refund-revocation flow.
 - Run local database diagnostics and create a local backup.
 
 ## 7. Data and safety rules
@@ -89,7 +90,7 @@ Paste the token from the Termux terminal into the Local Operator Access box. The
 - The server binds to 127.0.0.1. Do not change it to 0.0.0.0 or expose the port to the internet.
 - Approvals in this app record a decision only; they do not send messages, move money, or deploy software.
 - Pipeline amounts are not collected revenue. Scenario outputs are not forecasts.
-- The digital products remain preview-only. No checkout or paid file delivery is active.
+- The digital delivery feature is a local payment simulator only. It does not connect to a payment processor or charge a card. Private PDF files must be installed in the ignored local asset folder before download testing.
 - No production deployment, customer data access, outbound message, or live payment is performed by this guide.
 
 ## 8. Update the local checkout
