@@ -844,7 +844,11 @@ def list_local_backups(db_path:Path|str=DB_PATH,backup_dir:Path|str|None=None)->
 
 class Handler(BaseHTTPRequestHandler):
     server_version="GarcarLocal/1.0"
-    def log_message(self,fmt,*args): sys.stderr.write("[garcar] "+fmt%args+"\n")
+    def log_message(self,fmt,*args):
+        message=fmt%args
+        if self.path.startswith("/digital/download/"):
+            message=message.replace(self.path,"/digital/download/[TOKEN-REDACTED]")
+        sys.stderr.write("[garcar] "+message+"\\n")
     def send_body(self,status:int,body:Any,ctype:str="application/json"):
         raw=body if isinstance(body,bytes) else body if isinstance(body,str) else json.dumps(body,ensure_ascii=False)
         if isinstance(raw,str):raw=raw.encode()
