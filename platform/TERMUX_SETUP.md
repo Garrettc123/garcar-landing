@@ -100,3 +100,16 @@ git pull origin build/eight-division-operating-system-20261101
 ```
 
 Review the changed files and rerun the tests before using updated code.
+
+
+## 9. Run Garcar's own build pipeline
+
+From `~/garcar-landing/platform`:
+
+```bash
+bash run_garcar_ci.sh
+```
+
+This uses Garcar's own local runner and does not depend on GitHub-hosted runners. It runs Python compilation, unit tests, loopback HTTP smoke tests, and catalog validation. It stops at the first failure and stores stage logs, a JSON report, and SHA-256 checksums in `platform/.garcar-builds/`. Build subprocesses receive a minimal environment; shell API keys and payment credentials are not forwarded.
+
+A successful local run is evidence for this checkout and device only. It does not deploy the application or approve production use. The direct script `bash run_checks.sh` remains available.
