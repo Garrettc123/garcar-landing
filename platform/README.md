@@ -35,8 +35,8 @@ Environment:
 
 ## Test coverage
 
-- 25 standard-library unit tests are authored.
-- 18 loopback HTTP smoke checks are authored; they use synthetic records and a temporary database.
+- 29 standard-library unit tests are authored.
+- 19 loopback HTTP smoke checks are authored; they use synthetic records and a temporary database.
 - GitHub Actions is configured to run Python compile, unit tests, smoke tests, and catalog validation. See the PR status; a GitHub runner has not yet successfully executed those jobs.
 
 ## Working local modules
@@ -65,6 +65,7 @@ All other endpoints require the X-Admin-Token header:
 - GET /api/knowledge/docs, /api/knowledge/search, /api/knowledge/links, /api/knowledge/graph-search; POST /api/knowledge/docs, /api/knowledge/links
 - POST /api/documents/extract and /api/support/draft (deterministic, review-only)
 - GET /api/work-items; POST /api/work-items, /api/work-items/{id}/update
+- GET /api/workflows/definitions, /api/workflows/runs; POST /api/workflows/runs, /api/workflows/runs/{id}/action
 - GET /api/system/diagnostics, /api/system/backups; POST /api/system/backup, /api/system/backup/verify
 - GET /api/product-readiness; POST /api/product-readiness/{offer_id}/update
 - GET /api/approvals; POST /api/approvals, /api/approvals/{id}/decision
