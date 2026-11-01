@@ -82,4 +82,18 @@ class PlatformTests(unittest.TestCase):
         self.assertEqual(result["offer_count"],46)
         self.assertEqual(result["database_integrity"],"ok")
 
+
+    def test_release_board_seeds_all_46_offers(self):
+        from server import list_product_readiness
+        data=list_product_readiness(self.db)
+        self.assertEqual(data["total"],46)
+        self.assertEqual(len({x["offer_id"] for x in data["items"]}),46)
+    def test_release_state_requires_evidence(self):
+        from server import update_product_readiness
+        with self.assertRaises(ApiError):
+            update_product_readiness("RA-001",{"state":"tested_local","evidence_ref":""},self.db)
+        row=update_product_readiness("RA-001",{"state":"tested_local","evidence_ref":"local test report ref"},self.db)
+        self.assertEqual(row["state"],"tested_local")
+        self.assertFalse(row["evidence_is_independently_verified"])
+
 if __name__=="__main__":unittest.main()
