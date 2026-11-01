@@ -412,6 +412,10 @@ def consume_download_token(token: str, db_path: Path | str) -> tuple[Path, dict[
     return path, meta
 
 
+def list_digital_products(db_path: Path | str) -> list[dict[str, Any]]:
+    return list(_catalog(db_path).values())
+
+
 def list_digital_orders(db_path: Path | str) -> list[dict[str, Any]]:
     init_digital_schema(db_path)
     with connect(db_path) as db:
