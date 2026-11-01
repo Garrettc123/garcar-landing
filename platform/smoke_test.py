@@ -86,6 +86,14 @@ def main()->int:
             code2,summary=request(base,"/api/finance/summary")
             checks.append(("manual finance ledger and summary",code==201 and code2==200 and summary.get("inflows_cents")==10000))
 
+
+            code,quality=request(base,"/api/finance/quality")
+            code2,expenses=request(base,"/api/finance/expense-review")
+            checks.append(("revenue quality and expense review APIs",code==200 and code2==200 and "disclaimer" in quality and "categories" in expenses))
+
+            code,runway=request(base,"/api/finance/runway","POST",{"available_cash_cents":100000,"period_days":30})
+            checks.append(("manual cash runway scenario",code==200 and runway.get("available_cash_cents")==100000))
+
             code,forecast=request(base,"/api/finance/forecast","POST",{
               "opening_cash_cents":100000,"weekly_inflows_cents":50000,"weekly_outflows_cents":40000
             })
