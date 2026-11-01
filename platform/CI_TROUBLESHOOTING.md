@@ -54,3 +54,19 @@ The script compiles both platform modules, runs 41 unit tests, runs 23 temporary
 ## Release rule
 
 Keep PR #6 draft and unmerged until local checks or CI have executed successfully and the code has been reviewed. The empty-step GitHub failures must not be treated as passing tests.
+
+
+## Independent Garcar local runner
+
+The repository now includes `platform/garcar_ci.py` and `platform/run_garcar_ci.sh`. This is a project-owned, standard-library-only local CI runner. It runs compile, unit tests, loopback HTTP smoke tests, and catalog validation in sequence; stops on the first failure; writes stage logs, a JSON report, and SHA-256 checksums under `platform/.garcar-builds/`; and exits non-zero unless all stages pass.
+
+Run it from Termux:
+
+```bash
+cd ~/garcar-landing/platform
+bash run_garcar_ci.sh
+```
+
+It does not need a GitHub-hosted runner and does not perform deployments, payments, email, SMS, or customer-data operations. The runner deliberately passes a minimal environment to child processes to avoid forwarding shell-held credentials. It is manually invoked on the device; it is not a persistent remote agent and does not automatically fetch code. Pull the intended branch first, inspect changes, then run the pipeline.
+
+A local pass is evidence for that exact checkout and host only. It does not certify production security, cloud hosting, payment integration, or customer acceptance.
