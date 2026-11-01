@@ -96,4 +96,21 @@ class PlatformTests(unittest.TestCase):
         self.assertEqual(row["state"],"tested_local")
         self.assertFalse(row["evidence_is_independently_verified"])
 
+
+    def test_document_intake_extracts_invoice_fields_for_review(self):
+        from server import extract_document_fields
+        result=extract_document_fields({"document_text":"Invoice Number: INV-12345\nInvoice Date: 2026-11-01\nVendor: Demo Supply\nTotal: $245.00"})
+        self.assertEqual(result["document_type"],"invoice")
+        self.assertEqual(result["fields"]["document_number"],"INV-12345")
+        self.assertTrue(result["human_review_required"])
+        self.assertFalse(result["saved_to_database"])
+    def test_support_reply_uses_local_citations_and_is_not_sent(self):
+        from server import create_knowledge_doc,draft_support_reply
+        create_knowledge_doc({"title":"Warranty policy","division_id":"industry-solutions","source_ref":"internal/warranty-policy.md","content":"Warranty requests must be reviewed by a supervisor before a customer commitment is made."},self.db)
+        result=draft_support_reply({"question":"How are warranty requests reviewed?"})
+        self.assertTrue(result["requires_human_review"])
+        self.assertFalse(result["sent"])
+        self.assertTrue(result["sources"])
+        self.assertIn("supervisor",result["draft"])
+
 if __name__=="__main__":unittest.main()
