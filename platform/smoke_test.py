@@ -41,6 +41,10 @@ def main()->int:
         env=os.environ.copy()
         env["GARCAR_DB_PATH"]=str(Path(temp)/"smoke.sqlite3")
         env["GARCAR_ADMIN_TOKEN"]=TOKEN
+        assets=Path(temp)/"private_assets"
+        assets.mkdir()
+        (assets/"05_The_30_Second_Mindful_Reset.pdf").write_bytes(b"%PDF-1.4\\nSynthetic private asset\\n%%EOF")
+        env["GARCAR_DIGITAL_ASSET_DIR"]=str(assets)
         proc=subprocess.Popen(
             [sys.executable,str(HERE/"server.py"),"--port",str(port)],
             cwd=HERE,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True
@@ -78,6 +82,32 @@ def main()->int:
               "next_step":"Synthetic smoke test only"
             })
             checks.append(("create offer-linked opportunity",code==201 and deal.get("offer_id")=="RA-001"))
+
+
+            code,digital_order=request(base,"/api/digital/test-checkout","POST",{"product_id":"IA-002"})
+            code2,entitlements_before=request(base,"/api/digital/entitlements")
+            checks.append(("digital test checkout stays pending and creates no entitlement",code==201 and digital_order.get("status")=="pending" and digital_order.get("payment_taken") is False and code2==200 and len(entitlements_before.get("items",[]))==0))
+
+            code,digital_paid=request(base,"/api/digital/test-payment","POST",{"order_id":digital_order.get("order_id","")})
+            download_ok=False
+            try:
+                with urllib.request.urlopen(base+digital_paid.get("download_path",""),timeout=4) as response:
+                    payload=response.read()
+                    download_ok=response.status==200 and payload.startswith(b"%PDF-1.4")
+            except Exception:
+                download_ok=False
+            checks.append(("signed test payment grants a protected PDF download",code==200 and digital_paid.get("entitlement_created") is True and bool(digital_paid.get("download_token")) and download_ok))
+
+            code,refunded=request(base,"/api/digital/test-refund","POST",{"order_id":digital_order.get("order_id","")})
+            revoked=False
+            try:
+                urllib.request.urlopen(base+digital_paid.get("download_path",""),timeout=4)
+            except urllib.error.HTTPError as exc:
+                revoked=exc.code==403
+            checks.append(("test refund revokes entitlement and download token",code==200 and refunded.get("entitlement_revoked") is True and revoked))
+
+            code,digital_health=request(base,"/api/digital/health")
+            checks.append(("digital delivery health remains test-only",code==200 and digital_health.get("live_payments_enabled") is False and digital_health.get("payment_provider_connected") is False))
 
             code,entry=request(base,"/api/finance/entries","POST",{
               "entry_type":"inflow","label":"Synthetic receipt","category":"demo",
