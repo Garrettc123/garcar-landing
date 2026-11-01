@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>Garcar Enterprise | Local Operating Console</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0f17;--panel:#121a27;--line:#28354a;--ink:#f4f6fa;--muted:#aab5c5;--gold:#eab64b;--green:#75d5a0;--red:#ef7777}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,sans-serif}button,input,select,textarea{font:inherit}
+.shell{max-width:1440px;margin:auto;padding:20px}header{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:12px 0 20px;border-bottom:1px solid var(--line)}
+.brand{font-weight:900;letter-spacing:.12em;color:var(--gold)}.muted{color:var(--muted)}.tiny{font-size:11px}.status{padding:6px 10px;border:1px solid var(--line);border-radius:99px;font-size:12px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:20px;padding-top:20px}nav{display:flex;flex-direction:column;gap:6px;position:sticky;top:12px;height:max-content}
+nav button{background:transparent;color:var(--muted);border:1px solid transparent;text-align:left;padding:10px 12px;border-radius:9px}nav button.active,nav button:hover{color:var(--ink);background:#182334;border-color:var(--line)}
+main{min-width:0}.view{display:none}.view.active{display:block}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+h1{font-size:28px;line-height:1.1;margin:0 0 8px}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 6px}p{color:var(--muted);margin:5px 0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}.metric,.panel,.offer{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px}
+.metric span{font-size:12px;color:var(--muted);display:block}.metric strong{font-size:26px;display:block;margin-top:6px;font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:1.1fr .9fr;gap:13px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field{margin-bottom:10px}.full{grid-column:1/-1}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}input,select,textarea{width:100%;background:#0b111b;color:var(--ink);border:1px solid #33425a;border-radius:8px;padding:10px}textarea{min-height:76px;resize:vertical}
+.btn{background:var(--gold);color:#151a22;font-weight:800;border:0;border-radius:8px;padding:10px 14px;cursor:pointer}.btn.secondary{background:#1c2a3c;color:var(--ink);border:1px solid var(--line)}.btn.danger{background:#4b2026;color:#ffd8d8}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:600px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}th{color:var(--muted)}
+.pill{display:inline-block;background:#202d40;color:#dbe5f4;border-radius:99px;padding:3px 8px;font-size:11px}.catalog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.offer{padding:13px;background:#0f1622}.price{font-weight:800;color:var(--gold);margin-top:7px}.banner{padding:12px 14px;border:1px solid var(--line);border-radius:10px;color:var(--muted);margin-top:14px}
+#notice{position:fixed;right:18px;bottom:18px;max-width:420px;padding:12px 15px;background:#18273a;border:1px solid var(--line);border-radius:10px;display:none;box-shadow:0 15px 40px #0008}
+.mono{font-family:ui-monospace,monospace;overflow-wrap:anywhere;font-size:12px}.good{color:var(--green)}.bad{color:var(--red)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{position:static;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}nav button{text-align:center;padding:8px 4px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.shell{padding:12px}.cols,.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.head{flex-direction:column}nav{grid-template-columns:repeat(2,minmax(0,1fr))}.metric strong{font-size:22px}}
+</style>
+</head>
+<body><div class="shell">
+<header><div><div class="brand">GARCAR ENTERPRISE</div><div class="muted tiny">Local operating console · eight divisions · external actions disabled</div></div><div id="connection" class="status">Checking local service…</div></header>
+<div class="layout">
+<nav aria-label="Console sections">
+<button class="active" data-view="overview">Overview</button><button data-view="leads">Lead desk</button><button data-view="pipeline">Sales pipeline</button><button data-view="catalog">Product catalog</button><button data-view="interviews">Market validation</button><button data-view="approvals">Approvals</button><button data-view="audit">Audit ledger</button><button data-view="calculator">Opportunity model</button>
+</nav>
+<main>
+<section id="access" class="panel" style="margin-bottom:15px">
+<h2>Local operator access</h2><p>Paste the token printed by <span class="mono">python server.py</span>. It is kept in this browser tab only.</p>
+<div class="field"><label for="token">Local admin token</label><input id="token" type="password" autocomplete="off" placeholder="Local admin token"></div>
+<div class="toolbar"><button id="connect" class="btn">Connect</button><button id="disconnect" class="btn secondary">Clear token</button></div>
+<div class="tiny muted">The server binds to 127.0.0.1. Do not expose this local console to the public internet.</div>
+</section>
+<section id="overview" class="view active">
+<div class="head"><div><h1>Operating overview</h1><p>Local records and pipeline. Pipeline values are not collected revenue.</p></div><button class="btn secondary" id="refresh">Refresh</button></div>
+<div class="grid"><div class="metric"><span>Leads recorded</span><strong id="mLeads">—</strong></div><div class="metric"><span>Opportunities</span><strong id="mOpps">—</strong></div><div class="metric"><span>Pipeline value — not revenue</span><strong id="mPipeline">—</strong></div><div class="metric"><span>Pending approvals</span><strong id="mApprovals">—</strong></div></div>
+<div class="cols"><div class="panel"><h2>Lead status</h2><div id="leadStatus" class="muted">Connect to load.</div></div><div class="panel"><h2>Opportunity stages</h2><div id="oppStatus" class="muted">Connect to load.</div></div></div>
+<div class="panel" style="margin-top:13px"><h2>Portfolio coverage</h2><div id="divisionSummary" class="catalog-grid"></div></div>
+<div class="banner">Safety state: payment processing, outbound email/SMS, customer CRM writes, public deployment, and external integrations are not implemented.</div>
+</section>
+<section id="leads" class="view">
+<div class="head"><div><h1>Lead desk</h1><p>Record business opportunities and track next steps. No messages are sent.</p></div></div>
+<div class="cols">
+<form id="leadForm" class="panel"><h2>Record lead</h2><div class="form-grid">
+<div class="field"><label>Company / account *</label><input name="company" required maxlength="140"></div>
+<div class="field"><label>Trade</label><select name="category"><option>HVAC</option><option>Plumbing</option><option>Roofing</option><option>Restoration</option><option>Electrical</option><option>Other</option></select></div>
+<div class="field"><label>Source</label><select name="source"><option>inbound</option><option>referral</option><option>voluntary_interview</option><option>public_business_research</option><option>synthetic_demo</option><option>other</option></select></div>
+<div class="field"><label>Estimated value ($)</label><input name="estimated_value" type="number" min="0" step=".01" value="0"></div>
+<div class="field"><label>Service need</label><input name="service_need" maxlength="240"></div><div class="field"><label>Owner</label><input name="owner" maxlength="100"></div>
+<div class="field full"><label>Next step</label><input name="next_step" maxlength="240"></div><div class="field full"><label>Notes — no sensitive personal data</label><textarea name="notes" maxlength="1000"></textarea></div></div>
+<button class="btn" type="submit">Save lead</button></form>
+<div class="panel"><h2>Lead response workflow</h2><ol class="muted"><li>Record the source and business need.</li><li>Verify the problem in a discovery conversation.</li><li>Document baseline and evidence.</li><li>Move qualified work into the opportunity pipeline.</li><li>Record owner-approved scope and next step.</li></ol><p class="tiny">No calls, texts, email, or third-party CRM integration.</p></div>
+</div>
+<div class="panel" style="margin-top:13px"><div class="head"><h2>Lead records</h2><button class="btn secondary" id="refreshLeads">Refresh</button></div><div class="table-wrap"><table><thead><tr><th>Company</th><th>Trade</th><th>Source</th><th>Status</th><th>Owner</th><th>Next step</th><th>Updated</th></tr></thead><tbody id="leadRows"></tbody></table></div></div>
+</section>
+<section id="pipeline" class="view">
+<div class="head"><div><h1>Sales pipeline</h1><p>Amounts are proposed opportunity values, not booked sales or verified collections.</p></div></div>
+<div class="cols">
+<form id="oppForm" class="panel"><h2>Create opportunity</h2><div class="field"><label>Lead *</label><select name="lead_id" id="oppLead" required></select></div>
+<div class="field"><label>Catalog offer *</label><select name="offer_id" id="oppOffer" required></select></div>
+<div class="field"><label>Amount ($) *</label><input name="amount" type="number" min=".01" step=".01" required></div>
+<div class="field"><label>Stage</label><select name="stage"><option>target</option><option>researched</option><option>discovery</option><option>qualified</option><option>proposal</option><option>contract</option><option>paid_pending_verification</option><option>delivered</option><option>lost</option></select></div>
+<div class="field"><label>Next step</label><input name="next_step" maxlength="240"></div><div class="field"><label>Notes</label><textarea name="notes" maxlength="1000"></textarea></div>
+<button class="btn" type="submit">Save opportunity</button></form>
+<div class="panel"><h2>Stage definitions</h2><p><span class="pill">target</span> Candidate account.</p><p><span class="pill">discovery</span> Need being verified.</p><p><span class="pill">qualified</span> Buyer, problem, and feasible budget path.</p><p><span class="pill">proposal</span> Written scope offered, not accepted.</p><p><span class="pill">contract</span> Agreement process.</p><p><span class="pill">paid_pending_verification</span> Not verified as paid.</p><p><span class="pill">delivered</span> Delivery recorded; payment reconciliation is separate.</p></div>
+</div>
+<div class="panel" style="margin-top:13px"><div class="head"><h2>Opportunities</h2><button id="refreshOpps" class="btn secondary">Refresh</button></div><div class="table-wrap"><table><thead><tr><th>Lead</th><th>Offer</th><th>Amount</th><th>Stage</th><th>Next step</th><th>Change stage</th></tr></thead><tbody id="oppRows"></tbody></table></div></div>
+</section>
+<section id="catalog" class="view"><div class="head"><div><h1>Eight-division catalog</h1><p>Canonical catalog. Prices are hypotheses or planned prices, not live checkout.</p></div></div><div id="catalogGrid" class="catalog-grid"></div></section>
+<section id="interviews" class="view">
+<div class="head"><div><h1>Market validation</h1><p>Record voluntary interviews without sensitive personal details.</p></div></div>
+<div class="cols">
+<form id="interviewForm" class="panel"><h2>Record interview</h2>
+<div class="field"><label>Market / division *</label><input name="market" required></div><div class="field"><label>Product ID</label><input name="product_id" placeholder="e.g. RA-001"></div>
+<div class="field"><label>Date</label><input name="interview_date" type="date"></div><div class="field"><label>Source / permission basis *</label><input name="source" required placeholder="e.g. inbound inquiry"></div>
+<div class="field"><label>Follow-up explicitly permitted?</label><select name="follow_up_permission"><option value="false">No</option><option value="true">Yes, within discussed scope</option></select></div>
+<div class="field"><label>Need summary</label><textarea name="need_summary"></textarea></div><div class="field"><label>Main objection</label><textarea name="objection"></textarea></div>
+<div class="field"><label>Price reaction</label><input name="price_reaction"></div><div class="field"><label>Next action</label><input name="next_action"></div><button class="btn" type="submit">Save interview</button></form>
+<div class="panel"><h2>Interview standards</h2><ul class="muted"><li>Use voluntary, permission-based conversations.</li><li>Do not record sensitive medical, account, or trauma details.</li><li>Record objections as well as positive feedback.</li><li>Five qualified conversations are directional evidence, not market proof.</li><li>Follow-up permission is not blanket marketing consent.</li></ul></div></div>
+<div class="panel" style="margin-top:13px"><h2>Interviews recorded</h2><div class="table-wrap"><table><thead><tr><th>Market</th><th>Product</th><th>Date</th><th>Need</th><th>Objection</th><th>Permission</th></tr></thead><tbody id="interviewRows"></tbody></table></div></div>
+</section>
+<section id="approvals" class="view">
+<div class="head"><div><h1>Owner approval register</h1><p>Decisions are recorded for audit. There is no execution gateway.</p></div></div>
+<div class="cols">
+<form id="approvalForm" class="panel"><h2>Request approval</h2><div class="field"><label>Action type</label><select name="action_type"><option>email.send</option><option>sms.send</option><option>payment.create</option><option>refund.issue</option><option>production.deploy</option><option>customer_data.export</option><option>secret.rotate</option><option>infrastructure.change</option><option>external_api.write</option></select></div>
+<div class="field"><label>Exact resource / recipient / environment *</label><input name="resource" required maxlength="180"></div><div class="field"><label>Exact scope and limits *</label><textarea name="scope" required maxlength="500"></textarea></div>
+<div class="field"><label>Requested by</label><input name="requested_by" value="local-owner"></div><div class="field"><label>Expires in minutes (max 1440)</label><input name="expires_minutes" type="number" value="60" min="1" max="1440"></div>
+<button class="btn" type="submit">Log request</button></form>
+<div class="panel"><h2>What approval means</h2><p>Approve or reject changes only the local record and appends an audit event.</p><p class="bad">It does not send messages, move money, access customer data, deploy code, rotate secrets, or call outside APIs.</p></div></div>
+<div class="panel" style="margin-top:13px"><h2>Approval records</h2><div id="approvalRows"></div></div>
+</section>
+<section id="audit" class="view">
+<div class="head"><div><h1>Evidence ledger</h1><p>SHA-256 hash chain over local events. Tamper-evident, not WORM storage.</p></div><button id="verify" class="btn secondary">Verify chain</button></div>
+<div class="panel"><div id="ledgerCheck" class="muted">Connect to verify.</div></div>
+<div class="panel" style="margin-top:13px"><h2>Recent events</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>Event</th><th>Entity</th><th>Actor</th><th>Time</th><th>Hash</th></tr></thead><tbody id="auditRows"></tbody></table></div></div>
+</section>
+<section id="calculator" class="view">
+<div class="head"><div><h1>Lead-response opportunity model</h1><p>Illustrative scenario only. Use customer-approved actual data before making claims.</p></div></div>
+<div class="cols">
+<form id="calcForm" class="panel"><h2>Scenario assumptions</h2>
+<div class="field"><label>Inbound leads per month</label><input name="inbound_leads" type="number" min="0" max="100000" value="100"></div>
+<div class="field"><label>Missed share (0–1)</label><input name="missed_rate" type="number" min="0" max="1" step=".01" value=".20"></div>
+<div class="field"><label>Share of missed leads recovered (0–1)</label><input name="recovery_of_missed" type="number" min="0" max="1" step=".01" value=".50"></div>
+<div class="field"><label>Booking rate on recovered leads (0–1)</label><input name="booking_rate" type="number" min="0" max="1" step=".01" value=".30"></div>
+<div class="field"><label>Average job value ($)</label><input name="average_job_value" type="number" min="0" max="10000000" step=".01" value="1500"></div>
+<button class="btn" type="submit">Calculate scenario</button></form>
+<div class="panel"><h2>Illustrative output</h2><div class="metric"><span>Additional leads contacted</span><strong id="calcLeads">—</strong></div><div class="metric" style="margin-top:9px"><span>Expected bookings (scenario)</span><strong id="calcBookings">—</strong></div><div class="metric" style="margin-top:9px"><span>Gross job value scenario</span><strong id="calcValue">—</strong></div><p class="tiny">Not profit, forecast, guarantee, or verified revenue. Excludes capacity, cancellations, margin, costs, seasonality, and causality.</p></div>
+</div></section>
+</main></div><div id="notice" role="status" aria-live="polite"></div>
+<script>
+var $=function(id){return document.getElementById(id);};
+var token=sessionStorage.getItem("garcar_local_token")||"";
+var catalog=null,leads=[],opps=[];
+if(token)$("token").value=token;
+function notify(msg,bad){var n=$("notice");n.textContent=msg;n.style.display="block";n.style.borderColor=bad?"#8e424b":"#3b765d";setTimeout(function(){n.style.display="none";},3500);}
+function esc(v){return String(v===undefined||v===null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function money(c){return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format((c||0)/100);}
+function dt(v){return v?new Date(v).toLocaleString():"—";}
+function headers(){return {"Content-Type":"application/json","X-Admin-Token":token};}
+async function api(path,opts){opts=opts||{};var r=await fetch(path,{method:opts.method||"GET",headers:headers(),body:opts.body});var d={};try{d=await r.json();}catch(e){}if(!r.ok)throw new Error(d.error||("HTTP "+r.status));return d;}
+function formData(form){return Object.fromEntries(new FormData(form).entries());}
+function view(id){document.querySelectorAll(".view").forEach(function(x){x.classList.toggle("active",x.id===id);});document.querySelectorAll("nav button").forEach(function(x){x.classList.toggle("active",x.dataset.view===id);});}
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){view(b.dataset.view);};});
+async function health(){try{var r=await fetch("/api/health");var d=await r.json();$("connection").textContent=d.ok?"Local service online · external actions off":"Service unavailable";}catch(e){$("connection").textContent="Start server.py to connect";}}
+async function connect(){token=$("token").value.trim();if(!token){notify("Paste the local admin token.",true);return;}try{sessionStorage.setItem("garcar_local_token",token);await refreshAll();$("connection").textContent="Local console connected";$("connection").className="status good";notify("Connected to local console.");}catch(e){sessionStorage.removeItem("garcar_local_token");token="";notify(e.message,true);}}
+function disconnect(){token="";sessionStorage.removeItem("garcar_local_token");$("token").value="";$("connection").textContent="Token cleared";notify("Local token cleared.");}
+$("connect").onclick=connect;$("disconnect").onclick=disconnect;
+async function loadCatalog(){catalog=await api("/api/catalog");var all=[];catalog.divisions.forEach(function(d){d.offers.forEach(function(o){all.push({d:d,o:o});});});$("catalogGrid").innerHTML=all.map(function(x){var price=x.o.price===null?"Quote after discovery":money(x.o.price*100)+" proposed";return '<div class="offer"><div class="muted tiny">'+esc(x.d.name)+'</div><h3>'+esc(x.o.id)+' — '+esc(x.o.name)+'</h3><div class="tiny muted">'+esc(x.o.status)+'</div><div class="price">'+price+'</div></div>';}).join("");
+$("divisionSummary").innerHTML=catalog.divisions.map(function(d){return '<div class="offer"><strong>'+esc(d.name)+'</strong><div class="muted tiny">'+d.offers.length+' offers</div></div>';}).join("");
+$("oppOffer").innerHTML=all.map(function(x){return '<option value="'+esc(x.o.id)+'">'+esc(x.o.id)+' — '+esc(x.o.name)+'</option>';}).join("");}
+async function loadDashboard(){var d=await api("/api/dashboard");$("mLeads").textContent=d.leads_total;$("mOpps").textContent=d.opportunities_total;$("mPipeline").textContent=money(d.pipeline_value_cents_not_revenue);$("mApprovals").textContent=d.pending_approvals;
+$("leadStatus").innerHTML=Object.entries(d.lead_counts).map(function(x){return '<p><span class="pill">'+esc(x[0])+'</span> '+x[1]+'</p>';}).join("")||"No leads recorded.";
+$("oppStatus").innerHTML=Object.entries(d.stage_counts).map(function(x){return '<p><span class="pill">'+esc(x[0])+'</span> '+x[1]+'</p>';}).join("")||"No opportunities recorded.";}
+async function loadLeads(){var d=await api("/api/leads");leads=d.items;$("leadRows").innerHTML=leads.map(function(l){return '<tr><td><strong>'+esc(l.company)+'</strong><div class="tiny muted">'+esc(l.service_need)+'</div></td><td>'+esc(l.category)+'</td><td>'+esc(l.source)+'</td><td><select data-lead="'+esc(l.id)+'">'+["new","reviewed","qualified","proposal","contract","closed_won","closed_lost"].map(function(s){return '<option '+(s===l.status?"selected":"")+'>'+s+'</option>';}).join("")+'</select></td><td>'+esc(l.owner)+'</td><td>'+esc(l.next_step)+'</td><td>'+dt(l.updated_at)+'</td></tr>';}).join("")||'<tr><td colspan="7">No leads yet.</td></tr>';
+document.querySelectorAll("[data-lead]").forEach(function(s){s.onchange=async function(){try{await api("/api/leads/"+s.dataset.lead+"/update",{method:"POST",body:JSON.stringify({status:s.value})});notify("Lead status updated.");await refreshAll();}catch(e){notify(e.message,true);}};});
+$("oppLead").innerHTML=leads.map(function(l){return '<option value="'+esc(l.id)+'">'+esc(l.company)+'</option>';}).join("")||'<option value="">Create a lead first</option>';}
+async function loadOpps(){var d=await api("/api/opportunities");opps=d.items;var names={};(catalog.divisions||[]).forEach(function(div){div.offers.forEach(function(o){names[o.id]=o.name;});});
+$("oppRows").innerHTML=opps.map(function(o){var lead=leads.find(function(l){return l.id===o.lead_id;});var stages=["target","researched","discovery","qualified","proposal","contract","paid_pending_verification","delivered","lost"];return '<tr><td>'+esc(lead?lead.company:o.lead_id)+'</td><td>'+esc(o.offer_id)+'<div class="tiny muted">'+esc(names[o.offer_id]||"")+'</div></td><td>'+money(o.amount_cents)+'</td><td><span class="pill">'+esc(o.stage)+'</span></td><td>'+esc(o.next_step)+'</td><td><select data-opp="'+esc(o.id)+'">'+stages.map(function(s){return '<option '+(s===o.stage?"selected":"")+'>'+s+'</option>';}).join("")+'</select></td></tr>';}).join("")||'<tr><td colspan="6">No opportunities yet.</td></tr>';
+document.querySelectorAll("[data-opp]").forEach(function(s){s.onchange=async function(){try{await api("/api/opportunities/"+s.dataset.opp+"/update",{method:"POST",body:JSON.stringify({stage:s.value})});notify("Opportunity stage updated.");await refreshAll();}catch(e){notify(e.message,true);}};});}
+async function loadInterviews(){var d=await api("/api/interviews");$("interviewRows").innerHTML=d.items.map(function(i){return '<tr><td>'+esc(i.market)+'</td><td>'+esc(i.product_id)+'</td><td>'+esc(i.interview_date)+'</td><td>'+esc(i.need_summary)+'</td><td>'+esc(i.objection)+'</td><td>'+(i.follow_up_permission?"Yes — scoped":"No")+'</td></tr>';}).join("")||'<tr><td colspan="6">No interviews recorded.</td></tr>';}
+async function loadApprovals(){var d=await api("/api/approvals");$("approvalRows").innerHTML=d.items.map(function(a){var actions=a.status==="pending"?'<div class="toolbar"><button class="btn" data-approval="'+esc(a.id)+'" data-decision="approved">Record approval</button><button class="btn danger" data-approval="'+esc(a.id)+'" data-decision="rejected">Reject</button></div>':"";return '<div class="offer" style="margin-bottom:9px"><strong>'+esc(a.action_type)+' — '+esc(a.status)+'</strong><p>'+esc(a.resource)+'</p><div class="tiny muted">'+esc(a.scope)+'</div><div class="tiny muted">Expires '+dt(a.expires_at)+'</div>'+actions+'<p class="tiny">Decision only; no external execution.</p></div>';}).join("")||"No approval requests.";
+document.querySelectorAll("[data-approval]").forEach(function(b){b.onclick=async function(){try{await api("/api/approvals/"+b.dataset.approval+"/decision",{method:"POST",body:JSON.stringify({decision:b.dataset.decision,comment:"Recorded by local operator."})});notify("Decision recorded. No external action executed.");await loadApprovals();await loadDashboard();}catch(e){notify(e.message,true);}};});}
+async function loadAudit(){var pair=await Promise.all([api("/api/audit/verify"),api("/api/audit")]);var v=pair[0],d=pair[1];$("ledgerCheck").innerHTML='<strong class="'+(v.valid?"good":"bad")+'">'+(v.valid?"HASH CHAIN VALID":"HASH CHAIN INVALID")+'</strong><p>'+v.events+' events checked</p><div class="mono tiny">'+esc(v.head_hash||v.reason||"")+'</div>';$("auditRows").innerHTML=d.items.map(function(x){return '<tr><td>'+x.seq+'</td><td>'+esc(x.event_type)+'</td><td>'+esc(x.entity_type)+'<div class="tiny muted">'+esc(x.entity_id)+'</div></td><td>'+esc(x.actor)+'</td><td>'+dt(x.occurred_at)+'</td><td class="mono">'+esc(x.event_hash.slice(0,18))+'…</td></tr>';}).join("")||'<tr><td colspan="6">No events yet.</td></tr>';}
+async function refreshAll(){if(!token)throw new Error("Connect with the local admin token first.");await loadCatalog();await Promise.all([loadDashboard(),loadLeads(),loadInterviews(),loadApprovals(),loadAudit()]);await loadOpps();}
+$("refresh").onclick=async function(){try{await refreshAll();notify("Data refreshed.");}catch(e){notify(e.message,true);}};$("refreshLeads").onclick=loadLeads;$("refreshOpps").onclick=async function(){await loadLeads();await loadOpps();};$("verify").onclick=loadAudit;
+$("leadForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.estimated_value_cents=Math.round(Number(d.estimated_value||0)*100);delete d.estimated_value;await api("/api/leads",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Lead recorded.");await refreshAll();}catch(err){notify(err.message,true);}};
+$("oppForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.amount_cents=Math.round(Number(d.amount)*100);delete d.amount;await api("/api/opportunities",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Opportunity recorded.");await refreshAll();}catch(err){notify(err.message,true);}};
+$("interviewForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.follow_up_permission=d.follow_up_permission==="true";await api("/api/interviews",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Interview recorded.");await refreshAll();}catch(err){notify(err.message,true);}};
+$("approvalForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.expires_minutes=Number(d.expires_minutes);await api("/api/approvals",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Approval request recorded.");await refreshAll();}catch(err){notify(err.message,true);}};
+$("calcForm").onsubmit=function(e){e.preventDefault();var d=formData(e.target);var keys=["inbound_leads","missed_rate","recovery_of_missed","booking_rate","average_job_value"];var v={};for(var i=0;i<keys.length;i++){v[keys[i]]=Number(d[keys[i]]);if(!Number.isFinite(v[keys[i]])){notify("Enter valid numbers.",true);return;}}if(v.inbound_leads<0||v.inbound_leads>100000||v.missed_rate<0||v.missed_rate>1||v.recovery_of_missed<0||v.recovery_of_missed>1||v.booking_rate<0||v.booking_rate>1||v.average_job_value<0){notify("One or more assumptions are outside valid bounds.",true);return;}var leads=v.inbound_leads*v.missed_rate*v.recovery_of_missed;var bookings=leads*v.booking_rate;var value=bookings*v.average_job_value;$("calcLeads").textContent=leads.toFixed(1);$("calcBookings").textContent=bookings.toFixed(1);$("calcValue").textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(value);};
+health();if(token)connect();
+</script></body></html>
