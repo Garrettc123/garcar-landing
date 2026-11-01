@@ -35,14 +35,14 @@ Environment:
 
 ## Test coverage
 
-- 29 standard-library unit tests are authored.
-- 19 loopback HTTP smoke checks are authored; they use synthetic records and a temporary database.
+- 39 standard-library unit tests are authored.
+- 23 loopback HTTP smoke checks are authored; they use synthetic records and a temporary database.
 - GitHub Actions is configured to run Python compile, unit tests, smoke tests, and catalog validation. See the PR status; a GitHub runner has not yet successfully executed those jobs.
 
 ## Working local modules
 
 - **Revenue Automation:** business lead CRM, stages, opportunity pipeline, valid-offer link, and lead-response scenario model.
-- **Digital Products:** canonical digital catalog visibility; secure checkout and protected delivery are not connected.
+- **Digital Products:** canonical 12-product catalog, preview pages, and an isolated test-mode checkout/entitlement service with signed synthetic events, idempotency, expiring limited-use download tokens, and refund revocation. It does not connect to Stripe or take payments.
 - **AI Operations Studio:** document/support workflow work queue; no AI model inference or automatic customer replies.
 - **Wealth Forge:** manual inflow/outflow ledger, revenue-quality classification, expense review, runway scenario, and 13-week cash scenario; no bank connection or financial advice.
 - **Enterprise Intelligence:** local document register and keyword search with source references; no embeddings, model, or GraphRAG.
@@ -62,6 +62,8 @@ All other endpoints require the X-Admin-Token header:
 - POST /api/opportunities, /api/opportunities/{id}/update
 - POST /api/interviews
 - GET /api/finance/entries, /api/finance/summary, /api/finance/quality, /api/finance/expense-review; POST /api/finance/entries, /api/finance/forecast, /api/finance/runway
+- GET /api/digital/catalog, /api/digital/health, /api/digital/orders, /api/digital/entitlements; POST /api/digital/test-checkout, /api/digital/test-payment, /api/digital/test-refund
+- GET /digital/download/{token} (short-lived bearer token; private asset only)
 - GET /api/knowledge/docs, /api/knowledge/search, /api/knowledge/links, /api/knowledge/graph-search; POST /api/knowledge/docs, /api/knowledge/links
 - POST /api/documents/extract and /api/support/draft (deterministic, review-only)
 - GET /api/work-items; POST /api/work-items, /api/work-items/{id}/update
@@ -74,7 +76,7 @@ All other endpoints require the X-Admin-Token header:
 
 ## Release limitations
 
-This is a local single-operator foundation, not a production multi-tenant SaaS. It has not been deployed. No Stripe, bank, outbound email/SMS, customer CRM, external API, or cloud infrastructure connection is implemented. No live payment, booking, refund, data export, secret rotation, or production write can execute. Pipeline values are not revenue; scenario outputs are not forecasts. Initial CRM deliberately omits phone/email collection. Use synthetic data for demos.
+This is a local single-operator foundation, not a production multi-tenant SaaS. It has not been deployed. No Stripe, bank, outbound email/SMS, customer CRM, external API, or cloud infrastructure connection is implemented. No live payment, booking, refund, data export, secret rotation, or production write can execute. Pipeline values are not revenue; scenario outputs are not forecasts. Initial CRM deliberately omits phone/email collection. Use synthetic data for demos. Place the approved PDF assets in the ignored `private_assets/` directory only after local review.
 
 Production release still requires independent authentication and authorization, tenant isolation, secure hosting, CSRF protections if cookie auth is introduced, encrypted off-site backups, retention/deletion controls, security monitoring, formal migrations, recovery exercises, payment webhook and digital entitlement integrations, and external security review.
 
