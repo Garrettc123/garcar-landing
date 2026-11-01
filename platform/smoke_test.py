@@ -132,6 +132,14 @@ def main()->int:
             })
             checks.append(("industry operations queue",code==201 and work.get("status")=="open"))
 
+
+            code,definitions=request(base,"/api/workflows/definitions")
+            code2,run=request(base,"/api/workflows/runs","POST",{
+              "workflow_key":"lead_response_v1","context":{"summary":"Synthetic lead response workflow"}
+            })
+            code3,advanced=request(base,"/api/workflows/runs/"+run.get("id","")+"/action","POST",{"action":"advance"})
+            checks.append(("workflow template and controlled state transition",code==200 and len(definitions.get("items",[]))==6 and code2==201 and code3==200 and advanced.get("external_actions_executed") is False))
+
             code,readiness=request(base,"/api/product-readiness")
             checks.append(("46-offer readiness register",code==200 and readiness.get("total")==46))
 
