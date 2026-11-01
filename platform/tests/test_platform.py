@@ -296,4 +296,18 @@ class PlatformTests(unittest.TestCase):
         with self.assertRaises(ApiError):
             process_test_webhook(raw,sig,self.db)
 
+
+    def test_download_bearer_token_is_redacted_from_access_log(self):
+        import io
+        from contextlib import redirect_stderr
+        from server import Handler
+        handler=object.__new__(Handler)
+        handler.path="/digital/download/secret-bearer-token-value"
+        output=io.StringIO()
+        with redirect_stderr(output):
+            handler.log_message("%s",handler.path)
+        logged=output.getvalue()
+        self.assertNotIn("secret-bearer-token-value",logged)
+        self.assertIn("[TOKEN-REDACTED]",logged)
+
 if __name__=="__main__":unittest.main()
