@@ -37,7 +37,7 @@ Environment:
 - **Revenue Automation:** business lead CRM, stages, opportunity pipeline, valid-offer link, and lead-response scenario model.
 - **Digital Products:** canonical digital catalog visibility; secure checkout and protected delivery are not connected.
 - **AI Operations Studio:** document/support workflow work queue; no AI model inference or automatic customer replies.
-- **Wealth Forge:** manual inflow/outflow ledger and 13-week cash scenario; no bank connection or financial advice.
+- **Wealth Forge:** manual inflow/outflow ledger, revenue-quality classification, expense review, runway scenario, and 13-week cash scenario; no bank connection or financial advice.
 - **Enterprise Intelligence:** local document register and keyword search with source references; no embeddings, model, or GraphRAG.
 - **Industry Solutions:** task/exception queues for dispatch, maintenance, and shift handoffs; no operational equipment control.
 - **Infrastructure:** SQLite WAL, quick integrity diagnostics, and local backup.
@@ -54,7 +54,7 @@ All other endpoints require the X-Admin-Token header:
 - POST /api/leads, /api/leads/{id}/update
 - POST /api/opportunities, /api/opportunities/{id}/update
 - POST /api/interviews
-- GET /api/finance/entries, /api/finance/summary; POST /api/finance/entries, /api/finance/forecast
+- GET /api/finance/entries, /api/finance/summary, /api/finance/quality, /api/finance/expense-review; POST /api/finance/entries, /api/finance/forecast, /api/finance/runway
 - GET /api/knowledge/docs, /api/knowledge/search; POST /api/knowledge/docs
 - POST /api/documents/extract and /api/support/draft (deterministic, review-only)
 - GET /api/work-items; POST /api/work-items, /api/work-items/{id}/update
