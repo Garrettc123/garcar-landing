@@ -58,7 +58,7 @@ All other endpoints require the X-Admin-Token header:
 - GET /api/knowledge/docs, /api/knowledge/search, /api/knowledge/links, /api/knowledge/graph-search; POST /api/knowledge/docs, /api/knowledge/links
 - POST /api/documents/extract and /api/support/draft (deterministic, review-only)
 - GET /api/work-items; POST /api/work-items, /api/work-items/{id}/update
-- GET /api/system/diagnostics; POST /api/system/backup
+- GET /api/system/diagnostics, /api/system/backups; POST /api/system/backup, /api/system/backup/verify
 - GET /api/product-readiness; POST /api/product-readiness/{offer_id}/update
 - GET /api/approvals; POST /api/approvals, /api/approvals/{id}/decision
 - GET /api/audit, /api/audit/verify
