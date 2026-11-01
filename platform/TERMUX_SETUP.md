@@ -113,3 +113,14 @@ bash run_garcar_ci.sh
 This uses Garcar's own local runner and does not depend on GitHub-hosted runners. It runs Python compilation, unit tests, loopback HTTP smoke tests, and catalog validation. It stops at the first failure and stores stage logs, a JSON report, and SHA-256 checksums in `platform/.garcar-builds/`. Build subprocesses receive a minimal environment; shell API keys and payment credentials are not forwarded.
 
 A successful local run is evidence for this checkout and device only. It does not deploy the application or approve production use. The direct script `bash run_checks.sh` remains available.
+
+
+## 10. Verify release evidence (review only)
+
+After the local pipeline passes, copy the build ID printed by the runner and run:
+
+```bash
+python release_gate.py .garcar-builds/BUILD_ID/report.json
+```
+
+Replace `BUILD_ID` with the exact printed directory name. The gate checks all required stage results, logs, SHA-256 manifest entries, and the no-external-actions declaration. It does not deploy or merge anything. A valid gate result is only permission to begin a human release review.
