@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Garcar Enterprise local-first operating console. Python standard library only."""
 from __future__ import annotations
-import argparse, hashlib, hmac, json, os, secrets, sqlite3, sys, uuid
+import argparse, hashlib, hmac, json, os, re, secrets, sqlite3, sys, uuid
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -347,6 +347,51 @@ def list_product_readiness(db_path:Path|str=DB_PATH)->dict[str,Any]:
       "disclaimer":"Release states and evidence references are operator-entered records. They are not independently verified by this local register."}
 
 
+
+def extract_document_fields(data:dict[str,Any])->dict[str,Any]:
+    text=clean_text(data.get("document_text"),"document_text",20000,True)
+    lowered=text.lower()
+    if "invoice" in lowered:doc_type="invoice"
+    elif "work order" in lowered or "work-order" in lowered:doc_type="work_order"
+    else:doc_type="unknown"
+    patterns={
+      "document_number":r"(?im)^\s*(?:invoice|work\s*order)\s*(?:number|no\.?|#|id)?\s*[:#-]?\s*([A-Z0-9][A-Z0-9/_-]{2,40})\s*$",
+      "document_date":r"(?im)^\s*(?:invoice\s+date|date)\s*:\s*(\d{4}-\d{2}-\d{2})\s*$",
+      "due_date":r"(?im)^\s*(?:due\s+date|payment\s+due)\s*:\s*(\d{4}-\d{2}-\d{2})\s*$",
+      "vendor":r"(?im)^\s*(?:vendor|supplier|company)\s*:\s*(.{2,120})\s*$",
+      "total":r"(?im)^\s*(?:total|amount\s+due|balance\s+due)\s*:\s*\$?\s*([0-9,]+(?:\.[0-9]{2})?)\s*$"
+    }
+    fields={}
+    for key,pattern in patterns.items():
+        match=re.search(pattern,text)
+        if match:
+            value=match.group(1).strip()
+            fields[key]=value
+    required=("document_number","document_date","total")
+    confidence=round(sum(1 for key in required if key in fields)/len(required),2)
+    return {"document_type":doc_type,"fields":fields,"confidence_on_required_fields":confidence,
+      "human_review_required":True,"saved_to_database":False,
+      "disclaimer":"Deterministic text-pattern extraction only. Scanned-image OCR, legal/accounting validation, and AI inference are not performed. Check every field against the original document."}
+
+def draft_support_reply(data:dict[str,Any])->dict[str,Any]:
+    question=clean_text(data.get("question"),"question",1000,True)
+    result=search_knowledge(question)
+    matches=result.get("items",[])[:3]
+    if matches:
+        evidence="\n\n".join("- "+item["title"]+" ("+item["citation"]+"):\n  "+item["excerpt"] for item in matches)
+        draft=("Thank you for your question. I reviewed the available internal reference material. "
+               "The relevant documented information is:\n\n"+evidence+
+               "\n\nI have not independently verified whether this material is current or complete. "
+               "A team member should check the cited source and confirm any customer-specific details before sending.")
+    else:
+        evidence="No relevant local reference was found."
+        draft=("Thank you for your question. I don't currently have a verified internal reference that answers it. "
+               "A team member needs to review the request and confirm the correct answer before responding.")
+    return {"question":question,"draft":draft,"sources":[{"title":x["title"],"source_ref":x["source_ref"],"citation":x["citation"]} for x in matches],
+      "requires_human_review":True,"sent":False,"model_used":None,
+      "disclaimer":"Deterministic local draft only. No AI model was called and no email, SMS, or customer message was sent."}
+
+
 def _date_value(value:Any,field:str)->str:
     text=clean_text(value,field,10,True)
     try:
@@ -569,6 +614,8 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/finance/forecast":return self.send_body(200,forecast_cash(data))
             if path=="/api/knowledge/docs":return self.send_body(201,create_knowledge_doc(data))
             if path=="/api/work-items":return self.send_body(201,create_work_item(data))
+            if path=="/api/documents/extract":return self.send_body(200,extract_document_fields(data))
+            if path=="/api/support/draft":return self.send_body(200,draft_support_reply(data))
             if len(path.strip("/").split("/"))==4 and path.strip("/").split("/")[0:2]==["api","product-readiness"] and path.strip("/").split("/")[3]=="update":
                 parts=path.strip("/").split("/");return self.send_body(200,update_product_readiness(parts[2],data))
             if path=="/api/system/backup":return self.send_body(201,create_local_backup())
