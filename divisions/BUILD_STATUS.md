@@ -32,7 +32,7 @@ Pull request: #6 (open, draft; not merged)
 - 29 Python unit tests.
 - 19 isolated loopback HTTP smoke checks using temporary SQLite and synthetic records.
 - GitHub Actions workflow runs compile, unit tests, smoke checks, and catalog validator.
-- The most recent Platform Checks run (run ID `41278625620`) ended in failure before job steps were recorded. GitHub returned runner ID 0, no steps, and no job log. This is not evidence of a test assertion failure or a passing test run. Tests are authored but remain unverified by CI.
+- The most recent observed Platform Checks run (run ID `41278697827`, commit `c4150aab86232b1ba0cacc12c0c7160bca0c0414`) ended in failure before job steps were recorded. GitHub returned runner ID 0, no steps, and no job log. This is not evidence of a test assertion failure or a passing test run. Tests are authored but remain unverified by CI.
 - GitGuardian previously reported no secrets in a prior 37-commit scan; that result does not cover every later commit.
 - Product-readiness states/evidence references are operator-entered, not independently verified.
 
