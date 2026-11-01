@@ -1,8 +1,9 @@
 # Garcar Local Operating Console
 
-Zero-dependency local-first console for the eight-division Garcar Enterprise portfolio.
+A zero-dependency, local-first operator console covering working foundation modules across the eight-division Garcar Enterprise portfolio.
 
 ## Run
+
 Requires Python 3.10+; no third-party packages.
 
 \`\`\`bash
@@ -10,43 +11,58 @@ cd platform
 python server.py
 \`\`\`
 
-Open http://127.0.0.1:8788 and paste the local admin token printed in the terminal. The app binds to loopback and stores records in SQLite WAL mode.
+Open http://127.0.0.1:8788 and paste the one-time local admin token printed by the server. The app binds to loopback and stores data in SQLite WAL mode. Keep the token private.
 
-For clearly synthetic demo records:
+Optional synthetic demonstration records:
+
 \`\`\`bash
 python server.py --demo
 \`\`\`
 
-Run tests:
+Run checks:
+
 \`\`\`bash
+python -m py_compile server.py
 python -m unittest discover -s tests -v
 \`\`\`
 
-Optional environment:
-- GARCAR_PORT (default 8788)
-- GARCAR_DB_PATH (alternate SQLite path)
-- GARCAR_ADMIN_TOKEN (fixed local token; otherwise random each run)
+Environment:
+- GARCAR_PORT: local port (default 8788)
+- GARCAR_DB_PATH: alternate SQLite database path
+- GARCAR_ADMIN_TOKEN: stable local token; otherwise a random token is generated at startup
 
-## Implemented local modules
-- Eight-division, 46-offer canonical catalog reader
-- Lead CRM and status tracking
-- Opportunity pipeline tied to valid offer IDs
-- Validation interview log with permission field and data minimization
-- Lead-response opportunity scenario model
-- Approval request/decision register (record only)
-- SHA-256 hash-chained local audit ledger and verification
-- Responsive browser console
+## Working local modules
+
+- **Revenue Automation:** business lead CRM, stages, opportunity pipeline, valid-offer link, and lead-response scenario model.
+- **Digital Products:** canonical digital catalog visibility; secure checkout and protected delivery are not connected.
+- **AI Operations Studio:** document/support workflow work queue; no AI model inference or automatic customer replies.
+- **Wealth Forge:** manual inflow/outflow ledger and 13-week cash scenario; no bank connection or financial advice.
+- **Enterprise Intelligence:** local document register and keyword search with source references; no embeddings, model, or GraphRAG.
+- **Industry Solutions:** task/exception queues for dispatch, maintenance, and shift handoffs; no operational equipment control.
+- **Infrastructure:** SQLite WAL, quick integrity diagnostics, and local backup.
+- **Governance & Security:** local action approval register and SHA-256 event hash chain; approval decisions do not execute actions.
 
 ## API
-- GET /api/health and GET /api/catalog are read-only.
-- All other endpoints require X-Admin-Token.
-- GET /api/dashboard, /api/leads, /api/opportunities, /api/interviews, /api/approvals, /api/audit, /api/audit/verify
+
+Public read-only:
+- GET /api/health
+- GET /api/catalog
+
+All other endpoints require the X-Admin-Token header:
+- GET /api/dashboard, /api/leads, /api/opportunities, /api/interviews, /api/approvals
 - POST /api/leads, /api/leads/{id}/update
 - POST /api/opportunities, /api/opportunities/{id}/update
-- POST /api/interviews, /api/approvals, /api/approvals/{id}/decision
+- POST /api/interviews
+- GET /api/finance/entries, /api/finance/summary; POST /api/finance/entries, /api/finance/forecast
+- GET /api/knowledge/docs, /api/knowledge/search; POST /api/knowledge/docs
+- GET /api/work-items; POST /api/work-items, /api/work-items/{id}/update
+- GET /api/system/diagnostics; POST /api/system/backup
+- GET /api/approvals; POST /api/approvals, /api/approvals/{id}/decision
+- GET /api/audit, /api/audit/verify
 - GET /api/simulate/lead-value
 
-## Important limits
-This is a local single-operator operating tool, not production multi-tenant SaaS. No Stripe, outbound email/SMS, customer CRM, external APIs, deployments, refunds, or secret rotation is connected. Approval decisions do not execute actions. Scenario outputs are not forecasts. Pipeline amounts are not revenue. Initial CRM deliberately omits phone/email collection. Use synthetic data for demos.
+## Release limitations
 
-Before production use: implement independent user authentication and authorization, tenant isolation, secure deployment, CSRF protections if cookie auth is introduced, encrypted backup and retention controls, formal data deletion, monitoring, recovery tests, payment webhook and entitlement integrations, and external security review.
+This is a local single-operator foundation, not a production multi-tenant SaaS. It has not been deployed. No Stripe, bank, outbound email/SMS, customer CRM, external API, or cloud infrastructure connection is implemented. No live payment, booking, refund, data export, secret rotation, or production write can execute. Pipeline values are not revenue; scenario outputs are not forecasts. Initial CRM deliberately omits phone/email collection. Use synthetic data for demos.
+
+Production release still requires independent authentication and authorization, tenant isolation, secure hosting, CSRF protections if cookie auth is introduced, encrypted off-site backups, retention/deletion controls, security monitoring, formal migrations, recovery exercises, payment webhook and digital entitlement integrations, and external security review.
