@@ -151,4 +151,23 @@ class PlatformTests(unittest.TestCase):
         with self.assertRaises(ApiError):
             create_knowledge_link({"from_doc_id":doc["id"],"to_doc_id":doc["id"],"relation":"related_to"},self.db)
 
+
+    def test_local_backup_is_hash_and_sqlite_verified(self):
+        from server import create_local_backup,verify_local_backup
+        backup_dir=Path(self.tmp.name)/"backups"
+        created=create_local_backup(self.db,backup_dir)
+        result=verify_local_backup(created["filename"],self.db,backup_dir)
+        self.assertTrue(result["valid"])
+        self.assertEqual(result["database_integrity"],"ok")
+        self.assertFalse(result["restore_performed"])
+    def test_backup_tampering_is_detected(self):
+        from server import create_local_backup,verify_local_backup
+        backup_dir=Path(self.tmp.name)/"backups"
+        created=create_local_backup(self.db,backup_dir)
+        target=backup_dir/created["filename"]
+        with target.open("ab") as stream:stream.write(b"tamper")
+        result=verify_local_backup(created["filename"],self.db,backup_dir)
+        self.assertFalse(result["valid"])
+        self.assertFalse(result["checksum_match"])
+
 if __name__=="__main__":unittest.main()
