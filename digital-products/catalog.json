@@ -1,0 +1,177 @@
+{
+  "brand": "Garcar Digital",
+  "status": "launch_preview_not_for_sale",
+  "currency": "USD",
+  "products": [
+    {
+      "id": "IA-001",
+      "market": "inner-awareness",
+      "title": "The Third Eye: Science & Spirituality",
+      "price": 27,
+      "format": [
+        "ebook",
+        "workbook"
+      ],
+      "status": "draft",
+      "promise": "Understand pineal-gland biology, third-eye symbolism, and evidence-aware reflective practices.",
+      "guardrails": [
+        "No claim that pineal activation unlocks wealth, psychic powers, or healing.",
+        "No claim that CERN proves manifestation or parallel universes."
+      ]
+    },
+    {
+      "id": "IA-002",
+      "market": "inner-awareness",
+      "title": "The 30-Second Mindful Reset",
+      "price": 9,
+      "format": [
+        "quick-guide",
+        "audio-script"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "IA-003",
+      "market": "inner-awareness",
+      "title": "The Consciousness Workbook",
+      "price": 19,
+      "format": [
+        "workbook"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "WA-001",
+      "market": "wealth-abundance",
+      "title": "The Abundance Blueprint",
+      "price": 37,
+      "format": [
+        "ebook",
+        "workbook"
+      ],
+      "status": "draft",
+      "promise": "Translate financial aspirations into measurable goals, cash-flow habits, and practical weekly action.",
+      "guardrails": [
+        "No guaranteed income or investment returns.",
+        "No claim that visualization alone creates money."
+      ]
+    },
+    {
+      "id": "WA-002",
+      "market": "wealth-abundance",
+      "title": "The Money Mindset Reset",
+      "price": 17,
+      "format": [
+        "workbook"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "WA-003",
+      "market": "wealth-abundance",
+      "title": "The Personal Wealth Operating Manual",
+      "price": 47,
+      "format": [
+        "ebook",
+        "templates"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "MP-001",
+      "market": "mind-performance",
+      "title": "The Mind Reprogramming Method",
+      "price": 29,
+      "format": [
+        "ebook",
+        "workbook"
+      ],
+      "status": "draft",
+      "promise": "Build repeatable focus and behavior systems using goal clarity, cue design, practice, and reflection.",
+      "guardrails": [
+        "Do not describe habits as guaranteed brain rewiring.",
+        "No diagnosis or treatment claims."
+      ]
+    },
+    {
+      "id": "MP-002",
+      "market": "mind-performance",
+      "title": "The Focus Protocol",
+      "price": 17,
+      "format": [
+        "quick-guide",
+        "planner"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "MP-003",
+      "market": "mind-performance",
+      "title": "The 30-Day Mental Performance Workbook",
+      "price": 27,
+      "format": [
+        "workbook"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "HC-001",
+      "market": "human-connection",
+      "title": "The Connection Blueprint",
+      "price": 27,
+      "format": [
+        "ebook",
+        "workbook"
+      ],
+      "status": "draft",
+      "promise": "Practice listening, emotional awareness, boundaries, and constructive conflict repair.",
+      "guardrails": [
+        "No guaranteed soulmate or relationship outcome.",
+        "Not a substitute for therapy or safety support."
+      ]
+    },
+    {
+      "id": "HC-002",
+      "market": "human-connection",
+      "title": "The Relationship Intelligence Workbook",
+      "price": 19,
+      "format": [
+        "workbook"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "HC-003",
+      "market": "human-connection",
+      "title": "The Communication Mastery Guide",
+      "price": 37,
+      "format": [
+        "ebook",
+        "templates"
+      ],
+      "status": "planned"
+    }
+  ],
+  "existingGarcarBusinessProducts": [
+    {
+      "title": "100 AI Revenue Prompts + SOPs",
+      "price": 27,
+      "status": "existing_catalog_asset"
+    },
+    {
+      "title": "AI Revenue Leak Playbook",
+      "price": 49,
+      "status": "existing_catalog_asset"
+    },
+    {
+      "title": "AI Revenue Ops Mini-Course",
+      "price": 79,
+      "status": "existing_catalog_asset"
+    },
+    {
+      "title": "Garcar Operator Toolkit",
+      "price": 149,
+      "status": "existing_catalog_asset"
+    }
+  ]
+}
