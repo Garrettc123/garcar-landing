@@ -12,73 +12,73 @@
           "id": "IA-001",
           "name": "The Third Eye: Science & Spirituality",
           "price": 27,
-          "status": "manuscript_created_preview_only"
+          "status": "introductory_first_edition_preview_created_not_for_sale"
         },
         {
           "id": "IA-002",
           "name": "The 30-Second Mindful Reset",
           "price": 9,
-          "status": "planned"
+          "status": "first_edition_preview_created_not_for_sale"
         },
         {
           "id": "IA-003",
           "name": "The Consciousness Workbook",
           "price": 19,
-          "status": "planned"
+          "status": "first_edition_preview_created_not_for_sale"
         },
         {
           "id": "WA-001",
           "name": "The Abundance Blueprint",
           "price": 37,
-          "status": "manuscript_created_preview_only"
+          "status": "introductory_first_edition_preview_created_not_for_sale"
         },
         {
           "id": "WA-002",
           "name": "The Money Mindset Reset",
           "price": 17,
-          "status": "planned"
+          "status": "first_edition_preview_created_not_for_sale"
         },
         {
           "id": "WA-003",
           "name": "The Personal Wealth Operating Manual",
           "price": 47,
-          "status": "planned"
+          "status": "first_edition_preview_created_not_for_sale"
         },
         {
           "id": "MP-001",
           "name": "The Mind Reprogramming Method",
           "price": 29,
-          "status": "manuscript_created_preview_only"
+          "status": "introductory_first_edition_preview_created_not_for_sale"
         },
         {
           "id": "MP-002",
           "name": "The Focus Protocol",
           "price": 17,
-          "status": "planned"
+          "status": "first_edition_preview_created_not_for_sale"
         },
         {
           "id": "MP-003",
           "name": "The 30-Day Mental Performance Workbook",
           "price": 27,
-          "status": "planned"
+          "status": "first_edition_preview_created_not_for_sale"
         },
         {
           "id": "HC-001",
           "name": "The Connection Blueprint",
           "price": 27,
-          "status": "manuscript_created_preview_only"
+          "status": "introductory_first_edition_preview_created_not_for_sale"
         },
         {
           "id": "HC-002",
           "name": "The Relationship Intelligence Workbook",
           "price": 19,
-          "status": "planned"
+          "status": "first_edition_preview_created_not_for_sale"
         },
         {
           "id": "HC-003",
           "name": "The Communication Mastery Guide",
           "price": 37,
-          "status": "planned"
+          "status": "first_edition_preview_created_not_for_sale"
         }
       ]
     },
