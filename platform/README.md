@@ -64,6 +64,8 @@ All other endpoints require the X-Admin-Token header:
 - GET /api/finance/entries, /api/finance/summary, /api/finance/quality, /api/finance/expense-review; POST /api/finance/entries, /api/finance/forecast, /api/finance/runway
 - GET /api/digital/catalog, /api/digital/health, /api/digital/orders, /api/digital/entitlements; POST /api/digital/test-checkout, /api/digital/test-payment, /api/digital/test-refund
 - GET /digital/download/{token} (short-lived bearer token; private asset only)
+- GET /api/digital/catalog, /api/digital/health, /api/digital/orders, /api/digital/entitlements; POST /api/digital/test-checkout, /api/digital/test-payment, /api/digital/test-refund
+- GET /digital/download/{token} (short-lived bearer token; private asset only)
 - GET /api/knowledge/docs, /api/knowledge/search, /api/knowledge/links, /api/knowledge/graph-search; POST /api/knowledge/docs, /api/knowledge/links
 - POST /api/documents/extract and /api/support/draft (deterministic, review-only)
 - GET /api/work-items; POST /api/work-items, /api/work-items/{id}/update
@@ -76,7 +78,7 @@ All other endpoints require the X-Admin-Token header:
 
 ## Release limitations
 
-This is a local single-operator foundation, not a production multi-tenant SaaS. It has not been deployed. No Stripe, bank, outbound email/SMS, customer CRM, external API, or cloud infrastructure connection is implemented. No live payment, booking, refund, data export, secret rotation, or production write can execute. Pipeline values are not revenue; scenario outputs are not forecasts. Initial CRM deliberately omits phone/email collection. Use synthetic data for demos. Place the approved PDF assets in the ignored `private_assets/` directory only after local review.
+This is a local single-operator foundation, not a production multi-tenant SaaS. It has not been deployed. No Stripe, bank, outbound email/SMS, customer CRM, external API, or cloud infrastructure connection is implemented. No live payment, booking, refund, data export, secret rotation, or production write can execute. Pipeline values are not revenue; scenario outputs are not forecasts. Initial CRM deliberately omits phone/email collection. Use synthetic data for demos. Place approved PDF assets in the ignored `private_assets/` directory only after local review. Place the approved PDF assets in the ignored `private_assets/` directory only after local review.
 
 Production release still requires independent authentication and authorization, tenant isolation, secure hosting, CSRF protections if cookie auth is introduced, encrypted off-site backups, retention/deletion controls, security monitoring, formal migrations, recovery exercises, payment webhook and digital entitlement integrations, and external security review.
 
