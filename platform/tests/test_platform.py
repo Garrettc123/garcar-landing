@@ -170,4 +170,33 @@ class PlatformTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertFalse(result["checksum_match"])
 
+
+    def test_workflow_definitions_and_full_lifecycle(self):
+        from server import list_workflow_definitions,start_workflow,act_on_workflow_run
+        defs=list_workflow_definitions(self.db)
+        self.assertEqual(len(defs),6)
+        run=start_workflow({"workflow_key":"lead_response_v1","context":{"summary":"Synthetic lead"}} ,self.db)
+        self.assertEqual(run["status"],"active")
+        for _ in range(len(run["steps"])):
+            run=act_on_workflow_run(run["id"],{"action":"advance"},self.db)
+        self.assertEqual(run["status"],"completed")
+        self.assertFalse(run["external_actions_executed"])
+    def test_workflow_can_be_blocked_and_resumed(self):
+        from server import start_workflow,act_on_workflow_run
+        run=start_workflow({"workflow_key":"dispatch_exception_v1"},self.db)
+        blocked=act_on_workflow_run(run["id"],{"action":"block","note":"Await dispatcher review"},self.db)
+        self.assertEqual(blocked["status"],"blocked")
+        resumed=act_on_workflow_run(run["id"],{"action":"resume"},self.db)
+        self.assertEqual(resumed["status"],"active")
+    def test_workflow_rejects_sensitive_context_keys(self):
+        from server import start_workflow
+        with self.assertRaises(ApiError):
+            start_workflow({"workflow_key":"support_reply_v1","context":{"password":"do-not-save"}},self.db)
+    def test_workflow_cannot_advance_when_blocked(self):
+        from server import start_workflow,act_on_workflow_run
+        run=start_workflow({"workflow_key":"maintenance_request_v1"},self.db)
+        act_on_workflow_run(run["id"],{"action":"block"},self.db)
+        with self.assertRaises(ApiError):
+            act_on_workflow_run(run["id"],{"action":"advance"},self.db)
+
 if __name__=="__main__":unittest.main()
