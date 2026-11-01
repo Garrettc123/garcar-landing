@@ -35,8 +35,10 @@ Pull request: #6 (open, draft; not merged)
 - Private PDF library: 12 preview manuscripts; prior ZIP integrity check passed.
 - Python unit tests: 41 authored.
 - Loopback HTTP smoke tests: 23 authored; use temporary SQLite and synthetic records.
+- `platform/run_checks.sh` runs compile, unit, HTTP, and catalog checks locally.
+- `platform/CI_TROUBLESHOOTING.md` contains exact run/job identifiers and the pre-runner diagnostic checklist.
 - GitHub Actions workflow compiles both Python modules, runs unit tests, smoke checks, and catalog validation.
-- The Platform Checks jobs have repeatedly failed before runner assignment/step execution. Latest failure evidence showed runner ID 0, no recorded steps, and no job log. The tests are authored but have not been observed passing.
+- The latest Platform Checks run (41279657861; job 124768794696; commit 4827a28d4c2b3772743d2a7412fb4539602a88d4) failed before runner assignment: GitHub reports runner_id 0, empty runner name, empty steps, and no job log. The tests are authored but have not been observed passing. A pre-runner troubleshooting handoff and one-command Termux script are included.
 - GitGuardian previously reported no secrets in an earlier scanned commit range; it does not cover all later commits.
 - Release-board evidence references are operator-entered, not independently verified.
 
