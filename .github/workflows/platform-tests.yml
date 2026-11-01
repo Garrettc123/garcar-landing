@@ -24,5 +24,8 @@ jobs:
       - name: Run platform tests
         working-directory: platform
         run: python -m unittest discover -s tests -v
+      - name: Run loopback API smoke test
+        working-directory: platform
+        run: python smoke_test.py
       - name: Validate catalog
         run: python divisions/validate_catalog.py divisions/catalog.json
