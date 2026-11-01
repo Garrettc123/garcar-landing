@@ -24,6 +24,7 @@ Run checks:
 \`\`\`bash
 python -m py_compile server.py
 python -m unittest discover -s tests -v
+python smoke_test.py
 \`\`\`
 
 Environment:
