@@ -257,6 +257,7 @@ def process_test_webhook(raw_body: bytes, signature: str, db_path: Path | str) -
         raise ApiError(400, "Unsupported synthetic payment event.")
     order_id = clean_text(event.get("order_id"), "order_id", 100, True)
     provider_ref = clean_text(event.get("payment_reference"), "payment_reference", 120, True)
+    checkout_ref = clean_text(event.get("checkout_reference"), "checkout_reference", 120, True)
     if not provider_ref.startswith("test_payment_"):
         raise ApiError(403, "Only synthetic test payment references are accepted.")
     product_id = clean_text(event.get("product_id"), "product_id", 20, True)
@@ -280,7 +281,7 @@ def process_test_webhook(raw_body: bytes, signature: str, db_path: Path | str) -
         catalog_product = _catalog(db_path).get(product_id)
         if not catalog_product or order["product_id"] != product_id:
             raise ApiError(400, "Product ID does not match the original order.")
-        if order["provider_reference"] == "" or order["mode"] != "test":
+        if order["mode"] != "test" or checkout_ref != order["provider_reference"]:
             raise ApiError(403, "Order is not a test-mode order.")
         if amount != order["amount_cents"] or amount != catalog_product["amount_cents"]:
             raise ApiError(409, "Payment amount does not match the authoritative catalog price.")
@@ -311,7 +312,7 @@ def process_test_webhook(raw_body: bytes, signature: str, db_path: Path | str) -
                       "order_id": order_id, "order_status": "paid",
                       "entitlement_id": entitlement_id, "entitlement_created": True,
                       "download_expires_at": expiry, "download_limit": MAX_DOWNLOADS,
-                      "download_token": download_token, "mode": "test",
+                      "download_token": download_token, "download_path": "/digital/download/" + download_token, "mode": "test",
                       "note": "Synthetic payment only. No real money was collected."}
         else:
             if order["status"] != "paid":
@@ -351,6 +352,7 @@ def simulate_test_payment(order_id: str, db_path: Path | str) -> dict[str, Any]:
         "amount_cents": order["amount_cents"],
         "currency": order["currency"],
         "payment_reference": "test_payment_" + uuid.uuid4().hex,
+        "checkout_reference": order["provider_reference"],
     }
     raw, signature = _signed_body(event, db_path)
     return process_test_webhook(raw, signature, db_path)
