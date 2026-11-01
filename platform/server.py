@@ -1,0 +1,360 @@
+#!/usr/bin/env python3
+"""Garcar Enterprise local-first operating console. Python standard library only."""
+from __future__ import annotations
+import argparse, hashlib, hmac, json, os, secrets, sqlite3, sys, uuid
+from datetime import datetime, timedelta, timezone
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from typing import Any
+from urllib.parse import parse_qs, urlparse
+
+HERE=Path(__file__).resolve().parent
+ROOT=HERE.parent
+CATALOG_PATH=ROOT/"divisions"/"catalog.json"
+DB_PATH=Path(os.environ.get("GARCAR_DB_PATH",HERE/"garcar.local.sqlite3"))
+STATUSES={"new","reviewed","qualified","proposal","contract","closed_won","closed_lost"}
+STAGES={"target","researched","discovery","qualified","proposal","contract","paid_pending_verification","delivered","lost"}
+APPROVAL_ACTIONS={"email.send","sms.send","payment.create","refund.issue","production.deploy","customer_data.export","secret.rotate","infrastructure.change","external_api.write"}
+DIVISION_IDS={"digital-products","revenue-automation","ai-operations-studio","wealth-forge","enterprise-intelligence","industry-solutions","infrastructure","governance-security"}
+
+class ApiError(Exception):
+    def __init__(self,status:int,message:str):
+        super().__init__(message); self.status=status; self.message=message
+
+def now_iso()->str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+def connect(db_path:Path|str=DB_PATH)->sqlite3.Connection:
+    path=Path(db_path); path.parent.mkdir(parents=True,exist_ok=True)
+    db=sqlite3.connect(path,timeout=10); db.row_factory=sqlite3.Row
+    db.execute("PRAGMA journal_mode=WAL"); db.execute("PRAGMA foreign_keys=ON"); db.execute("PRAGMA busy_timeout=10000")
+    return db
+
+def init_db(db_path:Path|str=DB_PATH)->None:
+    with connect(db_path) as db:
+        db.executescript("""
+        CREATE TABLE IF NOT EXISTS leads(
+          id TEXT PRIMARY KEY, company TEXT NOT NULL, category TEXT NOT NULL, source TEXT NOT NULL,
+          service_need TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'new', owner TEXT NOT NULL DEFAULT '',
+          estimated_value_cents INTEGER NOT NULL DEFAULT 0, next_step TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS opportunities(
+          id TEXT PRIMARY KEY, lead_id TEXT NOT NULL REFERENCES leads(id) ON DELETE RESTRICT,
+          offer_id TEXT NOT NULL, amount_cents INTEGER NOT NULL, stage TEXT NOT NULL,
+          next_step TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS validation_interviews(
+          id TEXT PRIMARY KEY, market TEXT NOT NULL, product_id TEXT NOT NULL DEFAULT '', interview_date TEXT NOT NULL,
+          source TEXT NOT NULL, follow_up_permission INTEGER NOT NULL DEFAULT 0, need_summary TEXT NOT NULL DEFAULT '',
+          objection TEXT NOT NULL DEFAULT '', price_reaction TEXT NOT NULL DEFAULT '', next_action TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS approvals(
+          id TEXT PRIMARY KEY, action_type TEXT NOT NULL, resource TEXT NOT NULL, scope TEXT NOT NULL,
+          requested_by TEXT NOT NULL, expires_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
+          decision_comment TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, decided_at TEXT);
+        CREATE TABLE IF NOT EXISTS audit_events(
+          seq INTEGER PRIMARY KEY AUTOINCREMENT, event_id TEXT NOT NULL UNIQUE, event_type TEXT NOT NULL,
+          entity_type TEXT NOT NULL, entity_id TEXT NOT NULL, actor TEXT NOT NULL, payload_json TEXT NOT NULL,
+          occurred_at TEXT NOT NULL, previous_hash TEXT NOT NULL, event_hash TEXT NOT NULL UNIQUE);
+        CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
+        CREATE INDEX IF NOT EXISTS idx_opportunities_stage ON opportunities(stage);
+        CREATE INDEX IF NOT EXISTS idx_approvals_status ON approvals(status);
+        CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_events(entity_type,entity_id);
+        """)
+
+def canonical(value:Any)->str:
+    return json.dumps(value,sort_keys=True,separators=(",",":"),ensure_ascii=False)
+
+def append_audit(db:sqlite3.Connection,event_type:str,entity_type:str,entity_id:str,payload:dict[str,Any],actor:str="local-owner")->str:
+    last=db.execute("SELECT event_hash FROM audit_events ORDER BY seq DESC LIMIT 1").fetchone()
+    previous=last["event_hash"] if last else "GENESIS"
+    event_id=str(uuid.uuid4()); occurred=now_iso(); payload_json=canonical(payload)
+    material=canonical({"event_id":event_id,"event_type":event_type,"entity_type":entity_type,"entity_id":entity_id,
+      "actor":actor,"payload_json":payload_json,"occurred_at":occurred,"previous_hash":previous})
+    digest=hashlib.sha256(material.encode()).hexdigest()
+    db.execute("""INSERT INTO audit_events(event_id,event_type,entity_type,entity_id,actor,payload_json,occurred_at,previous_hash,event_hash)
+      VALUES(?,?,?,?,?,?,?,?,?)""",(event_id,event_type,entity_type,entity_id,actor,payload_json,occurred,previous,digest))
+    return digest
+
+def verify_ledger(db_path:Path|str=DB_PATH)->dict[str,Any]:
+    with connect(db_path) as db: rows=db.execute("SELECT * FROM audit_events ORDER BY seq").fetchall()
+    previous="GENESIS"
+    for row in rows:
+        if row["previous_hash"]!=previous:
+            return {"valid":False,"events":len(rows),"failed_seq":row["seq"],"reason":"previous_hash_mismatch"}
+        material=canonical({"event_id":row["event_id"],"event_type":row["event_type"],"entity_type":row["entity_type"],
+          "entity_id":row["entity_id"],"actor":row["actor"],"payload_json":row["payload_json"],
+          "occurred_at":row["occurred_at"],"previous_hash":row["previous_hash"]})
+        expected=hashlib.sha256(material.encode()).hexdigest()
+        if not hmac.compare_digest(expected,row["event_hash"]):
+            return {"valid":False,"events":len(rows),"failed_seq":row["seq"],"reason":"event_hash_mismatch"}
+        previous=row["event_hash"]
+    return {"valid":True,"events":len(rows),"head_hash":previous}
+
+def load_catalog()->dict[str,Any]:
+    if not CATALOG_PATH.exists(): raise ApiError(503,"divisions/catalog.json was not found.")
+    try: data=json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+    except (OSError,json.JSONDecodeError) as exc: raise ApiError(503,"Catalog could not be read.") from exc
+    ids={d.get("id") for d in data.get("divisions",[]) if isinstance(d,dict)}
+    if ids!=DIVISION_IDS: raise ApiError(503,"Catalog division integrity check failed.")
+    return data
+
+def offer_index()->dict[str,dict[str,Any]]:
+    c=load_catalog()
+    return {o["id"]:{**o,"division_id":d["id"],"division_name":d["name"]} for d in c["divisions"] for o in d.get("offers",[])}
+
+def clean_text(value:Any,field:str,maximum:int=500,required:bool=False)->str:
+    if value is None: value=""
+    if not isinstance(value,str): raise ApiError(400,field+" must be text.")
+    value=value.strip()
+    if required and not value: raise ApiError(400,field+" is required.")
+    if len(value)>maximum: raise ApiError(400,field+" is too long.")
+    return value
+
+def create_lead(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    company=clean_text(data.get("company"),"company",140,True)
+    category=clean_text(data.get("category"),"category",60,True)
+    source=clean_text(data.get("source"),"source",60,True)
+    service=clean_text(data.get("service_need"),"service_need",240)
+    owner=clean_text(data.get("owner"),"owner",100)
+    next_step=clean_text(data.get("next_step"),"next_step",240)
+    notes=clean_text(data.get("notes"),"notes",1000)
+    value=data.get("estimated_value_cents",0)
+    if isinstance(value,bool) or not isinstance(value,int) or not 0<=value<=10_000_000_000: raise ApiError(400,"estimated_value_cents must be a non-negative integer.")
+    rid=str(uuid.uuid4()); stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        db.execute("""INSERT INTO leads(id,company,category,source,service_need,status,owner,estimated_value_cents,next_step,notes,created_at,updated_at)
+          VALUES(?,?,?,?,?,'new',?,?,?,?,?,?)""",(rid,company,category,source,service,owner,value,next_step,notes,stamp,stamp))
+        append_audit(db,"lead.created","lead",rid,{"company":company,"category":category,"source":source})
+        row=dict(db.execute("SELECT * FROM leads WHERE id=?",(rid,)).fetchone())
+    return row
+
+def update_lead(rid:str,data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    if not data or set(data)-{"status","owner","next_step","notes"}: raise ApiError(400,"Only status, owner, next_step, notes may change.")
+    updates={}
+    if "status" in data:
+        s=clean_text(data["status"],"status",30,True)
+        if s not in STATUSES: raise ApiError(400,"Invalid lead status.")
+        updates["status"]=s
+    for f,n in (("owner",100),("next_step",240),("notes",1000)):
+        if f in data: updates[f]=clean_text(data[f],f,n)
+    updates["updated_at"]=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        if not db.execute("SELECT 1 FROM leads WHERE id=?",(rid,)).fetchone(): raise ApiError(404,"Lead not found.")
+        db.execute("UPDATE leads SET "+",".join(f+"=?" for f in updates)+" WHERE id=?",(*updates.values(),rid))
+        append_audit(db,"lead.updated","lead",rid,updates)
+        result=dict(db.execute("SELECT * FROM leads WHERE id=?",(rid,)).fetchone())
+    return result
+
+def create_opportunity(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    lead=clean_text(data.get("lead_id"),"lead_id",64,True); offer=clean_text(data.get("offer_id"),"offer_id",32,True)
+    if offer not in offer_index(): raise ApiError(400,"Unknown offer_id.")
+    amount=data.get("amount_cents")
+    if isinstance(amount,bool) or not isinstance(amount,int) or not 0<amount<=10_000_000_000: raise ApiError(400,"amount_cents must be a positive integer.")
+    stage=clean_text(data.get("stage","target"),"stage",40,True)
+    if stage not in STAGES: raise ApiError(400,"Invalid opportunity stage.")
+    next_step=clean_text(data.get("next_step"),"next_step",240); notes=clean_text(data.get("notes"),"notes",1000)
+    rid=str(uuid.uuid4()); stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        if not db.execute("SELECT 1 FROM leads WHERE id=?",(lead,)).fetchone(): raise ApiError(404,"Lead not found.")
+        db.execute("""INSERT INTO opportunities(id,lead_id,offer_id,amount_cents,stage,next_step,notes,created_at,updated_at)
+          VALUES(?,?,?,?,?,?,?,?,?)""",(rid,lead,offer,amount,stage,next_step,notes,stamp,stamp))
+        append_audit(db,"opportunity.created","opportunity",rid,{"lead_id":lead,"offer_id":offer,"amount_cents":amount,"stage":stage})
+        result=dict(db.execute("SELECT * FROM opportunities WHERE id=?",(rid,)).fetchone())
+    return result
+
+def update_opportunity(rid:str,data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    if not data or set(data)-{"stage","next_step","notes"}: raise ApiError(400,"Only stage, next_step, notes may change.")
+    updates={}
+    if "stage" in data:
+        stage=clean_text(data["stage"],"stage",40,True)
+        if stage not in STAGES: raise ApiError(400,"Invalid opportunity stage.")
+        updates["stage"]=stage
+    for f,n in (("next_step",240),("notes",1000)):
+        if f in data: updates[f]=clean_text(data[f],f,n)
+    updates["updated_at"]=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        if not db.execute("SELECT 1 FROM opportunities WHERE id=?",(rid,)).fetchone(): raise ApiError(404,"Opportunity not found.")
+        db.execute("UPDATE opportunities SET "+",".join(f+"=?" for f in updates)+" WHERE id=?",(*updates.values(),rid))
+        append_audit(db,"opportunity.updated","opportunity",rid,updates)
+        result=dict(db.execute("SELECT * FROM opportunities WHERE id=?",(rid,)).fetchone())
+    return result
+
+def create_interview(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    market=clean_text(data.get("market"),"market",80,True); product=clean_text(data.get("product_id"),"product_id",32)
+    if product and product not in offer_index(): raise ApiError(400,"Unknown product_id.")
+    source=clean_text(data.get("source"),"source",140,True); date=clean_text(data.get("interview_date") or now_iso()[:10],"interview_date",20,True)
+    permission=data.get("follow_up_permission",False)
+    if not isinstance(permission,bool): raise ApiError(400,"follow_up_permission must be boolean.")
+    fields={k:clean_text(data.get(k),k,n) for k,n in (("need_summary",500),("objection",300),("price_reaction",200),("next_action",200))}
+    rid=str(uuid.uuid4()); stamp=now_iso()
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        db.execute("""INSERT INTO validation_interviews(id,market,product_id,interview_date,source,follow_up_permission,need_summary,objection,price_reaction,next_action,created_at)
+          VALUES(?,?,?,?,?,?,?,?,?,?,?)""",(rid,market,product,date,source,int(permission),fields["need_summary"],fields["objection"],fields["price_reaction"],fields["next_action"],stamp))
+        append_audit(db,"interview.recorded","interview",rid,{"market":market,"product_id":product,"follow_up_permission":permission})
+        result=dict(db.execute("SELECT * FROM validation_interviews WHERE id=?",(rid,)).fetchone())
+    return result
+
+def create_approval(data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    action=clean_text(data.get("action_type"),"action_type",60,True)
+    if action not in APPROVAL_ACTIONS: raise ApiError(400,"Unknown action_type.")
+    resource=clean_text(data.get("resource"),"resource",180,True); scope=clean_text(data.get("scope"),"scope",500,True)
+    actor=clean_text(data.get("requested_by","local-owner"),"requested_by",100,True)
+    minutes=data.get("expires_minutes",60)
+    if isinstance(minutes,bool) or not isinstance(minutes,int) or not 1<=minutes<=1440: raise ApiError(400,"expires_minutes must be 1–1440.")
+    rid=str(uuid.uuid4()); stamp=now_iso(); expires=(datetime.now(timezone.utc)+timedelta(minutes=minutes)).isoformat(timespec="seconds")
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        db.execute("""INSERT INTO approvals(id,action_type,resource,scope,requested_by,expires_at,status,created_at)
+          VALUES(?,?,?,?,?,?,'pending',?)""",(rid,action,resource,scope,actor,expires,stamp))
+        append_audit(db,"approval.requested","approval",rid,{"action_type":action,"resource":resource,"expires_at":expires})
+        result=dict(db.execute("SELECT * FROM approvals WHERE id=?",(rid,)).fetchone())
+    return result
+
+def decide_approval(rid:str,data:dict[str,Any],db_path:Path|str=DB_PATH)->dict[str,Any]:
+    decision=clean_text(data.get("decision"),"decision",20,True)
+    if decision not in {"approved","rejected"}: raise ApiError(400,"decision must be approved or rejected.")
+    comment=clean_text(data.get("comment"),"comment",500)
+    with connect(db_path) as db:
+        db.execute("BEGIN IMMEDIATE")
+        row=db.execute("SELECT * FROM approvals WHERE id=?",(rid,)).fetchone()
+        if not row: raise ApiError(404,"Approval not found.")
+        if row["status"]!="pending": raise ApiError(409,"Approval is not pending.")
+        if datetime.fromisoformat(row["expires_at"])<=datetime.now(timezone.utc):
+            db.execute("UPDATE approvals SET status='expired',decided_at=? WHERE id=?",(now_iso(),rid))
+            append_audit(db,"approval.expired","approval",rid,{"action_type":row["action_type"]})
+            result={"id":rid,"status":"expired","execution_performed":False}
+        else:
+            stamp=now_iso(); db.execute("UPDATE approvals SET status=?,decision_comment=?,decided_at=? WHERE id=?",(decision,comment,stamp,rid))
+            append_audit(db,"approval.decided","approval",rid,{"decision":decision,"comment":comment})
+            result=dict(db.execute("SELECT * FROM approvals WHERE id=?",(rid,)).fetchone())
+            result["execution_performed"]=False
+    result["note"]="Decision record only. No external action is executed."
+    return result
+
+def simulate_lead_value(data:dict[str,Any])->dict[str,Any]:
+    def num(key:str,lo:float,hi:float)->float:
+        val=data.get(key)
+        if isinstance(val,bool) or not isinstance(val,(int,float)) or not lo<=val<=hi: raise ApiError(400,f"{key} must be between {lo} and {hi}.")
+        return float(val)
+    inbound=num("inbound_leads",0,100000); missed=num("missed_rate",0,1)
+    recovery=num("recovery_of_missed",0,1); booking=num("booking_rate",0,1); avg=num("average_job_value",0,10000000)
+    contacted=inbound*missed*recovery; bookings=contacted*booking; gross=bookings*avg
+    return {"additional_contacted_leads_scenario":round(contacted,2),"expected_bookings_scenario":round(bookings,2),
+      "illustrative_gross_job_value_scenario":round(gross,2),"assumptions":data,
+      "disclaimer":"Illustrative scenario only; not a forecast, guarantee, profit calculation, or verified revenue."}
+
+def list_records(table:str,db_path:Path|str=DB_PATH)->list[dict[str,Any]]:
+    allowed={"leads","opportunities","approvals","validation_interviews"}
+    if table not in allowed: raise ApiError(404,"Unknown collection.")
+    with connect(db_path) as db: rows=db.execute("SELECT * FROM "+table+" ORDER BY created_at DESC LIMIT 250").fetchall()
+    return [dict(r) for r in rows]
+
+def dashboard(db_path:Path|str=DB_PATH)->dict[str,Any]:
+    with connect(db_path) as db:
+        leads=db.execute("SELECT COUNT(*) n FROM leads").fetchone()["n"]
+        lead_counts={r["status"]:r["n"] for r in db.execute("SELECT status,COUNT(*) n FROM leads GROUP BY status")}
+        opps=db.execute("SELECT COUNT(*) n FROM opportunities").fetchone()["n"]
+        stage_counts={r["stage"]:r["n"] for r in db.execute("SELECT stage,COUNT(*) n FROM opportunities GROUP BY stage")}
+        pipeline=db.execute("SELECT COALESCE(SUM(amount_cents),0) n FROM opportunities WHERE stage IN ('proposal','contract','paid_pending_verification')").fetchone()["n"]
+        interviews=db.execute("SELECT COUNT(*) n FROM validation_interviews").fetchone()["n"]
+        pending=db.execute("SELECT COUNT(*) n FROM approvals WHERE status='pending'").fetchone()["n"]
+    return {"leads_total":leads,"lead_counts":lead_counts,"opportunities_total":opps,"stage_counts":stage_counts,
+      "pipeline_value_cents_not_revenue":pipeline,"validation_interviews":interviews,"pending_approvals":pending}
+
+def demo_seed(db_path:Path|str=DB_PATH)->int:
+    with connect(db_path) as db:
+        if db.execute("SELECT COUNT(*) n FROM leads").fetchone()["n"]: return 0
+    rows=[
+      {"company":"DEMO — North Star HVAC","category":"HVAC","source":"synthetic_demo","service_need":"Missed web enquiries","owner":"Demo operator","estimated_value_cents":250000,"next_step":"Review synthetic flow","notes":"Synthetic data only."},
+      {"company":"DEMO — Clear Path Roofing","category":"Roofing","source":"synthetic_demo","service_need":"After-hours lead handoff","owner":"Demo operator","estimated_value_cents":500000,"next_step":"Map callback process","notes":"Synthetic data only."}
+    ]
+    for row in rows:create_lead(row,db_path)
+    return len(rows)
+
+class Handler(BaseHTTPRequestHandler):
+    server_version="GarcarLocal/1.0"
+    def log_message(self,fmt,*args): sys.stderr.write("[garcar] "+fmt%args+"\n")
+    def send_body(self,status:int,body:Any,ctype:str="application/json"):
+        raw=body if isinstance(body,bytes) else body if isinstance(body,str) else json.dumps(body,ensure_ascii=False)
+        if isinstance(raw,str):raw=raw.encode()
+        self.send_response(status);self.send_header("Content-Type",ctype+"; charset=utf-8");self.send_header("Content-Length",str(len(raw)))
+        self.send_header("X-Content-Type-Options","nosniff");self.send_header("Referrer-Policy","no-referrer");self.send_header("Cache-Control","no-store")
+        if ctype=="text/html": self.send_header("Content-Security-Policy","default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
+        self.end_headers();self.wfile.write(raw)
+    def read_json(self):
+        try:n=int(self.headers.get("Content-Length","0"))
+        except ValueError:raise ApiError(400,"Invalid content length.")
+        if n<1 or n>65536:raise ApiError(400,"JSON body must be 1–65536 bytes.")
+        try:data=json.loads(self.rfile.read(n))
+        except (json.JSONDecodeError,UnicodeDecodeError) as e:raise ApiError(400,"Invalid JSON body.") from e
+        if not isinstance(data,dict):raise ApiError(400,"JSON body must be an object.")
+        return data
+    def auth(self):
+        if not hmac.compare_digest(self.headers.get("X-Admin-Token",""),self.server.admin_token):raise ApiError(401,"Missing or invalid local admin token.")
+    def route(self):
+        p=urlparse(self.path);return p.path,parse_qs(p.query)
+    def do_GET(self):
+        try:
+            path,q=self.route()
+            if path in {"/","/index.html"}:return self.send_body(200,(HERE/"index.html").read_text(encoding="utf-8"),"text/html")
+            if path=="/api/health":return self.send_body(200,{"ok":True,"mode":"local_only","external_actions_enabled":False,"database":"sqlite_wal"})
+            if path=="/api/catalog":return self.send_body(200,load_catalog())
+            self.auth()
+            if path=="/api/dashboard":return self.send_body(200,dashboard())
+            if path=="/api/leads":return self.send_body(200,{"items":list_records("leads")})
+            if path=="/api/opportunities":return self.send_body(200,{"items":list_records("opportunities")})
+            if path=="/api/approvals":return self.send_body(200,{"items":list_records("approvals")})
+            if path=="/api/interviews":return self.send_body(200,{"items":list_records("validation_interviews")})
+            if path=="/api/audit/verify":return self.send_body(200,verify_ledger())
+            if path=="/api/audit":
+                with connect() as db:rows=db.execute("SELECT seq,event_type,entity_type,entity_id,actor,occurred_at,previous_hash,event_hash FROM audit_events ORDER BY seq DESC LIMIT 100").fetchall()
+                return self.send_body(200,{"items":[dict(r) for r in rows]})
+            if path=="/api/simulate/lead-value":
+                try:d={k:float(q.get(k,[str(v)])[0]) for k,v in {"inbound_leads":100,"missed_rate":.2,"recovery_of_missed":.5,"booking_rate":.3,"average_job_value":1500}.items()}
+                except ValueError:raise ApiError(400,"Calculator inputs must be numeric.")
+                return self.send_body(200,simulate_lead_value(d))
+            return self.send_body(404,{"error":"Route not found."})
+        except ApiError as e:self.send_body(e.status,{"error":e.message})
+        except Exception as e:sys.stderr.write("[garcar] GET error "+repr(e)+"\n");self.send_body(500,{"error":"Internal server error."})
+    def do_POST(self):
+        try:
+            self.auth();path,_=self.route();data=self.read_json()
+            if path=="/api/leads":return self.send_body(201,create_lead(data))
+            if path=="/api/opportunities":return self.send_body(201,create_opportunity(data))
+            if path=="/api/interviews":return self.send_body(201,create_interview(data))
+            if path=="/api/approvals":return self.send_body(201,create_approval(data))
+            parts=path.strip("/").split("/")
+            if len(parts)==4 and parts[:2]==["api","leads"] and parts[3]=="update":return self.send_body(200,update_lead(parts[2],data))
+            if len(parts)==4 and parts[:2]==["api","opportunities"] and parts[3]=="update":return self.send_body(200,update_opportunity(parts[2],data))
+            if len(parts)==4 and parts[:2]==["api","approvals"] and parts[3]=="decision":return self.send_body(200,decide_approval(parts[2],data))
+            return self.send_body(404,{"error":"Route not found."})
+        except ApiError as e:self.send_body(e.status,{"error":e.message})
+        except Exception as e:sys.stderr.write("[garcar] POST error "+repr(e)+"\n");self.send_body(500,{"error":"Internal server error."})
+
+class LocalServer(ThreadingHTTPServer):
+    daemon_threads=True;allow_reuse_address=True
+    def __init__(self,address,token):super().__init__(address,Handler);self.admin_token=token
+
+def main():
+    parser=argparse.ArgumentParser(description="Garcar local operating console")
+    parser.add_argument("--port",type=int,default=int(os.environ.get("GARCAR_PORT","8788")))
+    parser.add_argument("--demo",action="store_true",help="Create synthetic demo records if database is empty.")
+    args=parser.parse_args()
+    if not 1024<=args.port<=65535:parser.error("port must be 1024–65535")
+    init_db()
+    if args.demo:print("Synthetic demo leads inserted:",demo_seed())
+    token=os.environ.get("GARCAR_ADMIN_TOKEN") or secrets.token_urlsafe(32)
+    print("Garcar local console: http://127.0.0.1:"+str(args.port))
+    print("Local admin token (keep private): "+token)
+    print("Email/SMS, payments, deployments, integrations and customer CRM writes are disabled.")
+    httpd=LocalServer(("127.0.0.1",args.port),token)
+    try:httpd.serve_forever()
+    except KeyboardInterrupt:print("\nStopping local console.")
+    finally:httpd.server_close()
+
+if __name__=="__main__":main()
