@@ -1,0 +1,1 @@
+"""Garcar local platform."""
