@@ -192,7 +192,7 @@ class PlatformTests(unittest.TestCase):
     def test_workflow_rejects_sensitive_context_keys(self):
         from server import start_workflow
         with self.assertRaises(ApiError):
-            start_workflow({"workflow_key":"support_reply_v1","context":{"password":"do-not-save"}},self.db)
+            start_workflow({"workflow_key":"support_reply_v1","context":{"password":"fixture-value"}},self.db)
     def test_workflow_cannot_advance_when_blocked(self):
         from server import start_workflow,act_on_workflow_run
         run=start_workflow({"workflow_key":"maintenance_request_v1"},self.db)
