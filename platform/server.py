@@ -655,17 +655,64 @@ def system_diagnostics(db_path:Path|str=DB_PATH)->dict[str,Any]:
       "database_integrity":integrity,"tables":tables,"division_count":len(catalog["divisions"]),"offer_count":offer_count,
       "external_integrations_enabled":False,"deployment_state":"local_only","backup_path":"platform/backups (local only)"}
 
-def create_local_backup(db_path:Path|str=DB_PATH)->dict[str,Any]:
-    backup_dir=HERE/"backups";backup_dir.mkdir(parents=True,exist_ok=True)
-    stamp=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    destination=backup_dir/("garcar-"+stamp+".sqlite3")
+def create_local_backup(db_path:Path|str=DB_PATH,backup_dir:Path|str|None=None)->dict[str,Any]:
+    directory=Path(backup_dir) if backup_dir is not None else HERE/"backups"
+    directory.mkdir(parents=True,exist_ok=True)
+    stamp=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ%f")
+    destination=directory/("garcar-"+stamp+".sqlite3")
     source=connect(db_path);target=sqlite3.connect(destination)
     try:source.backup(target)
     finally:target.close();source.close()
     digest=hashlib.sha256(destination.read_bytes()).hexdigest()
     with connect(db_path) as db:
         append_audit(db,"system.backup.created","backup",destination.name,{"sha256":digest,"bytes":destination.stat().st_size})
-    return {"filename":destination.name,"bytes":destination.stat().st_size,"sha256":digest,"location":"platform/backups","external_upload":False}
+    return {"filename":destination.name,"bytes":destination.stat().st_size,"sha256":digest,"location":str(directory),"external_upload":False}
+
+def _safe_backup_path(filename:str,backup_dir:Path|str|None=None)->Path:
+    name=clean_text(filename,"filename",120,True)
+    if Path(name).name!=name or not name.startswith("garcar-") or not name.endswith(".sqlite3"):
+        raise ApiError(400,"Invalid backup filename.")
+    directory=Path(backup_dir) if backup_dir is not None else HERE/"backups"
+    path=(directory/name).resolve()
+    if path.parent!=directory.resolve():raise ApiError(400,"Invalid backup path.")
+    return path
+
+def verify_local_backup(filename:str,db_path:Path|str=DB_PATH,backup_dir:Path|str|None=None)->dict[str,Any]:
+    path=_safe_backup_path(filename,backup_dir)
+    if not path.is_file():raise ApiError(404,"Backup file not found.")
+    digest=hashlib.sha256(path.read_bytes()).hexdigest()
+    with connect(db_path) as db:
+        row=db.execute("SELECT payload_json FROM audit_events WHERE event_type='system.backup.created' AND entity_id=? ORDER BY seq DESC LIMIT 1",(path.name,)).fetchone()
+    if not row:raise ApiError(404,"Backup audit reference not found.")
+    payload=json.loads(row["payload_json"])
+    checksum_match=hmac.compare_digest(digest,payload.get("sha256",""))
+    backup=None
+    try:
+        backup=sqlite3.connect(f"file:{path}?mode=ro",uri=True)
+        integrity=backup.execute("PRAGMA quick_check").fetchone()[0]
+    except sqlite3.Error as exc:raise ApiError(422,"Backup SQLite integrity check failed.") from exc
+    finally:
+        if backup is not None:backup.close()
+    valid=checksum_match and integrity=="ok"
+    return {"filename":path.name,"valid":valid,"checksum_match":checksum_match,"database_integrity":integrity,
+      "bytes":path.stat().st_size,"sha256":digest,"restore_performed":False}
+
+def list_local_backups(db_path:Path|str=DB_PATH,backup_dir:Path|str|None=None)->dict[str,Any]:
+    directory=Path(backup_dir) if backup_dir is not None else HERE/"backups"
+    directory.mkdir(parents=True,exist_ok=True)
+    with connect(db_path) as db:
+        rows=db.execute("SELECT entity_id,payload_json,occurred_at FROM audit_events WHERE event_type='system.backup.created' ORDER BY seq DESC LIMIT 50").fetchall()
+    items=[]
+    for row in rows:
+        path=_safe_backup_path(row["entity_id"],directory)
+        exists=path.is_file()
+        item={"filename":row["entity_id"],"created_at":row["occurred_at"],"exists":exists}
+        if exists:
+            item["bytes"]=path.stat().st_size
+            item["sha256_recorded"]=json.loads(row["payload_json"]).get("sha256","")
+        items.append(item)
+    return {"items":items,"location":str(directory),"external_copy":False,
+      "disclaimer":"Local backup inventory only. This is not off-site or disaster-recovery protection."}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -714,6 +761,7 @@ class Handler(BaseHTTPRequestHandler):
             if path=="/api/work-items":return self.send_body(200,{"items":list_records("work_items")})
             if path=="/api/product-readiness":return self.send_body(200,list_product_readiness())
             if path=="/api/system/diagnostics":return self.send_body(200,system_diagnostics())
+            if path=="/api/system/backups":return self.send_body(200,list_local_backups())
 
             if path=="/api/audit/verify":return self.send_body(200,verify_ledger())
             if path=="/api/audit":
@@ -744,6 +792,7 @@ class Handler(BaseHTTPRequestHandler):
             if len(path.strip("/").split("/"))==4 and path.strip("/").split("/")[0:2]==["api","product-readiness"] and path.strip("/").split("/")[3]=="update":
                 parts=path.strip("/").split("/");return self.send_body(200,update_product_readiness(parts[2],data))
             if path=="/api/system/backup":return self.send_body(201,create_local_backup())
+            if path=="/api/system/backup/verify":return self.send_body(200,verify_local_backup(clean_text(data.get("filename"),"filename",120,True)))
 
             if path=="/api/approvals":return self.send_body(201,create_approval(data))
             parts=path.strip("/").split("/")
