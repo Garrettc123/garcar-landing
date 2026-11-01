@@ -1,0 +1,339 @@
+{
+  "schema_version": "1.0",
+  "company": "Garcar Enterprise",
+  "status": "requirements_and_validation_only",
+  "currency": "USD",
+  "divisions": [
+    {
+      "id": "digital-products",
+      "name": "Garcar Digital Products",
+      "offers": [
+        {
+          "id": "IA-001",
+          "name": "The Third Eye: Science & Spirituality",
+          "price": 27,
+          "status": "manuscript_created_preview_only"
+        },
+        {
+          "id": "IA-002",
+          "name": "The 30-Second Mindful Reset",
+          "price": 9,
+          "status": "planned"
+        },
+        {
+          "id": "IA-003",
+          "name": "The Consciousness Workbook",
+          "price": 19,
+          "status": "planned"
+        },
+        {
+          "id": "WA-001",
+          "name": "The Abundance Blueprint",
+          "price": 37,
+          "status": "manuscript_created_preview_only"
+        },
+        {
+          "id": "WA-002",
+          "name": "The Money Mindset Reset",
+          "price": 17,
+          "status": "planned"
+        },
+        {
+          "id": "WA-003",
+          "name": "The Personal Wealth Operating Manual",
+          "price": 47,
+          "status": "planned"
+        },
+        {
+          "id": "MP-001",
+          "name": "The Mind Reprogramming Method",
+          "price": 29,
+          "status": "manuscript_created_preview_only"
+        },
+        {
+          "id": "MP-002",
+          "name": "The Focus Protocol",
+          "price": 17,
+          "status": "planned"
+        },
+        {
+          "id": "MP-003",
+          "name": "The 30-Day Mental Performance Workbook",
+          "price": 27,
+          "status": "planned"
+        },
+        {
+          "id": "HC-001",
+          "name": "The Connection Blueprint",
+          "price": 27,
+          "status": "manuscript_created_preview_only"
+        },
+        {
+          "id": "HC-002",
+          "name": "The Relationship Intelligence Workbook",
+          "price": 19,
+          "status": "planned"
+        },
+        {
+          "id": "HC-003",
+          "name": "The Communication Mastery Guide",
+          "price": 37,
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "revenue-automation",
+      "name": "Garcar Revenue Automation",
+      "offers": [
+        {
+          "id": "RA-001",
+          "name": "Revenue Leak / Lead Response Audit",
+          "price": 497,
+          "status": "proposed_price_hypothesis"
+        },
+        {
+          "id": "RA-002",
+          "name": "Speed-to-Lead Starter Installation",
+          "price": 2500,
+          "status": "proposed_price_hypothesis"
+        },
+        {
+          "id": "RA-003",
+          "name": "Managed Lead Response",
+          "price": null,
+          "status": "scope_and_price_hypothesis"
+        },
+        {
+          "id": "RA-004",
+          "name": "Missed Call Recovery Pilot",
+          "price": null,
+          "status": "scope_and_price_after_discovery"
+        }
+      ]
+    },
+    {
+      "id": "ai-operations-studio",
+      "name": "Garcar AI Operations Studio",
+      "offers": [
+        {
+          "id": "AO-001",
+          "name": "Workflow Discovery & Automation Map",
+          "price": null,
+          "status": "quote_after_discovery"
+        },
+        {
+          "id": "AO-002",
+          "name": "Document Intake Assistant",
+          "price": null,
+          "status": "quote_after_discovery"
+        },
+        {
+          "id": "AO-003",
+          "name": "Customer Support Drafting Assistant",
+          "price": null,
+          "status": "quote_after_discovery"
+        },
+        {
+          "id": "AO-004",
+          "name": "Internal Knowledge Assistant",
+          "price": null,
+          "status": "quote_after_discovery"
+        },
+        {
+          "id": "AO-005",
+          "name": "Managed Workflow Reliability",
+          "price": null,
+          "status": "quote_after_discovery"
+        }
+      ]
+    },
+    {
+      "id": "wealth-forge",
+      "name": "Garcar Wealth Forge",
+      "offers": [
+        {
+          "id": "WF-001",
+          "name": "Founder Cash-Flow Snapshot",
+          "price": null,
+          "status": "planned"
+        },
+        {
+          "id": "WF-002",
+          "name": "13-Week Business Cash Forecast",
+          "price": null,
+          "status": "planned"
+        },
+        {
+          "id": "WF-003",
+          "name": "Revenue Quality Dashboard",
+          "price": null,
+          "status": "planned"
+        },
+        {
+          "id": "WF-004",
+          "name": "Business Runway & Expense Review",
+          "price": null,
+          "status": "planned"
+        },
+        {
+          "id": "WF-005",
+          "name": "Wealth & Business Fundamentals Library",
+          "price": null,
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "enterprise-intelligence",
+      "name": "Garcar Enterprise Intelligence",
+      "offers": [
+        {
+          "id": "EI-001",
+          "name": "Enterprise Knowledge Fabric Assessment",
+          "price": null,
+          "status": "commercial_hypothesis"
+        },
+        {
+          "id": "EI-002",
+          "name": "Governed Knowledge Assistant",
+          "price": null,
+          "status": "commercial_hypothesis"
+        },
+        {
+          "id": "EI-003",
+          "name": "Workflow Orchestration Layer",
+          "price": null,
+          "status": "commercial_hypothesis"
+        },
+        {
+          "id": "EI-004",
+          "name": "Evidence & Decision Ledger",
+          "price": null,
+          "status": "commercial_hypothesis"
+        },
+        {
+          "id": "EI-005",
+          "name": "RHNS Architecture Evaluation",
+          "price": null,
+          "status": "commercial_hypothesis"
+        }
+      ]
+    },
+    {
+      "id": "industry-solutions",
+      "name": "Garcar Industry Solutions",
+      "offers": [
+        {
+          "id": "IS-001",
+          "name": "Construction & Home Services Workflow",
+          "price": null,
+          "status": "vertical_hypothesis"
+        },
+        {
+          "id": "IS-002",
+          "name": "Logistics Dispatch Exception Desk",
+          "price": null,
+          "status": "vertical_hypothesis"
+        },
+        {
+          "id": "IS-003",
+          "name": "Manufacturing Shift & Maintenance Intelligence",
+          "price": null,
+          "status": "vertical_hypothesis"
+        }
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "name": "Garcar Infrastructure",
+      "offers": [
+        {
+          "id": "INF-001",
+          "name": "Source Control & Release Records",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-002",
+          "name": "Application Runtime",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-003",
+          "name": "Data Persistence & Recovery",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-004",
+          "name": "Integration Gateway",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-005",
+          "name": "Secret Management",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-006",
+          "name": "Observability",
+          "price": null,
+          "status": "internal_capability_spec"
+        },
+        {
+          "id": "INF-007",
+          "name": "Backup & Recovery",
+          "price": null,
+          "status": "internal_capability_spec"
+        }
+      ]
+    },
+    {
+      "id": "governance-security",
+      "name": "Garcar Governance & Security",
+      "offers": [
+        {
+          "id": "GS-001",
+          "name": "Policy & Access-Control Baseline",
+          "price": null,
+          "status": "specification"
+        },
+        {
+          "id": "GS-002",
+          "name": "Evidence & Audit Ledger",
+          "price": null,
+          "status": "specification"
+        },
+        {
+          "id": "GS-003",
+          "name": "Security & Privacy Assessment",
+          "price": null,
+          "status": "specification"
+        },
+        {
+          "id": "GS-004",
+          "name": "Release & Change Approval Workflow",
+          "price": null,
+          "status": "specification"
+        },
+        {
+          "id": "GS-005",
+          "name": "Incident & Recovery Playbook",
+          "price": null,
+          "status": "specification"
+        }
+      ]
+    }
+  ],
+  "constraints": {
+    "paid_services_activation_authorized": false,
+    "live_payment_activation_authorized": false,
+    "outbound_email_authorized": false,
+    "production_deployment_authorized": false,
+    "customer_data_access_authorized": false
+  }
+}
