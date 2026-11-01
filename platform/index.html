@@ -173,6 +173,17 @@ label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}input,se
 <button class="btn" type="submit">Create work item</button></form>
 <div class="panel"><h2>Operational boundaries</h2><ul class="muted"><li>No autonomous dispatch or equipment control.</li><li>No customer support auto-send.</li><li>No production connector writes.</li><li>Human owners remain responsible for decisions and safety escalations.</li><li>Use synthetic records for demos until data permission is documented.</li></ul></div>
 </div>
+
+<div class="cols" style="margin-top:13px">
+<form id="extractForm" class="panel"><h2>Document intake — text extraction</h2>
+<p class="tiny muted">Paste text from an authorized document. The tool extracts common invoice/work-order fields using deterministic patterns. It does not OCR scans or save the source text.</p>
+<div class="field"><label>Document text *</label><textarea name="document_text" required maxlength="20000" style="min-height:170px" placeholder="Invoice Number: INV-123&#10;Invoice Date: 2026-11-01&#10;Vendor: Example Supply&#10;Total: $245.00"></textarea></div>
+<button class="btn" type="submit">Extract fields</button><pre id="extractOutput" class="mono tiny muted" style="white-space:pre-wrap;margin-top:10px">Extraction results appear here. Human review is always required.</pre></form>
+<form id="supportDraftForm" class="panel"><h2>Support drafting — source-linked</h2>
+<p class="tiny muted">Searches only the local approved knowledge documents and creates a response draft with local source references. No AI model is called.</p>
+<div class="field"><label>Customer question / issue *</label><textarea name="question" required maxlength="1000" style="min-height:170px"></textarea></div>
+<button class="btn" type="submit">Prepare reply draft</button><pre id="supportDraftOutput" class="mono tiny muted" style="white-space:pre-wrap;margin-top:10px">Draft and source references appear here. No send action exists.</pre></form>
+</div>
 <div class="panel" style="margin-top:13px"><h2>Work items</h2><div id="workRows"></div></div>
 </section>
 <section id="system" class="view">
@@ -239,6 +250,10 @@ $("financeEntryForm").onsubmit=async function(e){e.preventDefault();try{var d=fo
 $("forecastForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);d.opening_cash_cents=Math.round(Number(d.opening_cash)*100);d.weekly_inflows_cents=Math.round(Number(d.weekly_inflows)*100);d.weekly_outflows_cents=Math.round(Number(d.weekly_outflows)*100);delete d.opening_cash;delete d.weekly_inflows;delete d.weekly_outflows;if(!d.start_date)delete d.start_date;var x=await api("/api/finance/forecast",{method:"POST",body:JSON.stringify(d)});$("forecastOutput").innerHTML='<strong>Week 13 closing cash: '+money(x.week_13_closing_cash_cents)+'</strong><p>Lowest cash: '+money(x.lowest_cash_cents)+' (week '+x.lowest_cash_week+')</p><p>Estimated runway at assumed net burn: '+(x.runway_weeks_at_assumed_net_burn===null?"No net burn in these assumptions":x.runway_weeks_at_assumed_net_burn+" weeks")+'</p><p class="tiny">'+esc(x.disclaimer)+'</p>';}catch(err){notify(err.message,true);}};
 $("knowledgeForm").onsubmit=async function(e){e.preventDefault();try{await api("/api/knowledge/docs",{method:"POST",body:JSON.stringify(formData(e.target))});e.target.reset();notify("Local knowledge document saved.");await loadKnowledge();}catch(err){notify(err.message,true);}};
 $("knowledgeSearch").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);var r=await api("/api/knowledge/search?q="+encodeURIComponent(d.q));$("knowledgeResults").innerHTML=r.items.map(function(x){return '<div class="offer" style="margin-bottom:8px"><strong>'+esc(x.title)+'</strong><div class="tiny muted">'+esc(x.source_ref)+' · score '+x.score+'</div><p>'+esc(x.excerpt)+'</p><div class="tiny mono">'+esc(x.citation)+'</div></div>';}).join("")||"No local keyword matches."; }catch(err){notify(err.message,true);}};
+
+$("extractForm").onsubmit=async function(e){e.preventDefault();try{var d=await api("/api/documents/extract",{method:"POST",body:JSON.stringify(formData(e.target))});$("extractOutput").textContent=JSON.stringify(d,null,2);}catch(err){notify(err.message,true);}};
+$("supportDraftForm").onsubmit=async function(e){e.preventDefault();try{var d=await api("/api/support/draft",{method:"POST",body:JSON.stringify(formData(e.target))});$("supportDraftOutput").textContent=JSON.stringify(d,null,2);}catch(err){notify(err.message,true);}};
+
 $("workForm").onsubmit=async function(e){e.preventDefault();try{var d=formData(e.target);if(!d.due_date)delete d.due_date;await api("/api/work-items",{method:"POST",body:JSON.stringify(d)});e.target.reset();notify("Work item created.");await loadWorkItems();}catch(err){notify(err.message,true);}};
 $("refreshRelease").onclick=loadRelease;
 $("diagnostics").onclick=async function(){try{await loadSystem();notify("Diagnostics completed.");}catch(err){notify(err.message,true);}};
