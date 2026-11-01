@@ -199,4 +199,100 @@ class PlatformTests(unittest.TestCase):
         with self.assertRaises(ApiError):
             act_on_workflow_run(run["id"],{"action":"advance"},self.db)
 
+
+    def test_digital_test_checkout_creates_pending_order_only(self):
+        from digital_delivery import create_test_checkout,list_digital_entitlements
+        order=create_test_checkout({"product_id":"IA-002"},self.db)
+        self.assertEqual(order["status"],"pending")
+        self.assertEqual(order["mode"],"test")
+        self.assertFalse(order["payment_taken"])
+        self.assertEqual(order["amount_cents"],900)
+        self.assertEqual(list_digital_entitlements(self.db),[])
+    def test_digital_signed_test_payment_grants_entitlement_and_token(self):
+        from digital_delivery import create_test_checkout,simulate_test_payment,list_digital_entitlements
+        order=create_test_checkout({"product_id":"IA-002"},self.db)
+        result=simulate_test_payment(order["order_id"],self.db)
+        self.assertTrue(result["entitlement_created"])
+        self.assertTrue(result["download_token"])
+        self.assertTrue(result["download_path"].startswith("/digital/download/"))
+        self.assertEqual(list_digital_entitlements(self.db)[0]["status"],"active")
+    def test_digital_invalid_signature_is_rejected(self):
+        from digital_delivery import create_test_checkout,process_test_webhook,_signed_body
+        order=create_test_checkout({"product_id":"WA-001"},self.db)
+        event={"id":"evt_test_invalid","type":"payment_succeeded","mode":"test","livemode":False,
+          "order_id":order["order_id"],"product_id":"WA-001","amount_cents":3700,"currency":"usd",
+          "payment_reference":"test_payment_invalid","checkout_reference":"wrong_checkout"}
+        raw,_=_signed_body(event,self.db)
+        with self.assertRaises(ApiError):
+            process_test_webhook(raw,"sha256="+"0"*64,self.db)
+    def test_digital_authoritative_amount_mismatch_is_rejected(self):
+        from digital_delivery import create_test_checkout,process_test_webhook,_signed_body
+        order=create_test_checkout({"product_id":"WA-001"},self.db)
+        event={"id":"evt_test_wrongamount","type":"payment_succeeded","mode":"test","livemode":False,
+          "order_id":order["order_id"],"product_id":"WA-001","amount_cents":1,"currency":"usd",
+          "payment_reference":"test_payment_wrongamount","checkout_reference":order["provider_reference"]}
+        raw,sig=_signed_body(event,self.db)
+        with self.assertRaises(ApiError):
+            process_test_webhook(raw,sig,self.db)
+    def test_digital_event_replay_is_idempotent(self):
+        from digital_delivery import create_test_checkout,process_test_webhook,_signed_body,list_digital_entitlements
+        order=create_test_checkout({"product_id":"MP-001"},self.db)
+        event={"id":"evt_test_replay","type":"payment_succeeded","mode":"test","livemode":False,
+          "order_id":order["order_id"],"product_id":"MP-001","amount_cents":2900,"currency":"usd",
+          "payment_reference":"test_payment_replay","checkout_reference":order["provider_reference"]}
+        raw,sig=_signed_body(event,self.db)
+        first=process_test_webhook(raw,sig,self.db)
+        second=process_test_webhook(raw,sig,self.db)
+        self.assertTrue(first["entitlement_created"])
+        self.assertTrue(second["duplicate"])
+        self.assertEqual(len(list_digital_entitlements(self.db)),1)
+    def test_digital_wrong_checkout_reference_is_rejected(self):
+        from digital_delivery import create_test_checkout,process_test_webhook,_signed_body
+        order=create_test_checkout({"product_id":"HC-001"},self.db)
+        event={"id":"evt_test_checkout_mismatch","type":"payment_succeeded","mode":"test","livemode":False,
+          "order_id":order["order_id"],"product_id":"HC-001","amount_cents":2700,"currency":"usd",
+          "payment_reference":"test_payment_mismatch","checkout_reference":"not-the-session"}
+        raw,sig=_signed_body(event,self.db)
+        with self.assertRaises(ApiError):
+            process_test_webhook(raw,sig,self.db)
+    def test_digital_refund_revokes_entitlement_and_download(self):
+        from digital_delivery import create_test_checkout,simulate_test_payment,simulate_test_refund,consume_download_token
+        order=create_test_checkout({"product_id":"HC-001"},self.db)
+        paid=simulate_test_payment(order["order_id"],self.db)
+        refunded=simulate_test_refund(order["order_id"],self.db)
+        self.assertTrue(refunded["entitlement_revoked"])
+        with self.assertRaises(ApiError):
+            consume_download_token(paid["download_token"],self.db)
+    def test_digital_asset_path_is_fixed_and_download_limit_enforced(self):
+        import os
+        from digital_delivery import create_test_checkout,simulate_test_payment,consume_download_token,ASSET_FILES
+        assets=Path(self.tmp.name)/"private_assets";assets.mkdir()
+        for pid,filename in ASSET_FILES.items():
+            if pid=="IA-002":(assets/filename).write_bytes(b"%PDF-1.4 synthetic fixture")
+        with unittest.mock.patch.dict(os.environ,{"GARCAR_DIGITAL_ASSET_DIR":str(assets)}):
+            order=create_test_checkout({"product_id":"IA-002"},self.db)
+            paid=simulate_test_payment(order["order_id"],self.db)
+            path,meta=consume_download_token(paid["download_token"],self.db)
+            self.assertEqual(path.name,ASSET_FILES["IA-002"])
+            self.assertEqual(meta["remaining_downloads"],2)
+            consume_download_token(paid["download_token"],self.db)
+            consume_download_token(paid["download_token"],self.db)
+            with self.assertRaises(ApiError):
+                consume_download_token(paid["download_token"],self.db)
+    def test_digital_missing_private_asset_blocks_download(self):
+        from digital_delivery import create_test_checkout,simulate_test_payment,consume_download_token
+        order=create_test_checkout({"product_id":"IA-002"},self.db)
+        paid=simulate_test_payment(order["order_id"],self.db)
+        with self.assertRaises(ApiError):
+            consume_download_token(paid["download_token"],self.db)
+    def test_digital_live_mode_event_is_rejected(self):
+        from digital_delivery import create_test_checkout,process_test_webhook,_signed_body
+        order=create_test_checkout({"product_id":"IA-003"},self.db)
+        event={"id":"evt_test_liveflag","type":"payment_succeeded","mode":"test","livemode":True,
+          "order_id":order["order_id"],"product_id":"IA-003","amount_cents":1900,"currency":"usd",
+          "payment_reference":"test_payment_liveflag","checkout_reference":order["provider_reference"]}
+        raw,sig=_signed_body(event,self.db)
+        with self.assertRaises(ApiError):
+            process_test_webhook(raw,sig,self.db)
+
 if __name__=="__main__":unittest.main()
