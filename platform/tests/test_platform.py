@@ -134,4 +134,21 @@ class PlatformTests(unittest.TestCase):
         self.assertEqual(result["estimated_monthly_net_burn_cents"],30000)
         self.assertEqual(result["runway_months_at_assumed_cash_and_burn"],3.0)
 
+
+    def test_knowledge_evidence_link_is_recorded_and_retrieved(self):
+        from server import create_knowledge_doc,create_knowledge_link,search_knowledge_graph
+        first=create_knowledge_doc({"title":"Lead intake process","division_id":"revenue-automation","source_ref":"sop/lead-intake.md","content":"Assign every inbound lead to a named owner."},self.db)
+        second=create_knowledge_doc({"title":"After-hours procedure","division_id":"revenue-automation","source_ref":"sop/after-hours.md","content":"After-hours enquiries are assigned to the on-call owner."},self.db)
+        link=create_knowledge_link({"from_doc_id":first["id"],"to_doc_id":second["id"],"relation":"supports"},self.db)
+        self.assertEqual(link["relation"],"supports")
+        result=search_knowledge_graph("inbound lead owner",self.db)
+        self.assertTrue(result["matches"])
+        self.assertTrue(result["related"])
+        self.assertEqual(result["edges"][0]["relation"],"supports")
+    def test_knowledge_graph_rejects_self_link(self):
+        from server import create_knowledge_doc,create_knowledge_link
+        doc=create_knowledge_doc({"title":"One source","division_id":"enterprise-intelligence","source_ref":"one.md","content":"Some approved internal content."},self.db)
+        with self.assertRaises(ApiError):
+            create_knowledge_link({"from_doc_id":doc["id"],"to_doc_id":doc["id"],"relation":"related_to"},self.db)
+
 if __name__=="__main__":unittest.main()
