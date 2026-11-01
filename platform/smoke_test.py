@@ -144,6 +144,12 @@ def main()->int:
             })
             checks.append(("approval is recorded without execution",code==201 and code2==200 and decision.get("execution_performed") is False))
 
+
+            code,backup=request(base,"/api/system/backup","POST",{})
+            code2,backup_list=request(base,"/api/system/backups")
+            code3,verified=request(base,"/api/system/backup/verify","POST",{"filename":backup.get("filename","")})
+            checks.append(("local backup inventory and checksum verification",code==201 and code2==200 and code3==200 and verified.get("valid") is True))
+
             code,diagnostics=request(base,"/api/system/diagnostics")
             checks.append(("database and catalog diagnostics",code==200 and diagnostics.get("database_integrity")=="ok"))
             code,ledger=request(base,"/api/audit/verify")
