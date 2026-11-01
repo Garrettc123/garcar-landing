@@ -265,7 +265,7 @@ def simulate_lead_value(data:dict[str,Any])->dict[str,Any]:
       "disclaimer":"Illustrative scenario only; not a forecast, guarantee, profit calculation, or verified revenue."}
 
 def list_records(table:str,db_path:Path|str=DB_PATH)->list[dict[str,Any]]:
-    allowed={"leads","opportunities","approvals","validation_interviews"}
+    allowed={"leads","opportunities","approvals","validation_interviews","finance_entries","knowledge_docs","work_items"}
     if table not in allowed: raise ApiError(404,"Unknown collection.")
     with connect(db_path) as db: rows=db.execute("SELECT * FROM "+table+" ORDER BY created_at DESC LIMIT 250").fetchall()
     return [dict(r) for r in rows]
