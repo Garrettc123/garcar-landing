@@ -43,7 +43,7 @@ def main() -> int:
         parser.error("--timeout must be between 1 and 7200 seconds")
 
     ARTIFACT_ROOT.mkdir(parents=True, exist_ok=True)
-    build_id = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    build_id = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     build_dir = ARTIFACT_ROOT / build_id
     build_dir.mkdir(mode=0o700)
     python = sys.executable
