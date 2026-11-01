@@ -98,6 +98,15 @@ def main()->int:
             code2,found=request(base,"/api/knowledge/search?q=lead%20response")
             checks.append(("source-linked local knowledge search",code==201 and code2==200 and bool(found.get("items"))))
 
+
+            code,extracted=request(base,"/api/documents/extract","POST",{
+              "document_text":"Invoice Number: INV-TEST-123\nInvoice Date: 2026-11-01\nVendor: Synthetic Supplier\nTotal: $125.00"
+            })
+            checks.append(("document intake extraction requires human review",code==200 and extracted.get("human_review_required") is True and extracted.get("saved_to_database") is False))
+
+            code,draft=request(base,"/api/support/draft","POST",{"question":"How is lead response tracked?"})
+            checks.append(("support draft remains unsent and requires review",code==200 and draft.get("sent") is False and draft.get("requires_human_review") is True))
+
             code,work=request(base,"/api/work-items","POST",{
               "division_id":"industry-solutions","workflow_type":"dispatch_exception",
               "title":"Synthetic dispatch exception","priority":"normal"
