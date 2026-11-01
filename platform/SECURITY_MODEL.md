@@ -9,13 +9,14 @@ A single local operator using a loopback-bound development console with syntheti
 - Product catalog and local documents
 - Lead, opportunity, finance, work-item, approval, and audit records
 - Product release-state and evidence references
+- Synthetic digital orders, entitlements, download-token hashes, local test signing key, and private PDF assets
 
 ## Trust boundaries
 1. Browser tab to local HTTP service: one local bearer token is sent in the `X-Admin-Token` header.
 2. Service to local SQLite file: read/write access is granted to the operating-system account running the process.
 3. Local knowledge store: document text is supplied by the operator; search output is lexical and is not trusted as authoritative without checking its source reference.
 4. Approval register: it records requests and decisions but has no execution capability.
-5. External environment: there is no network integration for payments, email, SMS, CRM, cloud deployment, or bank data.
+5. External environment: there is no real payment integration, email, SMS, CRM, cloud deployment, or bank connection. Digital checkout is a local test simulator only.
 
 ## Implemented controls
 - HTTP server binds to `127.0.0.1`, not all network interfaces.
@@ -30,6 +31,12 @@ A single local operator using a loopback-bound development console with syntheti
 - Audit events are linked by SHA-256 hashes and can be checked for modification.
 - Local backups are created via SQLite's online backup API.
 - No external actions or execution adapters exist.
+- Digital test orders use prices read from the server-side catalog; the browser cannot submit an amount.
+- Synthetic payment events require an HMAC signature, explicit test mode, a false live-mode flag, a matching test checkout reference, and an exact catalog amount.
+- Digital entitlement is granted only after the synthetic success event validates; duplicate event IDs are idempotent.
+- Private assets are mapped by fixed product IDs to filenames; caller-supplied paths are not accepted.
+- Download tokens are high-entropy, HMAC-hashed at rest, time-limited, use-limited, and revoked on synthetic refund.
+- Download bearer values are redacted from the local HTTP access log.
 
 ## Known gaps — do not treat as production security
 - One shared local bearer token; no individual identity, password, MFA, RBAC, or tenant separation.
@@ -41,6 +48,9 @@ A single local operator using a loopback-bound development console with syntheti
 - No HTTPS; loopback-only transport is the intended boundary.
 - No rate limiting or lockout; do not bind the service to a LAN or public interface.
 - No independent security audit or penetration test.
+- Digital payment simulation is not a real processor, a real webhook contract, or evidence of money collected.
+- Local test signing and download secrets remain on the local filesystem; file permissions depend on the host OS.
+- A local operator can read the download token once from the test response; possession of that token grants file access until expiry, limit, or revocation.
 - Manual approval records are not production authorization and do not execute work.
 - Release board evidence references are user-entered and not independently verified.
 
@@ -54,7 +64,7 @@ Before any hosted or customer-facing use:
 6. Add dependency and container scanning, SBOM, signed artifacts, static analysis, and independent security review.
 7. Add immutable or externally anchored audit storage with independent verification.
 8. Implement explicit per-action approvals in the execution service; use idempotency, scope/time-bound grants, allow-listed actions, and reliable rollback.
-9. Validate payment webhooks, product-price mapping, entitlements, refunds, disputes, and signed file delivery before digital commerce.
+9. Replace the synthetic payment simulator with an independently reviewed real processor integration in test mode first; validate the processor's signature, idempotency, product-price mapping, entitlements, refund/dispute events, and signed file delivery before any live digital commerce.
 10. Complete synthetic, sandbox, and customer acceptance testing and obtain written release approval.
 
 ## Safe operator rule
