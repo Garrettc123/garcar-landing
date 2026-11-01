@@ -310,4 +310,17 @@ class PlatformTests(unittest.TestCase):
         self.assertNotIn("secret-bearer-token-value",logged)
         self.assertIn("[TOKEN-REDACTED]",logged)
 
+
+    def test_digital_download_token_expiry_is_enforced(self):
+        from digital_delivery import create_test_checkout,simulate_test_payment,consume_download_token,_download_secret,_token_hash
+        order=create_test_checkout({"product_id":"IA-002"},self.db)
+        paid=simulate_test_payment(order["order_id"],self.db)
+        digest=_token_hash(paid["download_token"],_download_secret(self.db))
+        import sqlite3
+        db=sqlite3.connect(self.db)
+        db.execute("UPDATE digital_download_tokens SET expires_at='2000-01-01T00:00:00+00:00' WHERE token_hash=?",(digest,))
+        db.commit();db.close()
+        with self.assertRaises(ApiError):
+            consume_download_token(paid["download_token"],self.db)
+
 if __name__=="__main__":unittest.main()
