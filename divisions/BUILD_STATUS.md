@@ -11,7 +11,7 @@ Pull request: #6 (open, draft; not merged)
 | 1. Digital Products | 12 first-edition preview PDFs exist in a private local ZIP; catalog, preview pages, delivery architecture, and manuscript inventory are in the branch. | No separate digital checkout, paid entitlement, protected downloads, refund flow, support operation, or commercial release. |
 | 2. Revenue Automation | Local lead CRM, status tracking, offer-linked opportunities, pipeline, manual interview ledger, and lead-response scenario calculator. | No customer CRM connector, calls, SMS, email, calendar integration, automated routing, or customer pilot. |
 | 3. AI Operations Studio | Manual document-intake/support-review/workflow work queues. | No model inference, document parser, autonomous ticket drafting, or production knowledge connector. |
-| 4. Wealth Forge | Manual cash inflow/outflow ledger and 13-week scenario calculator. | No bank feed, accounting integration, live balances, tax outputs, or individualized financial advice. |
+| 4. Wealth Forge | Manual cash inflow/outflow ledger and 13-week cash scenario calculator. | No bank feed, accounting integration, live balances, tax outputs, or individualized financial advice. |
 | 5. Enterprise Intelligence | Local document store and keyword search with source references. | No embeddings, semantic retrieval, GraphRAG, model integration, tenant isolation, or enterprise SSO. |
 | 6. Industry Solutions | Local work-item types for dispatch exceptions, maintenance requests, and shift handoffs. | No live dispatch, CMMS/MES integration, routing, equipment control, or customer deployment. |
 | 7. Infrastructure | SQLite WAL, health/diagnostic endpoint, integrity check, and local backup function. | No cloud deployment, encrypted off-site backup, monitoring service, restore drill, or production SLO. |
@@ -22,9 +22,13 @@ Pull request: #6 (open, draft; not merged)
 - Eight unique divisions are present.
 - Forty-six offer IDs are present and unique.
 - Twelve digital product entries have first-edition preview status.
-- Fourteen Python unit tests have been added.
+- Sixteen Python unit tests have been added.
 - A GitHub Actions test workflow has been added to the branch.
-- These tests have not yet been observed running successfully; do not report them as passed until a run result is available.
+- The Platform Checks runs have failed before any job steps were recorded (GitHub reports runner_id 0 and an empty steps array); the logs endpoint returned no job log. This means there is no usable test execution output yet. Tests are authored, but not verified as passed.
+- A 46-offer release readiness register now tracks evidence references and explicit release states. References are operator-entered and are not independently verified.
+- The digital-product landing page now lists all twelve guides and links to individual preview pages.
+- Eight additional individual HTML preview pages were created; all twelve pages remain preview-only with proposed prices and no checkout links.
+- The release board exposes per-product states from specified through deployed-and-verified; recording a state does not itself validate the evidence.
 - All new and changed files should be checked again after merge and deployment.
 
 ## External actions and commercial state
@@ -39,7 +43,7 @@ Pull request: #6 (open, draft; not merged)
 
 ## Immediate remaining release gates
 
-1. Run the unit tests and address any failures.
+1. Obtain a usable GitHub Actions runner or execute the tests in a local Python 3.10+ environment; verify all sixteen unit tests and the catalog validator.
 2. Perform an independent security review of authentication, local data storage, backup handling, and audit integrity.
 3. Proofread and fact-check every digital manuscript; verify licensing and source rights.
 4. Build and test the separate digital-product checkout and signed-download entitlement service.
@@ -49,4 +53,4 @@ Pull request: #6 (open, draft; not merged)
 
 ## Release statement
 
-This checkpoint represents a substantial local implementation foundation across all eight divisions. It is not a claim that 46 independent products are complete, production-ready, deployed, commercially validated, or generating revenue.
+This checkpoint now includes local operating modules for all eight divisions, a per-product release board, the twelve-guide private preview library, and individual preview pages. It is not a claim that 46 independent products are complete, production-ready, deployed, commercially validated, or generating revenue.
