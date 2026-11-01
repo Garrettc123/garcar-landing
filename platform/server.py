@@ -656,7 +656,7 @@ def system_diagnostics(db_path:Path|str=DB_PATH)->dict[str,Any]:
       "external_integrations_enabled":False,"deployment_state":"local_only","backup_path":"platform/backups (local only)"}
 
 def create_local_backup(db_path:Path|str=DB_PATH,backup_dir:Path|str|None=None)->dict[str,Any]:
-    directory=Path(backup_dir) if backup_dir is not None else HERE/"backups"
+    directory=Path(backup_dir) if backup_dir is not None else Path(db_path).parent/"backups"
     directory.mkdir(parents=True,exist_ok=True)
     stamp=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ%f")
     destination=directory/("garcar-"+stamp+".sqlite3")
@@ -668,17 +668,17 @@ def create_local_backup(db_path:Path|str=DB_PATH,backup_dir:Path|str|None=None)-
         append_audit(db,"system.backup.created","backup",destination.name,{"sha256":digest,"bytes":destination.stat().st_size})
     return {"filename":destination.name,"bytes":destination.stat().st_size,"sha256":digest,"location":str(directory),"external_upload":False}
 
-def _safe_backup_path(filename:str,backup_dir:Path|str|None=None)->Path:
+def _safe_backup_path(filename:str,backup_dir:Path|str|None=None,db_path:Path|str=DB_PATH)->Path:
     name=clean_text(filename,"filename",120,True)
     if Path(name).name!=name or not name.startswith("garcar-") or not name.endswith(".sqlite3"):
         raise ApiError(400,"Invalid backup filename.")
-    directory=Path(backup_dir) if backup_dir is not None else HERE/"backups"
+    directory=Path(backup_dir) if backup_dir is not None else Path(db_path).parent/"backups"
     path=(directory/name).resolve()
     if path.parent!=directory.resolve():raise ApiError(400,"Invalid backup path.")
     return path
 
 def verify_local_backup(filename:str,db_path:Path|str=DB_PATH,backup_dir:Path|str|None=None)->dict[str,Any]:
-    path=_safe_backup_path(filename,backup_dir)
+    path=_safe_backup_path(filename,backup_dir,db_path)
     if not path.is_file():raise ApiError(404,"Backup file not found.")
     digest=hashlib.sha256(path.read_bytes()).hexdigest()
     with connect(db_path) as db:
@@ -698,13 +698,13 @@ def verify_local_backup(filename:str,db_path:Path|str=DB_PATH,backup_dir:Path|st
       "bytes":path.stat().st_size,"sha256":digest,"restore_performed":False}
 
 def list_local_backups(db_path:Path|str=DB_PATH,backup_dir:Path|str|None=None)->dict[str,Any]:
-    directory=Path(backup_dir) if backup_dir is not None else HERE/"backups"
+    directory=Path(backup_dir) if backup_dir is not None else Path(db_path).parent/"backups"
     directory.mkdir(parents=True,exist_ok=True)
     with connect(db_path) as db:
         rows=db.execute("SELECT entity_id,payload_json,occurred_at FROM audit_events WHERE event_type='system.backup.created' ORDER BY seq DESC LIMIT 50").fetchall()
     items=[]
     for row in rows:
-        path=_safe_backup_path(row["entity_id"],directory)
+        path=_safe_backup_path(row["entity_id"],directory,db_path)
         exists=path.is_file()
         item={"filename":row["entity_id"],"created_at":row["occurred_at"],"exists":exists}
         if exists:
