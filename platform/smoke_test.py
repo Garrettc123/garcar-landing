@@ -107,6 +107,17 @@ def main()->int:
             checks.append(("source-linked local knowledge search",code==201 and code2==200 and bool(found.get("items"))))
 
 
+
+            code,doc2=request(base,"/api/knowledge/docs","POST",{
+              "title":"After-hours owner SOP","division_id":"revenue-automation","source_ref":"synthetic:after-hours",
+              "content":"After-hours enquiries are routed to the on-call owner."
+            })
+            code2,link=request(base,"/api/knowledge/links","POST",{
+              "from_doc_id":doc.get("id"),"to_doc_id":doc2.get("id"),"relation":"supports"
+            })
+            code3,graph=request(base,"/api/knowledge/graph-search?q=lead%20owner")
+            checks.append(("evidence graph links and one-hop search",code==201 and code2==201 and code3==200 and bool(graph.get("edges"))))
+
             code,extracted=request(base,"/api/documents/extract","POST",{
               "document_text":"Invoice Number: INV-TEST-123\nInvoice Date: 2026-11-01\nVendor: Synthetic Supplier\nTotal: $125.00"
             })
