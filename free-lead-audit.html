@@ -57,11 +57,12 @@ function check(rec,cols,instant=now()){
  if(closed(status))return null;
  const issues=[];const hasFirst=Number.isFinite(first)||Number.isFinite(last);
  const statusOpen=/\b(new|open|pending|uncontacted|unassigned|waiting)\b/i.test(status);
- if(Number.isFinite(c)&&instant-c>=2*3600000&&!hasFirst&&statusOpen)issues.push(["Response not recorded","Open inquiry older than 2 hours; no response timestamp appears in this export.",5]);
- if(!hasFirst&&Number.isFinite(c)&&!statusOpen)issues.push(["Response evidence missing","No response timestamp is present; the export does not prove an inquiry was ignored.",2]);
+ const hasContactFields=cols.first!==""||cols.last!=="";
+ if(Number.isFinite(c)&&instant-c>=2*3600000&&!hasFirst&&statusOpen&&hasContactFields)issues.push(["Response not recorded","Open inquiry older than 2 hours with no timestamp in the selected contact-history columns.",5]);
+ if(!hasFirst&&Number.isFinite(c)&&(!statusOpen||!hasContactFields))issues.push(["Response evidence missing","Response documentation is missing or unavailable; this does not prove a call was missed.",2]);
  if(Number.isFinite(quote)&&instant-quote>=72*3600000&&(!Number.isFinite(last)||last<=quote)&&(!Number.isFinite(first)||first<=quote))issues.push(["Estimate needs verification","Proposal/estimate was sent over 72 hours ago with no later contact timestamp in this file.",4]);
  if(hasFirst&&instant-Math.max(Number.isFinite(last)?last:0,Number.isFinite(first)?first:0)>=72*3600000)issues.push(["Follow-up gap","Last documented contact is more than 72 hours old while the record is not closed.",3]);
- if(!v("owner"))issues.push(["Owner not recorded","No responsible person appears in the selected owner column.",2]);
+ if(cols.owner!==""&&!v("owner"))issues.push(["Owner not recorded","No responsible person appears in the selected owner column.",2]);
  if(!Number.isFinite(c)&&!hasFirst&&!Number.isFinite(quote))issues.push(["Missing timeline","No usable inquiry, response or proposal timestamp is available.",1]);
  if(!issues.length)return null;
  const rank=Math.max(...issues.map(x=>x[2])),ident=v("name")||v("email")||v("phone")||"Row needs identification";
