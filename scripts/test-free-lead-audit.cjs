@@ -1,0 +1,33 @@
+'use strict';
+/** No dependencies; tests the exact CSV rules embedded in free-lead-audit.html. */
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const content=fs.readFileSync(path.join(__dirname,'..','free-lead-audit.html'),'utf8');
+const begin=content.indexOf('"use strict";');
+const end=content.indexOf('function mapFields(){');
+assert.ok(begin>=0&&end>begin,'Expected current exact inline rule source');
+const core=content.slice(begin,end)+'\n({csvParse,check,excelSafe})';
+const {csvParse,check,excelSafe}=vm.runInNewContext(core,{Date,Number,Math,RegExp,String,Error}, {timeout:3000});
+let passed=0;
+function test(name,fn){fn();console.log('PASS',name);passed++;}
+const cols={name:'0',created:'1',first:'2',last:'3',quote:'4',owner:'5',status:'6',email:'',phone:''};
+const now=Date.parse('2026-11-08T10:00:00Z');
+const row=['Customer','2026-11-07T08:00:00Z','','','','','new'];
+test('quoted name and quotes',()=>{const r=csvParse('name,status\n"Smith, John","open"\n"Jane ""JJ""",new\n');assert.equal(r.length,3);assert.equal(r[1][0],'Smith, John');assert.equal(r[2][0],'Jane "JJ"');});
+test('BOM and CRLF',()=>assert.equal(csvParse('\ufeffname,status\r\nx,new\r\n')[0][0],'name'));
+test('invalid CSV must fail',()=>assert.throws(()=>csvParse('name\n"open'),/Unclosed/));
+test('open lead not replied in documented timestamps',()=>assert.ok(check(row,cols,now).issues.includes('Response not recorded')));
+test('missing owner flagged when owner column exists',()=>assert.ok(check(row,cols,now).issues.includes('Owner not recorded')));
+test('absent owner column does not imply unassigned',()=>assert.ok(!check(row,{...cols,owner:''},now).issues.includes('Owner not recorded')));
+test('absent response fields does not imply ignored',()=>assert.equal(check(row,{...cols,first:'',last:''},now).category,'Response evidence missing'));
+test('estimate needing follow up',()=>assert.ok(check(['Customer','2026-11-01','2026-11-01','2026-11-02','2026-11-03','Staff','open'],cols,now).issues.includes('Estimate needs verification')));
+test('explicit opt-out suppresses recommendations',()=>assert.equal(check([...row.slice(0,6),'opted out'],cols,now),null));
+test('closed won suppresses recommendations',()=>assert.equal(check([...row.slice(0,6),'closed won'],cols,now),null));
+test('CSV formula escapes',()=>assert.ok(excelSafe('=HYPERLINK("x")').startsWith('"\'')));
+test('no network request permitted',()=>{assert.ok(content.includes("connect-src 'none'"));assert.ok(!/\\b(fetch|XMLHttpRequest|sendBeacon)\\b/.test(content));});
+test('inquiry is voluntary aggregate-only mailto',()=>{const start=content.indexOf('document.getElementById("request")');const idx=content.indexOf('$("request").addEventListener');assert.ok(idx>=0);const until=content.indexOf('$("clear").addEventListener',idx);const body=content.slice(idx,until);assert.ok(body.includes('mailto:'));assert.ok(!body.includes('source:rec'));assert.ok(!body.includes('imported['));assert.ok(!body.includes('fetch('));});
+test('valid $497 review CTA',()=>assert.ok(content.includes('https://garcar-followup-review.vercel.app/products/follow-up-review/')));
+test('customer file handle retained',()=>assert.ok(content.includes('const file=this.files&&this.files[0];reset();if(!file)return;')));
+console.log(passed+' analyzer checks passed');
