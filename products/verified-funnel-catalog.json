@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-11-07",
+  "origin": "live Stripe account payment link line-items and Vercel deployment checks",
+  "storefront": "https://garcar-followup-review.vercel.app/",
+  "catalog_url": "https://garcar-followup-review.vercel.app/products/",
+  "payment_proof_required": "verified succeeded payment intent; do not count page views, invoices or failed attempts as paid revenue",
+  "products": [
+    {
+      "slug": "follow-up-review",
+      "name": "Lead Follow-Up Review",
+      "price_cents": 49700,
+      "currency": "usd",
+      "billing": "one_time",
+      "stripe_link_id": "plink_1UEcv4FKGbk21LK57hRic0dR",
+      "checkout": "https://buy.stripe.com/8x2eVddjf0hQ86Tf0f43S2h",
+      "funnel": "direct_checkout",
+      "availability": "scoped_manual_delivery"
+    },
+    {
+      "slug": "automation-audit",
+      "name": "AI Automation Audit",
+      "price_cents": 29900,
+      "currency": "usd",
+      "billing": "one_time",
+      "stripe_link_id": "plink_1UHN4YFKGbk21LK5Hyg4W2Cf",
+      "checkout": "https://buy.stripe.com/14A5kD3IF9Sqdrd05l43S2l",
+      "funnel": "direct_checkout",
+      "availability": "scoped_manual_delivery",
+      "note": "Stripe product copy previously mentioned DFW contractors; noncontractor buyers should confirm scope before purchase."
+    },
+    {
+      "slug": "lead-backup-installation",
+      "name": "Lead Backup Installation",
+      "price_cents": 250000,
+      "currency": "usd",
+      "billing": "one_time",
+      "stripe_link_id": "plink_1UGpMIFKGbk21LK5RHl8asRI",
+      "funnel": "consult_first",
+      "availability": "requires_integration_and_capacity_approval"
+    },
+    {
+      "slug": "callback-clock",
+      "name": "Callback Clock Management",
+      "price_cents": 49700,
+      "currency": "usd",
+      "billing": "monthly",
+      "stripe_link_id": "plink_1UGpMNFKGbk21LK5wNRiuNsI",
+      "funnel": "consult_first",
+      "availability": "requires_service_capacity"
+    },
+    {
+      "slug": "ai-growth-engine",
+      "name": "AI Growth Engine",
+      "price_cents": 149700,
+      "currency": "usd",
+      "billing": "monthly",
+      "stripe_link_id": "plink_1UHN4eFKGbk21LK5MTs8ir3u",
+      "funnel": "consult_first",
+      "availability": "requires_service_capacity"
+    },
+    {
+      "slug": "ai-revenue-prompts",
+      "name": "100 AI Revenue Prompts + SOPs",
+      "price_cents": 2700,
+      "currency": "usd",
+      "billing": "one_time",
+      "stripe_link_id": "plink_1UHOE6FKGbk21LK5OpCCAjVw",
+      "funnel": "preview_only_until_live_fulfillment",
+      "availability": "complete_bundle_private_payment_delivery_not_deployed",
+      "asset_edition": "1.0",
+      "private_asset_sha256": "5bcde006775f87bd2c1b9987edeb1b0d9e53e6653adad538644eff1e7c313ee9",
+      "asset_prompt_count": 100,
+      "asset_sop_count": 10,
+      "tests_passed": 26,
+      "fulfillment_issue": "https://github.com/Garrettc123/garcar-payments/issues/20",
+      "note": "Product file is complete and hash-verified, but must remain preview-only until a verified paid-only download and buyer notification flow passes staging.",
+      "bundle_sha256": "5f280820ea6fc1c823accec26147aafd4d214cb30d32af17fcbd1a4df5862c31",
+      "edition": "full 100 prompts + 10 SOPs + PDF"
+    },
+    {
+      "slug": "revenue-ops-course",
+      "name": "AI Revenue Ops Mini-Course",
+      "price_cents": 7900,
+      "currency": "usd",
+      "billing": "one_time",
+      "stripe_link_id": "plink_1UHOE8FKGbk21LK5PIBnVaeR",
+      "funnel": "preview_only_until_live_fulfillment",
+      "availability": "written_course_complete_video_not_recorded_private_delivery_not_deployed",
+      "bundle_sha256": "56cffc6d453efff130dddc88d83a8f3b32fc51e8fd9ee05e15d3686e8f1f2629",
+      "edition": "six-lesson written course (not recorded video)"
+    },
+    {
+      "slug": "operator-toolkit",
+      "name": "Garcar Operator Toolkit",
+      "price_cents": 14900,
+      "currency": "usd",
+      "billing": "one_time",
+      "stripe_link_id": "plink_1UHOEAFKGbk21LK5JEiSgzvd",
+      "funnel": "preview_only_until_live_fulfillment",
+      "availability": "written_bundle_complete_private_delivery_not_deployed",
+      "bundle_sha256": "ebdd553ee25d9350f4cdc2e716f95bda8b820fcf7aecd3264f71a721e3f27429",
+      "edition": "operational manual + Excel workbook + prompts + written course"
+    },
+    {
+      "slug": "repo-atlas",
+      "name": "Garcar Repo Atlas — Complete",
+      "price_cents": 9700,
+      "currency": "usd",
+      "billing": "one_time",
+      "stripe_link_id": "plink_1UBgMQFKGbk21LK59hZY415X",
+      "funnel": "preview_only_until_live_fulfillment",
+      "availability": "inventory_workflow_tool_complete_no_private_repo_snapshot_delivery_not_deployed",
+      "bundle_sha256": "ad80464824dce98745cc531eacc4273a33409c874a5a71dd8322b164166a80fc",
+      "edition": "read-only CLI + HTML/CSV/JSON inventory + tests"
+    }
+  ],
+  "owner_release": {
+    "version": "2026-11-07",
+    "owner_archive_sha256": "2995766915ffc079d31121cfceef217d5d6657338af5361a627fcdc7882f2c73",
+    "fulfillment": "code_tested_private_deployment_blocked",
+    "local_tests": {
+      "delivery": 29,
+      "atlas": 6
+    },
+    "payment_link_redirects": "three products redirect to public description pages; Atlas hosted confirmation manual delivery",
+    "requires": [
+      "private asset storage",
+      "server Stripe key",
+      "signing secret",
+      "Stripe webhook secret",
+      "verified transactional email provider",
+      "test-mode purchase-to-download verification",
+      "approved product copy and terms"
+    ]
+  }
+}
