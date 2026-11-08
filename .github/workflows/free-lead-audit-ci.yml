@@ -1,0 +1,22 @@
+name: Free Lead Audit — CSV Rules & Privacy
+on:
+  push:
+    paths:
+      - free-lead-audit.html
+      - scripts/test-free-lead-audit.cjs
+      - .github/workflows/free-lead-audit-ci.yml
+  pull_request:
+    paths:
+      - free-lead-audit.html
+      - scripts/test-free-lead-audit.cjs
+      - .github/workflows/free-lead-audit-ci.yml
+permissions:
+  contents: read
+jobs:
+  free-lead-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run browser-free rule and privacy regressions
+        run: node scripts/test-free-lead-audit.cjs
