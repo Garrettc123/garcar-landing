@@ -66,15 +66,17 @@
       "currency": "usd",
       "billing": "one_time",
       "stripe_link_id": "plink_1UHOE6FKGbk21LK5OpCCAjVw",
-      "funnel": "preview_only",
-      "availability": "asset_complete_secure_delivery_not_deployed",
+      "funnel": "preview_only_until_live_fulfillment",
+      "availability": "complete_bundle_private_payment_delivery_not_deployed",
       "asset_edition": "1.0",
       "private_asset_sha256": "5bcde006775f87bd2c1b9987edeb1b0d9e53e6653adad538644eff1e7c313ee9",
       "asset_prompt_count": 100,
       "asset_sop_count": 10,
       "tests_passed": 26,
       "fulfillment_issue": "https://github.com/Garrettc123/garcar-payments/issues/20",
-      "note": "Product file is complete and hash-verified, but must remain preview-only until a verified paid-only download and buyer notification flow passes staging."
+      "note": "Product file is complete and hash-verified, but must remain preview-only until a verified paid-only download and buyer notification flow passes staging.",
+      "bundle_sha256": "5f280820ea6fc1c823accec26147aafd4d214cb30d32af17fcbd1a4df5862c31",
+      "edition": "full 100 prompts + 10 SOPs + PDF"
     },
     {
       "slug": "revenue-ops-course",
@@ -83,8 +85,10 @@
       "currency": "usd",
       "billing": "one_time",
       "stripe_link_id": "plink_1UHOE8FKGbk21LK5PIBnVaeR",
-      "funnel": "preview_only",
-      "availability": "recorded_course_and_delivery_unverified"
+      "funnel": "preview_only_until_live_fulfillment",
+      "availability": "written_course_complete_video_not_recorded_private_delivery_not_deployed",
+      "bundle_sha256": "56cffc6d453efff130dddc88d83a8f3b32fc51e8fd9ee05e15d3686e8f1f2629",
+      "edition": "six-lesson written course (not recorded video)"
     },
     {
       "slug": "operator-toolkit",
@@ -93,8 +97,10 @@
       "currency": "usd",
       "billing": "one_time",
       "stripe_link_id": "plink_1UHOEAFKGbk21LK5JEiSgzvd",
-      "funnel": "preview_only",
-      "availability": "complete_bundle_and_delivery_unverified"
+      "funnel": "preview_only_until_live_fulfillment",
+      "availability": "written_bundle_complete_private_delivery_not_deployed",
+      "bundle_sha256": "ebdd553ee25d9350f4cdc2e716f95bda8b820fcf7aecd3264f71a721e3f27429",
+      "edition": "operational manual + Excel workbook + prompts + written course"
     },
     {
       "slug": "repo-atlas",
@@ -103,8 +109,29 @@
       "currency": "usd",
       "billing": "one_time",
       "stripe_link_id": "plink_1UBgMQFKGbk21LK59hZY415X",
-      "funnel": "preview_only",
-      "availability": "complete_archive_and_licensing_unverified"
+      "funnel": "preview_only_until_live_fulfillment",
+      "availability": "inventory_workflow_tool_complete_no_private_repo_snapshot_delivery_not_deployed",
+      "bundle_sha256": "ad80464824dce98745cc531eacc4273a33409c874a5a71dd8322b164166a80fc",
+      "edition": "read-only CLI + HTML/CSV/JSON inventory + tests"
     }
-  ]
+  ],
+  "owner_release": {
+    "version": "2026-11-07",
+    "owner_archive_sha256": "2995766915ffc079d31121cfceef217d5d6657338af5361a627fcdc7882f2c73",
+    "fulfillment": "code_tested_private_deployment_blocked",
+    "local_tests": {
+      "delivery": 29,
+      "atlas": 6
+    },
+    "payment_link_redirects": "three products redirect to public description pages; Atlas hosted confirmation manual delivery",
+    "requires": [
+      "private asset storage",
+      "server Stripe key",
+      "signing secret",
+      "Stripe webhook secret",
+      "verified transactional email provider",
+      "test-mode purchase-to-download verification",
+      "approved product copy and terms"
+    ]
+  }
 }
