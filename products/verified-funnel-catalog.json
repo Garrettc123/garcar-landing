@@ -67,7 +67,14 @@
       "billing": "one_time",
       "stripe_link_id": "plink_1UHOE6FKGbk21LK5OpCCAjVw",
       "funnel": "preview_only",
-      "availability": "full_assets_and_delivery_unverified"
+      "availability": "asset_complete_secure_delivery_not_deployed",
+      "asset_edition": "1.0",
+      "private_asset_sha256": "5bcde006775f87bd2c1b9987edeb1b0d9e53e6653adad538644eff1e7c313ee9",
+      "asset_prompt_count": 100,
+      "asset_sop_count": 10,
+      "tests_passed": 26,
+      "fulfillment_issue": "https://github.com/Garrettc123/garcar-payments/issues/20",
+      "note": "Product file is complete and hash-verified, but must remain preview-only until a verified paid-only download and buyer notification flow passes staging."
     },
     {
       "slug": "revenue-ops-course",
