@@ -12,7 +12,7 @@
 <header class="nav"><a class="brand" href="https://garcar-followup-review.vercel.app/">GARCAR <span>ENTERPRISE</span></a><a href="https://garcar-followup-review.vercel.app/products/">All Garcar products ↗</a></header>
 <main><section class="hero"><span class="eyebrow">FREE · REAL RECORDS · ON-DEVICE ONLY</span><h1>Find the leads your team <em>might be overlooking.</em></h1><p class="lede">Upload a CSV from your CRM or spreadsheet. See prioritized follow-up opportunities using your own rows—not a fictional demo. We distinguish a documented gap from a missing timestamp, so you can investigate before contacting anyone.</p><span class="badge">Privacy: your CSV never leaves this browser</span><p class="sub">No signup, tracking, network request, or server upload. Works for real estate, property management, agencies, home services, and other lead-driven businesses.</p></section>
 <section class="panel"><h2>1. Choose an authorized CSV export</h2><p class="sub">Use a CSV you have permission to process. Do not use highly sensitive health, legal case, identity or financial records. Maximum 2 MB and 5,000 records. The first ten prioritized results can be saved locally as a CSV.</p><div class="field"><label for="file">CSV file</label><input id="file" type="file" accept=".csv,text/csv" aria-describedby="filehelp"><div id="filehelp" class="sub">Nothing is sent to Garcar or any third-party service.</div></div><div id="mappingArea" class="hidden"><h2>2. Confirm your columns</h2><p class="sub">Automatic guesses are shown below. Choose the correct field for each category; timestamp values should be ISO 8601 or recognizable local dates.</p><div class="grid" id="maps"></div><div class="actions"><button type="button" id="analyze" class="btn">Analyze my list</button><button type="button" id="clear" class="btn alt">Clear data</button></div></div><p id="status" role="status" aria-live="polite"></p></section>
-<section id="results" class="panel hidden"><h2>3. Your real follow-up findings</h2><div id="stats" class="statrow"></div><div class="notice">These are rule-based checks, not proof a call was missed. Confirm CRM activity and consent before calling. Closed, opted-out and do-not-contact records are excluded from the action list.</div><div class="tablewrap"><table><thead><tr><th>Priority</th><th>Record</th><th>Category</th><th>Why review it</th></tr></thead><tbody id="rows"></tbody></table></div><div class="actions"><button id="export" class="btn alt" type="button">Save top 10 as CSV</button><button id="reset" class="btn alt" type="button">Clear &amp; start over</button></div><p class="sub" id="summary"></p></section>
+<section id="results" class="panel hidden"><h2>3. Your real follow-up findings</h2><div id="stats" class="statrow"></div><div class="notice">These are rule-based checks, not proof a call was missed. Confirm CRM activity and consent before calling. Closed, opted-out and do-not-contact records are excluded from the action list.</div><div class="tablewrap"><table><thead><tr><th>Priority</th><th>Record</th><th>Category</th><th>Why review it</th></tr></thead><tbody id="rows"></tbody></table></div><div class="actions"><button id="export" class="btn alt" type="button">Save top 10 as CSV</button><button id="request" class="btn" type="button">Request a scoped review (summary only)</button><button id="reset" class="btn alt" type="button">Clear &amp; start over</button></div><p class="sub" id="summary"></p></section>
 <section class="cta"><span class="eyebrow">NEXT STEP · FULL FOLLOW-UP REVIEW</span><h2>Want every row reviewed and prioritized?</h2><p>Garcar's <strong>$497 Lead Follow-Up Review</strong> works from one authorized export, documents the evidence gaps and produces a callback plan. No CRM migration required. Scope, secure handoff and usable data must be agreed before work begins.</p><div class="actions"><a class="btn" href="https://garcar-followup-review.vercel.app/products/follow-up-review/">Review the $497 service ↗</a><a class="btn alt" href="mailto:gwc2780@gmail.com?subject=Garcar%20Follow-Up%20Review%20Scope">Ask about secure intake ↗</a></div><p class="sub">No guaranteed recovery or booking results. This free tool doesn't transmit your contacts to Garcar.</p></section></main>
 <footer class="footer">Garcar Enterprise · On-device CSV check · The tool provides evidence flags, not legal compliance or sales predictions. The operator decides whether contacting each prospect is appropriate.</footer></div>
 <script>
@@ -121,6 +121,29 @@ $("export").addEventListener("click",function(){
  const data=[["record_row","identifier","category","reason","lead_date","status"],...out.slice(0,10).map(x=>[x.row,x.ident,x.issues.join(" | "),x.reason,x.leadtime,x.status])];
  const blob=new Blob(["\uFEFF"+data.map(r=>r.map(excelSafe).join(",")).join("\r\n")+"\r\n"],{type:"text/csv;charset=utf-8"});
  const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="garcar-real-lead-review-top10.csv";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+});
+$("request").addEventListener("click",function(){
+ if(!imported.length)return;
+ const overview={inspected:imported.length,flagged:out.length,
+   undocumented_response:out.filter(x=>x.issues.includes("Response not recorded")).length,
+   missing_evidence:out.filter(x=>x.issues.includes("Response evidence missing")||x.issues.includes("Missing timeline")).length,
+   quote_followups:out.filter(x=>x.issues.includes("Estimate needs verification")).length};
+ const body=["Hello Garcar,",
+   "I used the free, on-device Lead Follow-Up Check and want to discuss a scoped $497 review.",
+   "",
+   "Aggregate result counts (no customer records attached):",
+   "Total rows checked: "+overview.inspected,
+   "Rows flagged for review: "+overview.flagged,
+   "Open inquiries with no response documented: "+overview.undocumented_response,
+   "Records needing documentation verification: "+overview.missing_evidence,
+   "Estimates needing follow-up verification: "+overview.quote_followups,
+   "",
+   "Please confirm the minimum fields and a secure intake method before I share any data.",
+   "Business/industry:",
+   "Preferred contact method:",
+   ""].join("\n");
+ const subject="Garcar follow-up review request — self-assessed lead list";
+ window.location.href="mailto:gwc2780@gmail.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
 });
 $("clear").addEventListener("click",reset);$("reset").addEventListener("click",reset);
 window.GarcarAuditTest={csvParse,check,excelSafe};
