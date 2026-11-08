@@ -84,7 +84,7 @@ function mapFields(){
 }
 function reset(){imported=[];headers=[];out=[];$("file").value="";$("mappingArea").classList.add("hidden");$("results").classList.add("hidden");$("status").textContent="Data cleared from this page."}
 $("file").addEventListener("change",async function(){
- reset();const file=this.files&&this.files[0];if(!file)return;
+ const file=this.files&&this.files[0];reset();if(!file)return;
  try{
   if(file.size>2*1024*1024)throw Error("File exceeds 2 MB.");
   if(!/\.csv$/i.test(file.name))throw Error("Choose a .csv file.");
