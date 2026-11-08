@@ -26,7 +26,7 @@ test('estimate needing follow up',()=>assert.ok(check(['Customer','2026-11-01','
 test('explicit opt-out suppresses recommendations',()=>assert.equal(check([...row.slice(0,6),'opted out'],cols,now),null));
 test('closed won suppresses recommendations',()=>assert.equal(check([...row.slice(0,6),'closed won'],cols,now),null));
 test('CSV formula escapes',()=>assert.ok(excelSafe('=HYPERLINK("x")').startsWith('"\'')));
-test('no network request permitted',()=>{assert.ok(content.includes("connect-src 'none'"));assert.ok(!/\\b(fetch|XMLHttpRequest|sendBeacon)\\b/.test(content));});
+test('no network request permitted',()=>{assert.ok(content.includes("connect-src 'none'"));assert.ok(!/\b(fetch|XMLHttpRequest|sendBeacon)\b/.test(content));});
 test('inquiry is voluntary aggregate-only mailto',()=>{const start=content.indexOf('document.getElementById("request")');const idx=content.indexOf('$("request").addEventListener');assert.ok(idx>=0);const until=content.indexOf('$("clear").addEventListener',idx);const body=content.slice(idx,until);assert.ok(body.includes('mailto:'));assert.ok(!body.includes('source:rec'));assert.ok(!body.includes('imported['));assert.ok(!body.includes('fetch('));});
 test('valid $497 review CTA',()=>assert.ok(content.includes('https://garcar-followup-review.vercel.app/products/follow-up-review/')));
 test('customer file handle retained',()=>assert.ok(content.includes('const file=this.files&&this.files[0];reset();if(!file)return;')));
