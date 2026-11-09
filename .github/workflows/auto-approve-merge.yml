@@ -1,33 +1,17 @@
-name: Auto Approve & Merge
+name: Manual Release Gate
 
 on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-  workflow_run:
-    workflows: ["*"]
-    types: [completed]
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 jobs:
-  auto-approve-merge:
+  release-gate:
     runs-on: ubuntu-latest
-    if: github.event.pull_request || github.event.workflow_run.conclusion == 'success'
     steps:
-      - name: Approve PR
-        uses: hmarr/auto-approve-action@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Auto Merge PR
-        uses: pascalgn/automerge-action@v0.15.6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MERGE_LABELS: ""
-          MERGE_METHOD: squash
-          MERGE_DELETE_BRANCH: true
-          UPDATE_METHOD: rebase
-          MERGE_COMMIT_MESSAGE: "auto"
-          MERGE_RETRY_SLEEP: 5000
+      - name: Explain release policy
+        run: |
+          echo "Automatic approval and merging are disabled."
+          echo "Production changes require review and an explicit owner-controlled merge."
