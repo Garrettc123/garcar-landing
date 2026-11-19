@@ -1,0 +1,27 @@
+name: Commercial offer and credit disclosures
+on:
+  pull_request:
+    paths:
+      - index.html
+      - checkout.html
+      - README.md
+      - scripts/test-commercial-offer.cjs
+      - .github/workflows/commercial-offer-ci.yml
+  push:
+    branches: [master]
+    paths:
+      - index.html
+      - checkout.html
+      - README.md
+      - scripts/test-commercial-offer.cjs
+      - .github/workflows/commercial-offer-ci.yml
+permissions:
+  contents: read
+jobs:
+  verify-offer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify static offer claims and upgrade disclosure
+        run: node scripts/test-commercial-offer.cjs
